@@ -1,14 +1,14 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
 import {
-  copyFile,
+  cp,
+  lstat,
   mkdir,
   mkdtemp,
   readFile,
   readdir,
   rename,
   rm,
-  unlink,
   writeFile
 } from 'node:fs/promises';
 import path from 'node:path';
@@ -35,21 +35,55 @@ function manifestSource() {
 }
 
 export function collectAudioIds(curriculum) {
-  if (!curriculum || typeof curriculum !== 'object' || !Array.isArray(curriculum.units)) {
-    throw new Error('Curriculum must contain a units array');
+  if (!curriculum || typeof curriculum !== 'object' || Array.isArray(curriculum)) {
+    throw new Error('curriculum must be an object');
+  }
+  if (!Array.isArray(curriculum.units)) {
+    throw new Error('curriculum.units must be an array');
+  }
+  if (curriculum.units.length === 0) {
+    throw new Error('curriculum.units must be non-empty');
   }
 
   const ids = new Set();
-  for (const unit of curriculum.units) {
-    for (const section of unit.lessons ?? []) {
+  for (const [unitIndex, unit] of curriculum.units.entries()) {
+    const unitLocation = `curriculum.units[${unitIndex}]`;
+    if (!unit || typeof unit !== 'object' || Array.isArray(unit)) {
+      throw new Error(`${unitLocation} must be an object`);
+    }
+    if (!Array.isArray(unit.lessons)) {
+      throw new Error(`${unitLocation}.lessons must be an array`);
+    }
+    if (unit.lessons.length === 0) {
+      throw new Error(`${unitLocation}.lessons must be non-empty`);
+    }
+
+    for (const [sectionIndex, section] of unit.lessons.entries()) {
+      const sectionLocation = `${unitLocation}.lessons[${sectionIndex}]`;
+      if (!section || typeof section !== 'object' || Array.isArray(section)) {
+        throw new Error(`${sectionLocation} must be an object`);
+      }
       for (const group of ['recognize', 'write']) {
-        for (const entry of section[group] ?? []) {
-          sourceRecordForId(entry.audio);
+        const groupLocation = `${sectionLocation}.${group}`;
+        if (!Array.isArray(section[group])) {
+          throw new Error(`${groupLocation} must be an array`);
+        }
+        for (const [entryIndex, entry] of section[group].entries()) {
+          const entryLocation = `${groupLocation}[${entryIndex}]`;
+          if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+            throw new Error(`${entryLocation} must be an object`);
+          }
+          try {
+            sourceRecordForId(entry.audio);
+          } catch (error) {
+            throw new Error(`${entryLocation}.audio: ${error.message}`);
+          }
           ids.add(entry.audio);
         }
       }
     }
   }
+  if (ids.size === 0) throw new Error('Curriculum must reference at least one audio id');
   return [...ids].sort();
 }
 
@@ -129,6 +163,59 @@ export async function inspectAudioFile(filePath, { execFileImpl = execFileAsync 
   }
 
   return inspection;
+}
+
+function commandError(error) {
+  const detail = error?.stderr || error?.message || String(error);
+  return String(detail).trim();
+}
+
+export async function verifySourceCheckout(sourceDir, { execFileImpl = execFileAsync } = {}) {
+  const resolvedSourceDir = path.resolve(sourceDir);
+  let checkoutRoot;
+  try {
+    const result = await execFileImpl('git', [
+      '-C', resolvedSourceDir,
+      'rev-parse', '--show-toplevel'
+    ], { maxBuffer: 1024 * 1024 });
+    checkoutRoot = String(result.stdout).trim();
+  } catch (error) {
+    throw new Error(`Source directory ${resolvedSourceDir} must be a Git checkout: ${commandError(error)}`);
+  }
+  if (path.resolve(checkoutRoot) !== resolvedSourceDir) {
+    throw new Error(`Source directory ${resolvedSourceDir} must be the Git checkout root; actual root: ${checkoutRoot}`);
+  }
+
+  let actualCommit;
+  try {
+    const result = await execFileImpl('git', [
+      '-C', resolvedSourceDir,
+      'rev-parse', 'HEAD'
+    ], { maxBuffer: 1024 * 1024 });
+    actualCommit = String(result.stdout).trim();
+  } catch (error) {
+    throw new Error(`Unable to read source Git revision at ${resolvedSourceDir}: ${commandError(error)}`);
+  }
+  if (actualCommit !== AUDIO_SOURCE.commit) {
+    throw new Error(`Source revision mismatch: expected ${AUDIO_SOURCE.commit}; actual ${actualCommit}`);
+  }
+
+  let status;
+  try {
+    const result = await execFileImpl('git', [
+      '-C', resolvedSourceDir,
+      'status', '--porcelain=v1', '--untracked-files=all', '--ignored=matching',
+      '--', AUDIO_SOURCE.subset
+    ], { maxBuffer: 4 * 1024 * 1024 });
+    status = String(result.stdout).trim();
+  } catch (error) {
+    throw new Error(`Unable to inspect source subset ${AUDIO_SOURCE.subset}: ${commandError(error)}`);
+  }
+  if (status !== '') {
+    throw new Error(`Source subset ${AUDIO_SOURCE.subset} is dirty or modified:\n${status}`);
+  }
+
+  return { checkoutRoot, commit: actualCommit, subset: AUDIO_SOURCE.subset };
 }
 
 export function parseArguments(arguments_) {
@@ -261,14 +348,40 @@ function validateManifestDocument(manifest) {
   return ids;
 }
 
+async function readCurriculumDocument(curriculumPath) {
+  try {
+    return JSON.parse(await readFile(curriculumPath, 'utf8'));
+  } catch (error) {
+    throw new Error(`Unable to read curriculum ${curriculumPath}: ${error.message}`);
+  }
+}
+
+function assertExactIds(actualIds, expectedIds, context) {
+  const actual = new Set(actualIds);
+  const expected = new Set(expectedIds);
+  const missing = expectedIds.filter(id => !actual.has(id));
+  const extra = actualIds.filter(id => !expected.has(id));
+  if (missing.length > 0 || extra.length > 0) {
+    const details = [];
+    if (missing.length > 0) details.push(`missing: ${missing.join(', ')}`);
+    if (extra.length > 0) details.push(`extra: ${extra.join(', ')}`);
+    throw new Error(`${context} (${details.join('; ')})`);
+  }
+}
+
 export async function verifyAudioDirectory({
   audioDir = path.join(defaultRootDir, 'assets/audio'),
+  curriculum,
+  curriculumPath = path.join(defaultRootDir, 'data/curriculum.json'),
   inspectFile = inspectAudioFile,
   concurrency = 6
 } = {}) {
   if (!Number.isInteger(concurrency) || concurrency < 1) {
     throw new Error('Audio verification concurrency must be a positive integer');
   }
+
+  if (curriculum === undefined) curriculum = await readCurriculumDocument(curriculumPath);
+  const curriculumIds = collectAudioIds(curriculum);
 
   let manifest;
   try {
@@ -277,6 +390,7 @@ export async function verifyAudioDirectory({
     throw new Error(`Unable to read audio manifest: ${error.message}`);
   }
   const ids = validateManifestDocument(manifest);
+  assertExactIds(ids, curriculumIds, 'Audio manifest does not exactly cover curriculum');
 
   let directoryEntries;
   try {
@@ -323,30 +437,80 @@ export async function verifyAudioDirectory({
   };
 }
 
-async function publishAudio(stagingDir, outputDir, records, manifest) {
-  await mkdir(outputDir, { recursive: true });
-  const temporaryFiles = [];
+function isManagedAudioEntry(name) {
+  return name === 'manifest.json' || name.toLowerCase().endsWith('.mp3');
+}
+
+async function preserveNonManagedEntries(outputDir, candidateDir) {
+  let entries;
   try {
-    for (const { id } of records) {
-      const temporaryPath = path.join(outputDir, `.${id}.mp3.sync-${process.pid}`);
-      temporaryFiles.push(temporaryPath);
-      await copyFile(path.join(stagingDir, `${id}.mp3`), temporaryPath);
-      await rename(temporaryPath, path.join(outputDir, `${id}.mp3`));
-    }
+    entries = await readdir(outputDir, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === 'ENOENT') return;
+    throw new Error(`Unable to list existing audio notices: ${error.message}`);
+  }
 
-    const wanted = new Set(records.map(record => `${record.id}.mp3`));
-    for (const entry of await readdir(outputDir, { withFileTypes: true })) {
-      if (entry.isFile() && /^[a-z]+[1-5]\.mp3$/.test(entry.name) && !wanted.has(entry.name)) {
-        await unlink(path.join(outputDir, entry.name));
+  for (const entry of entries) {
+    if (isManagedAudioEntry(entry.name)) continue;
+    try {
+      await cp(path.join(outputDir, entry.name), path.join(candidateDir, entry.name), {
+        recursive: true,
+        force: false,
+        errorOnExist: true,
+        verbatimSymlinks: true
+      });
+    } catch (error) {
+      throw new Error(`Unable to preserve existing audio notice ${entry.name}: ${error.message}`);
+    }
+  }
+}
+
+async function pathExists(targetPath) {
+  try {
+    await lstat(targetPath);
+    return true;
+  } catch (error) {
+    if (error.code === 'ENOENT') return false;
+    throw error;
+  }
+}
+
+async function publishAudioCandidate(candidateDir, outputDir, { renamePath = rename } = {}) {
+  const parentDir = path.dirname(outputDir);
+  const outputName = path.basename(outputDir);
+  const backupDir = path.join(parentDir, `.${outputName}.audio-backup-${randomUUID()}`);
+  const hadOutput = await pathExists(outputDir);
+  let originalInBackup = false;
+
+  try {
+    if (hadOutput) {
+      await renamePath(outputDir, backupDir);
+      originalInBackup = true;
+    }
+    try {
+      await renamePath(candidateDir, outputDir);
+    } catch (publishError) {
+      if (originalInBackup) {
+        try {
+          await renamePath(backupDir, outputDir);
+          originalInBackup = false;
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [publishError, rollbackError],
+            `Audio publish failed and rollback failed; original directory is preserved at ${backupDir}`
+          );
+        }
       }
+      throw publishError;
     }
 
-    const manifestTemporaryPath = path.join(outputDir, `.manifest.json.sync-${process.pid}`);
-    temporaryFiles.push(manifestTemporaryPath);
-    await writeFile(manifestTemporaryPath, `${JSON.stringify(manifest, null, 2)}\n`);
-    await rename(manifestTemporaryPath, path.join(outputDir, 'manifest.json'));
+    if (originalInBackup) {
+      await rm(backupDir, { recursive: true, force: true });
+      originalInBackup = false;
+    }
   } finally {
-    await Promise.all(temporaryFiles.map(file => rm(file, { force: true })));
+    await rm(candidateDir, { recursive: true, force: true });
+    if (!originalInBackup) await rm(backupDir, { recursive: true, force: true });
   }
 }
 
@@ -356,14 +520,12 @@ export async function syncAudio({
   sourceDir,
   fetchImpl = globalThis.fetch,
   inspectFile = inspectAudioFile,
-  concurrency = 6
+  concurrency = 6,
+  verifySourceRevision = verifySourceCheckout,
+  renamePath = rename
 } = {}) {
   if (curriculum === undefined) {
-    try {
-      curriculum = JSON.parse(await readFile(path.join(defaultRootDir, 'data/curriculum.json'), 'utf8'));
-    } catch (error) {
-      throw new Error(`Unable to read curriculum: ${error.message}`);
-    }
+    curriculum = await readCurriculumDocument(path.join(defaultRootDir, 'data/curriculum.json'));
   }
   if (!Number.isInteger(concurrency) || concurrency < 1) {
     throw new Error('Audio sync concurrency must be a positive integer');
@@ -373,17 +535,22 @@ export async function syncAudio({
   }
 
   const ids = collectAudioIds(curriculum);
+  if (sourceDir !== undefined) await verifySourceRevision(sourceDir);
+
   await mkdir(path.dirname(outputDir), { recursive: true });
-  const stagingDir = await mkdtemp(path.join(path.dirname(outputDir), '.audio-sync-'));
+  const candidateDir = await mkdtemp(path.join(
+    path.dirname(outputDir),
+    `.${path.basename(outputDir)}.audio-candidate-`
+  ));
   try {
     const records = await mapWithConcurrency(ids, concurrency, async id => {
       const source = sourceRecordForId(id);
       const bytes = await readSourceBytes({ sourceDir, sourceFile: source.sourceFile, fetchImpl });
       if (bytes.length === 0) throw new Error(`${source.sourceFile}: source audio is empty`);
 
-      const stagingPath = path.join(stagingDir, `${id}.mp3`);
-      await writeFile(stagingPath, bytes);
-      const inspection = await inspectFile(stagingPath);
+      const candidatePath = path.join(candidateDir, `${id}.mp3`);
+      await writeFile(candidatePath, bytes);
+      const inspection = await inspectFile(candidatePath);
       validateAudioMetadata(source.sourceLabel, inspection);
 
       return {
@@ -399,14 +566,17 @@ export async function syncAudio({
     });
 
     const manifest = createManifest(records);
-    await publishAudio(stagingDir, outputDir, records, manifest);
+    assertExactIds(Object.keys(manifest.readings), ids, 'Generated manifest ids do not match curriculum');
+    await preserveNonManagedEntries(outputDir, candidateDir);
+    await writeFile(path.join(candidateDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
+    await publishAudioCandidate(candidateDir, outputDir, { renamePath });
     return {
       fileCount: records.length,
       totalBytes: records.reduce((sum, record) => sum + record.bytes, 0),
       manifest
     };
   } finally {
-    await rm(stagingDir, { recursive: true, force: true });
+    await rm(candidateDir, { recursive: true, force: true });
   }
 }
 

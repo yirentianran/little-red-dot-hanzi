@@ -107,6 +107,9 @@ CC BY-SA 3.0 许可；作者与说话人署名、官方法律文本来源及改�
 
 同步程序对每个文件执行了以下机器检查：
 
+- 使用 `--source` 本地同步时，先要求来源目录是 Git checkout 根目录，确认 HEAD
+  严格等于上述固定 commit，并确认 `64k/syllabs` 内没有 tracked、untracked 或
+  ignored 的工作树改动；来源核验失败时不会写入输出目录。
 - 使用 `ffprobe` 以 JSON 读取媒体结构，确认音频流是单声道 MP3。
 - 核对 ID3 中的 `SWAC_TEXT` 与上游读音标签一致，核对
   `SWAC_COLL_LICENSE=CC-BY-SA-3.0`，并确认作者与版权标签存在。
@@ -116,7 +119,9 @@ CC BY-SA 3.0 许可；作者与说话人署名、官方法律文本来源及改�
 
 运行 `npm run verify:audio` 可在无网络环境中重新读取当前 manifest，并复算精确
 文件集合、字节数和 SHA-256，同时再次执行上述 ffprobe、完整 ffmpeg 解码和 ID3
-元数据检查。
+元数据检查；manifest 的读音 id 还必须精确覆盖当前 `data/curriculum.json`。
+同步发布先在输出目录旁构建完整候选目录，再以目录 rename 交换；若交换失败，旧
+目录会自动恢复，不会把新旧 MP3 和 manifest 混合发布。
 
 本地 `ju4.mp3` 对应上游 `cmn-jv4.mp3`，其源标签为 `jv4`；其余 id 与源标签
 相同。需要重点人工确认的课内多音读音 id 为：`ji4`、`qiao3`、`shao4`、

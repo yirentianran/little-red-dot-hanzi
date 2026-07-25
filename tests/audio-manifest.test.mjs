@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { mkdtemp, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, readdir, rename, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -12,7 +12,8 @@ import {
   sourceRecordForId,
   syncAudio,
   validateAudioMetadata,
-  verifyAudioDirectory
+  verifyAudioDirectory,
+  verifySourceCheckout
 } from '../scripts/sync-audio.mjs';
 
 const curriculum = JSON.parse(await readFile(new URL('../data/curriculum.json', import.meta.url), 'utf8'));
@@ -75,6 +76,45 @@ async function temporaryDirectory(t, prefix) {
   return directory;
 }
 
+const acceptTestSourceRevision = async () => {};
+
+async function snapshotDirectory(directory) {
+  const snapshot = {};
+  let entries;
+  try {
+    entries = await readdir(directory, { withFileTypes: true });
+  } catch (error) {
+    if (error.code === 'ENOENT') return snapshot;
+    throw error;
+  }
+  for (const entry of entries.sort((left, right) => left.name.localeCompare(right.name))) {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      const nested = await snapshotDirectory(entryPath);
+      for (const [name, bytes] of Object.entries(nested)) snapshot[`${entry.name}/${name}`] = bytes;
+    } else {
+      snapshot[entry.name] = (await readFile(entryPath)).toString('base64');
+    }
+  }
+  return snapshot;
+}
+
+async function assertNoPublishTemps(parentDirectory) {
+  const leftovers = (await readdir(parentDirectory))
+    .filter(name => /\.audio-(candidate|backup)-/.test(name));
+  assert.deepEqual(leftovers, [], `unexpected publish temporary paths: ${leftovers.join(', ')}`);
+}
+
+function gitInspection({ sourceDir, head = AUDIO_SOURCE.commit, status = '' }) {
+  return async (command, arguments_) => {
+    assert.equal(command, 'git');
+    if (arguments_.includes('--show-toplevel')) return { stdout: `${sourceDir}\n`, stderr: '' };
+    if (arguments_.at(-1) === 'HEAD') return { stdout: `${head}\n`, stderr: '' };
+    if (arguments_.includes('--porcelain=v1')) return { stdout: status, stderr: '' };
+    throw new Error(`unexpected git arguments: ${arguments_.join(' ')}`);
+  };
+}
+
 test('collects the 335 unique curriculum audio ids in deterministic order', () => {
   const ids = collectAudioIds(curriculum);
 
@@ -82,6 +122,27 @@ test('collects the 335 unique curriculum audio ids in deterministic order', () =
   assert.deepEqual(ids, [...ids].sort());
   assert.equal(new Set(ids).size, ids.length);
   assert.ok(ids.every(id => /^[a-z]+[1-5]$/.test(id)));
+});
+
+test('rejects missing curriculum structure with exact data locations', () => {
+  const invalidDocuments = [
+    [null, /curriculum.*object/i],
+    [{}, /curriculum\.units.*array/i],
+    [{ units: [] }, /curriculum\.units.*non-empty/i],
+    [{ units: [null] }, /curriculum\.units\[0\].*object/i],
+    [{ units: [{}] }, /curriculum\.units\[0\]\.lessons.*array/i],
+    [{ units: [{ lessons: [] }] }, /curriculum\.units\[0\]\.lessons.*non-empty/i],
+    [{ units: [{ lessons: [null] }] }, /curriculum\.units\[0\]\.lessons\[0\].*object/i],
+    [{ units: [{ lessons: [{ write: [] }] }] }, /lessons\[0\]\.recognize.*array/i],
+    [{ units: [{ lessons: [{ recognize: [] }] }] }, /lessons\[0\]\.write.*array/i],
+    [{ units: [{ lessons: [{ recognize: [null], write: [] }] }] }, /recognize\[0\].*object/i],
+    [{ units: [{ lessons: [{ recognize: [{ audio: 'bad' }], write: [] }] }] }, /recognize\[0\]\.audio.*invalid/i],
+    [{ units: [{ lessons: [{ recognize: [], write: [] }] }] }, /at least one audio id/i]
+  ];
+
+  for (const [document, expected] of invalidDocuments) {
+    assert.throws(() => collectAudioIds(document), expected);
+  }
 });
 
 test('maps ju4 to the upstream jv4 spelling and leaves other ids unchanged', () => {
@@ -132,12 +193,49 @@ test('parses local-source usage and reports invalid command lines clearly', () =
   assert.throws(() => parseArguments(['--unknown']), /unknown argument.*--unknown/i);
 });
 
+test('requires the local source checkout to match the pinned revision', async () => {
+  const sourceDir = '/tmp/audio-cmn-wrong-revision';
+  await assert.rejects(() => verifySourceCheckout(sourceDir, {
+    execFileImpl: gitInspection({ sourceDir, head: '0123456789abcdef' })
+  }), new RegExp(`expected.*${AUDIO_SOURCE.commit}.*actual.*0123456789abcdef`, 'i'));
+});
+
+test('rejects tracked and untracked changes in the pinned source subset', async () => {
+  const sourceDir = '/tmp/audio-cmn-dirty';
+  const status = ' M 64k/syllabs/cmn-chao2.mp3\n?? 64k/syllabs/untracked.mp3\n';
+  await assert.rejects(() => verifySourceCheckout(sourceDir, {
+    execFileImpl: gitInspection({ sourceDir, status })
+  }), /64k\/syllabs.*(modified|dirty).*cmn-chao2\.mp3.*untracked\.mp3/is);
+});
+
+test('rejects a non-git local source before touching existing output', async t => {
+  const directory = await temporaryDirectory(t, 'hanzi-audio-non-git-');
+  const sourceDir = path.join(directory, 'source');
+  const outputDir = path.join(directory, 'output');
+  await mkdir(path.join(sourceDir, '64k/syllabs'), { recursive: true });
+  await writeFile(path.join(sourceDir, '64k/syllabs/cmn-chao2.mp3'), 'source');
+  await mkdir(outputDir);
+  await writeFile(path.join(outputDir, 'sentinel.txt'), 'unchanged');
+  const before = await snapshotDirectory(outputDir);
+
+  await assert.rejects(() => syncAudio({
+    curriculum: fixtureCurriculum(['chao2']),
+    outputDir,
+    sourceDir,
+    inspectFile: async () => inspection('chao2')
+  }), /git checkout/i);
+
+  assert.deepEqual(await snapshotDirectory(outputDir), before);
+});
+
 test('copies a local source byte-for-byte and writes a deterministic manifest', async t => {
   const directory = await temporaryDirectory(t, 'hanzi-audio-local-');
   const sourceDir = path.join(directory, 'source');
   const outputDir = path.join(directory, 'output');
   const sourceFile = path.join(sourceDir, '64k/syllabs/cmn-chao2.mp3');
   const sourceBytes = Buffer.from('fixture-source-mp3-bytes');
+  await mkdir(outputDir, { recursive: true });
+  await writeFile(path.join(outputDir, 'NOTICE.txt'), 'preserve this notice');
   await mkdir(path.dirname(sourceFile), { recursive: true });
   await writeFile(sourceFile, sourceBytes);
 
@@ -145,12 +243,14 @@ test('copies a local source byte-for-byte and writes a deterministic manifest', 
     curriculum: fixtureCurriculum(['chao2']),
     outputDir,
     sourceDir,
-    inspectFile: async () => inspection('chao2')
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
   });
 
   assert.equal(result.fileCount, 1);
   assert.equal(result.totalBytes, sourceBytes.length);
   assert.deepEqual(await readFile(path.join(outputDir, 'chao2.mp3')), sourceBytes);
+  assert.equal(await readFile(path.join(outputDir, 'NOTICE.txt'), 'utf8'), 'preserve this notice');
   const manifestText = await readFile(path.join(outputDir, 'manifest.json'), 'utf8');
   const manifest = JSON.parse(manifestText);
   assert.equal(manifestText, `${JSON.stringify(manifest, null, 2)}\n`);
@@ -204,10 +304,42 @@ test('reports a missing local source without writing a partial manifest', async 
     curriculum: fixtureCurriculum(['chao2']),
     outputDir,
     sourceDir: path.join(directory, 'missing'),
-    inspectFile: async () => inspection('chao2')
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
   }), /read source audio.*cmn-chao2\.mp3/i);
 
   await assert.rejects(readFile(path.join(outputDir, 'manifest.json')), /ENOENT/);
+  await assertNoPublishTemps(directory);
+});
+
+test('rejects malformed curriculum before fetching or changing existing output', async t => {
+  const directory = await temporaryDirectory(t, 'hanzi-audio-curriculum-');
+  const outputDir = path.join(directory, 'output');
+  await mkdir(outputDir);
+  await writeFile(path.join(outputDir, 'manifest.json'), 'previous manifest\n');
+  await writeFile(path.join(outputDir, 'old1.mp3'), 'previous audio');
+  const before = await snapshotDirectory(outputDir);
+  const invalidDocuments = [
+    { units: [] },
+    { units: [{}] },
+    { units: [{ lessons: [{ write: [] }] }] },
+    { units: [{ lessons: [{ recognize: [] }] }] }
+  ];
+
+  for (const invalidCurriculum of invalidDocuments) {
+    let fetched = false;
+    await assert.rejects(() => syncAudio({
+      curriculum: invalidCurriculum,
+      outputDir,
+      fetchImpl: async () => {
+        fetched = true;
+        throw new Error('fetch must not run');
+      },
+      inspectFile: async () => inspection('chao2')
+    }), /curriculum\.units/);
+    assert.equal(fetched, false);
+    assert.deepEqual(await snapshotDirectory(outputDir), before);
+  }
 });
 
 test('preserves the prior manifest and publishes no partial file when a fetch fails', async t => {
@@ -228,6 +360,7 @@ test('preserves the prior manifest and publishes no partial file when a fetch fa
 
   assert.equal(await readFile(path.join(outputDir, 'manifest.json'), 'utf8'), 'previous manifest\n');
   assert.deepEqual((await readdir(outputDir)).sort(), ['manifest.json']);
+  await assertNoPublishTemps(directory);
 });
 
 test('does not publish files when source metadata does not match the requested reading', async t => {
@@ -242,6 +375,40 @@ test('does not publish files when source metadata does not match the requested r
   }), /SWAC_TEXT.*chao2/i);
 
   await assert.rejects(readFile(path.join(outputDir, 'manifest.json')), /ENOENT/);
+  await assertNoPublishTemps(directory);
+});
+
+test('restores the complete prior directory when the candidate directory rename fails', async t => {
+  const directory = await temporaryDirectory(t, 'hanzi-audio-rollback-');
+  const sourceDir = path.join(directory, 'source');
+  const outputDir = path.join(directory, 'output');
+  const sourceFile = path.join(sourceDir, '64k/syllabs/cmn-chao2.mp3');
+  await mkdir(path.dirname(sourceFile), { recursive: true });
+  await writeFile(sourceFile, Buffer.from('new source bytes'));
+  await mkdir(path.join(outputDir, 'nested'), { recursive: true });
+  await writeFile(path.join(outputDir, 'old1.mp3'), Buffer.from('old audio bytes'));
+  await writeFile(path.join(outputDir, 'manifest.json'), 'old manifest\n');
+  await writeFile(path.join(outputDir, 'THIRD_PARTY_NOTICES.md'), 'old notice\n');
+  await writeFile(path.join(outputDir, 'nested/license.txt'), 'old nested license\n');
+  const before = await snapshotDirectory(outputDir);
+  let renameCalls = 0;
+
+  await assert.rejects(() => syncAudio({
+    curriculum: fixtureCurriculum(['chao2']),
+    outputDir,
+    sourceDir,
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision,
+    renamePath: async (from, to) => {
+      renameCalls += 1;
+      if (renameCalls === 2) throw new Error('injected candidate rename failure');
+      return rename(from, to);
+    }
+  }), /injected candidate rename failure/i);
+
+  assert.equal(renameCalls, 3, 'move old directory, fail candidate move, restore old directory');
+  assert.deepEqual(await snapshotDirectory(outputDir), before);
+  await assertNoPublishTemps(directory);
 });
 
 test('re-verifies a synced directory from its manifest without network access', async t => {
@@ -255,12 +422,14 @@ test('re-verifies a synced directory from its manifest without network access', 
     curriculum: fixtureCurriculum(['chao2']),
     outputDir,
     sourceDir,
-    inspectFile: async () => inspection('chao2')
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
   });
   let inspected = 0;
 
   const result = await verifyAudioDirectory({
     audioDir: outputDir,
+    curriculum: fixtureCurriculum(['chao2']),
     inspectFile: async () => {
       inspected += 1;
       return inspection('chao2');
@@ -282,12 +451,14 @@ test('verification rejects byte tampering before accepting the manifest', async 
     curriculum: fixtureCurriculum(['chao2']),
     outputDir,
     sourceDir,
-    inspectFile: async () => inspection('chao2')
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
   });
   await writeFile(path.join(outputDir, 'chao2.mp3'), Buffer.from('tampered'));
 
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
+    curriculum: fixtureCurriculum(['chao2']),
     inspectFile: async () => inspection('chao2')
   }), /chao2.*byte count|chao2.*SHA-256/i);
 });
@@ -303,20 +474,45 @@ test('verification rejects extra MP3 files and changed embedded labels', async t
     curriculum: fixtureCurriculum(['chao2']),
     outputDir,
     sourceDir,
-    inspectFile: async () => inspection('chao2')
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
   });
   await writeFile(path.join(outputDir, 'extra1.mp3'), Buffer.from('extra'));
 
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
+    curriculum: fixtureCurriculum(['chao2']),
     inspectFile: async () => inspection('chao2')
   }), /unexpected MP3.*extra1\.mp3/i);
 
   await rm(path.join(outputDir, 'extra1.mp3'));
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
+    curriculum: fixtureCurriculum(['chao2']),
     inspectFile: async () => inspection('wrong2')
   }), /SWAC_TEXT.*chao2/i);
+});
+
+test('verification rejects a self-consistent manifest that omits a curriculum reading', async t => {
+  const directory = await temporaryDirectory(t, 'hanzi-audio-coverage-');
+  const sourceDir = path.join(directory, 'source');
+  const outputDir = path.join(directory, 'output');
+  const sourceFile = path.join(sourceDir, '64k/syllabs/cmn-chao2.mp3');
+  await mkdir(path.dirname(sourceFile), { recursive: true });
+  await writeFile(sourceFile, Buffer.from('fixture-source-mp3-bytes'));
+  await syncAudio({
+    curriculum: fixtureCurriculum(['chao2']),
+    outputDir,
+    sourceDir,
+    inspectFile: async () => inspection('chao2'),
+    verifySourceRevision: acceptTestSourceRevision
+  });
+
+  await assert.rejects(() => verifyAudioDirectory({
+    audioDir: outputDir,
+    curriculum: fixtureCurriculum(['ai1', 'chao2']),
+    inspectFile: async () => inspection('chao2')
+  }), /manifest.*curriculum.*missing.*ai1/i);
 });
 
 test('the committed manifest exactly covers the curriculum and byte-preserved MP3 files', async () => {
