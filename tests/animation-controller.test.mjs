@@ -245,6 +245,315 @@ test('carries a late frame across multiple phases without losing elapsed time', 
   closeTo(controller.getState().progress, 0.25);
 });
 
+test('fast-forwards huge continuous overshoot with bounded observable work', async (t) => {
+  await t.test('twenty hours on one zero-length stroke', () => {
+    const { calls, clock, controller, stateChanges } = createHarness([0]);
+    controller.play();
+
+    clock.tick((20 * 60 * 60 * 1000) + 150);
+
+    assert.equal(controller.getState().status, 'playing');
+    assert.equal(controller.getState().strokeIndex, 0);
+    closeTo(controller.getState().progress, 0.5);
+    assert.ok(calls.length < 10, `renderer received ${calls.length} calls`);
+    assert.ok(stateChanges.length < 10, `observer received ${stateChanges.length} calls`);
+  });
+
+  await t.test('different stroke lengths, gaps, hold, and slow speed', () => {
+    const { calls, clock, controller, stateChanges } = createHarness([150, 250]);
+    const completeCycle = (
+      strokeDuration(150, 'slow')
+      + (TIMING.betweenStrokes * 1.45)
+      + strokeDuration(250, 'slow')
+      + (TIMING.completedCharacter * 1.45)
+    );
+    controller.setSpeed('slow');
+    controller.play();
+
+    clock.tick(
+      (completeCycle * 50_000)
+      + strokeDuration(150, 'slow')
+      + (TIMING.betweenStrokes * 1.45)
+      + 145
+    );
+
+    assert.equal(controller.getState().status, 'playing');
+    assert.equal(controller.getState().strokeIndex, 1);
+    closeTo(controller.getState().progress, 0.2);
+    assert.ok(calls.length < 20, `renderer received ${calls.length} calls`);
+    assert.ok(stateChanges.length < 10, `observer received ${stateChanges.length} calls`);
+  });
+});
+
+test('exact full-cycle fast-forward preserves arbitrary phase positions', async (t) => {
+  const twoStrokeCycle = (
+    strokeDuration(150)
+    + TIMING.betweenStrokes
+    + strokeDuration(200)
+    + TIMING.completedCharacter
+  );
+
+  await t.test('halfway through a stroke', () => {
+    const { calls, clock, controller, stateChanges } = createHarness([150, 200]);
+    controller.play();
+    clock.tick(150);
+    const callCount = calls.length;
+    const changeCount = stateChanges.length;
+
+    clock.tick(twoStrokeCycle * 50_000);
+
+    assert.equal(controller.getState().status, 'playing');
+    assert.equal(controller.getState().strokeIndex, 0);
+    closeTo(controller.getState().progress, 0.5);
+    assert.equal(calls.length, callCount);
+    assert.equal(stateChanges.length, changeCount);
+  });
+
+  await t.test('halfway through a between-stroke delay', () => {
+    const { calls, clock, controller, stateChanges } = createHarness([150, 200]);
+    controller.play();
+    clock.tick(strokeDuration(150));
+    clock.tick(TIMING.betweenStrokes / 2);
+    const callCount = calls.length;
+    const changeCount = stateChanges.length;
+
+    clock.tick(twoStrokeCycle * 50_000);
+
+    assert.equal(controller.getState().status, 'between-strokes');
+    assert.equal(controller.getState().strokeIndex, 0);
+    assert.equal(controller.getState().progress, 1);
+    assert.equal(calls.length, callCount);
+    assert.equal(stateChanges.length, changeCount);
+  });
+
+  await t.test('halfway through a completed-character hold', () => {
+    const { calls, clock, controller, stateChanges } = createHarness([150]);
+    const oneStrokeCycle = strokeDuration(150) + TIMING.completedCharacter;
+    controller.play();
+    clock.tick(strokeDuration(150));
+    clock.tick(TIMING.completedCharacter / 2);
+    const callCount = calls.length;
+    const changeCount = stateChanges.length;
+
+    clock.tick(oneStrokeCycle * 50_000);
+
+    assert.equal(controller.getState().status, 'completed');
+    assert.equal(controller.getState().strokeIndex, 0);
+    assert.equal(controller.getState().progress, 1);
+    assert.equal(calls.length, callCount);
+    assert.equal(stateChanges.length, changeCount);
+  });
+});
+
+test('normalizes floating modulo error for huge exact non-integer cycles', () => {
+  const length = 234.567;
+  const completeCycle = strokeDuration(length) + TIMING.completedCharacter;
+  const { calls, clock, controller, stateChanges } = createHarness([length]);
+  controller.play();
+  clock.tick(strokeDuration(length) / 2);
+  const stateBeforeCycles = controller.getState();
+  const callCount = calls.length;
+  const changeCount = stateChanges.length;
+
+  clock.tick(completeCycle * 50_000);
+
+  assert.deepEqual(controller.getState(), stateBeforeCycles);
+  assert.equal(calls.length, callCount);
+  assert.equal(stateChanges.length, changeCount);
+});
+
+test('huge overshoot in step mode completes once with bounded work', () => {
+  const { calls, clock, controller, stateChanges } = createHarness([150, 200]);
+  controller.nextStroke();
+
+  clock.tick(20 * 60 * 60 * 1000);
+
+  assert.equal(controller.getState().status, 'paused');
+  assert.equal(controller.getState().mode, 'step');
+  assert.equal(controller.getState().strokeIndex, 1);
+  assert.equal(controller.getState().progress, 1);
+  assert.ok(calls.length < 10, `renderer received ${calls.length} calls`);
+  assert.ok(stateChanges.length < 10, `observer received ${stateChanges.length} calls`);
+});
+
+test('a replay command from onStateChange supersedes the old frame remainder', () => {
+  const clock = createFakeClock();
+  const { calls, renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let replayed = false;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (!replayed && state.status === 'between-strokes') {
+        replayed = true;
+        controller.replay();
+      }
+    }
+  });
+  controller.play();
+
+  clock.tick(400);
+
+  assert.equal(replayed, true);
+  assert.deepEqual(controller.getState(), {
+    status: 'playing',
+    mode: 'continuous',
+    strokeIndex: 0,
+    progress: 0,
+    speed: 'normal'
+  });
+  assert.deepEqual(lastProgressCall(calls), ['setStrokeProgress', 0, 0]);
+  assert.equal(clock.getPending().size, 1);
+});
+
+test('a step command from onStateChange supersedes the old frame remainder', () => {
+  const clock = createFakeClock();
+  const { calls, renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let stepped = false;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (!stepped && state.status === 'between-strokes') {
+        stepped = true;
+        controller.nextStroke();
+      }
+    }
+  });
+  controller.play();
+
+  clock.tick(400);
+
+  assert.equal(stepped, true);
+  assert.deepEqual(controller.getState(), {
+    status: 'playing',
+    mode: 'step',
+    strokeIndex: 1,
+    progress: 0,
+    speed: 'normal'
+  });
+  assert.deepEqual(lastProgressCall(calls), ['setStrokeProgress', 1, 0]);
+  assert.equal(clock.getPending().size, 1);
+});
+
+test('destroy from onStateChange stops the old frame and all later rendering', () => {
+  const clock = createFakeClock();
+  const { calls, renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let destroyedAtCallCount = null;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (destroyedAtCallCount === null && state.status === 'between-strokes') {
+        controller.destroy();
+        destroyedAtCallCount = calls.length;
+      }
+    }
+  });
+  controller.play();
+
+  clock.tick(400);
+  clock.tick(10_000);
+
+  assert.notEqual(destroyedAtCallCount, null);
+  assert.equal(calls.length, destroyedAtCallCount);
+  assert.equal(clock.getPending().size, 0);
+  assert.throws(() => controller.getState(), /destroyed/);
+});
+
+test('setSpeed from a settling pause supersedes the outer pause command', () => {
+  const clock = createFakeClock();
+  const { renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let changedSpeed = false;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (!changedSpeed && state.status === 'between-strokes') {
+        changedSpeed = true;
+        controller.setSpeed('fast');
+      }
+    }
+  });
+  controller.play();
+  clock.elapse(400);
+
+  controller.pause();
+
+  assert.equal(changedSpeed, true);
+  assert.equal(controller.getState().status, 'between-strokes');
+  assert.equal(controller.getState().speed, 'fast');
+  assert.equal(clock.getPending().size, 1);
+});
+
+test('pause from a settling speed change supersedes the outer speed command', () => {
+  const clock = createFakeClock();
+  const { renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let paused = false;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (!paused && state.status === 'between-strokes') {
+        paused = true;
+        controller.pause();
+      }
+    }
+  });
+  controller.play();
+  clock.elapse(400);
+
+  controller.setSpeed('slow');
+
+  assert.equal(paused, true);
+  assert.equal(controller.getState().status, 'paused');
+  assert.equal(controller.getState().speed, 'normal');
+  assert.equal(clock.getPending().size, 0);
+});
+
+test('physical hide remains applied when its settling callback replays', () => {
+  const clock = createFakeClock();
+  const { renderer } = createFakeRenderer([150, 150]);
+  let controller;
+  let replayed = false;
+  controller = createAnimationController(renderer, {
+    now: clock.now,
+    requestFrame: clock.requestFrame,
+    cancelFrame: clock.cancelFrame,
+    onStateChange(state) {
+      if (!replayed && state.status === 'between-strokes') {
+        replayed = true;
+        controller.replay();
+      }
+    }
+  });
+  controller.play();
+  clock.elapse(400);
+
+  controller.handleVisibilityChange(true);
+
+  assert.equal(replayed, true);
+  assert.equal(controller.getState().status, 'playing');
+  assert.equal(controller.getState().strokeIndex, 0);
+  assert.equal(controller.getState().progress, 0);
+  assert.equal(clock.getPending().size, 0);
+  clock.elapse(5000);
+  assert.equal(controller.handleVisibilityChange(false), true);
+  assert.equal(clock.getPending().size, 1);
+  clock.tick(100);
+  closeTo(controller.getState().progress, 1 / 3);
+});
+
 test('next and previous play only the target stroke in step mode', () => {
   const { calls, clock, controller } = createHarness([150, 200, 250]);
 
@@ -653,6 +962,29 @@ test('validates renderer, timing dependencies, clock values, speed, and visibili
   const controller = createAnimationController(valid, timing);
   assert.throws(() => controller.setSpeed('warp'), /speed/);
   assert.throws(() => controller.handleVisibilityChange('yes'), /hidden/);
+});
+
+test('rejects a non-finite elapsed difference between finite clock readings', () => {
+  let currentTime = -Number.MAX_VALUE;
+  let pendingFrame = null;
+  const { renderer } = createFakeRenderer([150]);
+  let controller;
+  controller = createAnimationController(renderer, {
+    now: () => currentTime,
+    requestFrame: (callback) => {
+      pendingFrame = callback;
+      return 1;
+    },
+    cancelFrame: () => {},
+    onStateChange(state) {
+      // Keeps the unfixed NaN loop bounded so the regression can fail without hanging the test process.
+      if (state.status === 'completed') controller.destroy();
+    }
+  });
+  controller.play();
+  currentTime = Number.MAX_VALUE;
+
+  assert.throws(() => pendingFrame(), /elapsed.*finite/);
 });
 
 test('does not mutate frozen renderer, options, or length input objects', () => {

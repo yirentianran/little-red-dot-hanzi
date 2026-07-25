@@ -72,6 +72,17 @@
     );
   }
 
+  function reduceFullCycles(elapsed, cycleDuration) {
+    var tolerance = Math.min(
+      cycleDuration / 2,
+      Math.max(TIME_EPSILON, Number.EPSILON * Math.abs(elapsed) * 4)
+    );
+    if (elapsed + tolerance < cycleDuration) return elapsed;
+    var remainder = elapsed % cycleDuration;
+    if (remainder <= tolerance || cycleDuration - remainder <= tolerance) return 0;
+    return remainder;
+  }
+
   function createAnimationController(renderer, options) {
     if (!isRecord(renderer)) reject('renderer', 'must be an object');
     RENDERER_METHODS.forEach(function (method) {
@@ -120,6 +131,9 @@
       }
       strokeDurations.push(durationFromLength(length));
     }
+    var baseContinuousCycleDuration = strokeDurations.reduce(function (total, duration) {
+      return total + duration;
+    }, COMPLETED_CHARACTER_PAUSE + (BETWEEN_STROKE_PAUSE * (strokeCount - 1)));
 
     var lastClockTime;
     function readNow() {
@@ -147,6 +161,7 @@
     var destroyed = false;
     var activeFrame = null;
     var frameGeneration = 0;
+    var timelineRevision = 0;
     var lastPublishedKey = stateKey(state);
 
     renderer.setStrokeProgress(0, 0);
@@ -175,11 +190,12 @@
       });
     }
 
-    function publish() {
+    function publish(expectedRevision) {
       var key = stateKey(state);
-      if (key === lastPublishedKey) return;
+      if (key === lastPublishedKey) return timelineRevision === expectedRevision;
       lastPublishedKey = key;
       onStateChange(snapshot());
+      return timelineRevision === expectedRevision;
     }
 
     function statusForPhase() {
@@ -192,13 +208,13 @@
       return Math.min(1, Math.max(0, value));
     }
 
-    function renderStrokeProgress(progress) {
+    function renderStrokeProgress(progress, expectedRevision) {
       state.progress = clampUnit(progress);
       renderer.setStrokeProgress(state.strokeIndex, state.progress);
-      publish();
+      return publish(expectedRevision);
     }
 
-    function finishStroke() {
+    function finishStroke(expectedRevision) {
       state.progress = 1;
       renderer.setStrokeProgress(state.strokeIndex, 1);
       renderer.showCompletedThrough(state.strokeIndex);
@@ -208,8 +224,7 @@
         phase = 'stroke';
         delayProgress = 0;
         state.status = 'paused';
-        publish();
-        return;
+        return publish(expectedRevision);
       }
 
       delayProgress = 0;
@@ -221,71 +236,81 @@
         phase = 'between';
         state.status = 'between-strokes';
       }
-      publish();
+      return publish(expectedRevision);
     }
 
-    function startNextStroke() {
+    function startNextStroke(expectedRevision) {
       phase = 'stroke';
       delayProgress = 0;
       state.strokeIndex += 1;
       state.progress = 0;
       state.status = 'playing';
       renderer.setStrokeProgress(state.strokeIndex, 0);
-      publish();
+      return publish(expectedRevision);
     }
 
-    function startLoop() {
+    function startLoop(expectedRevision) {
       phase = 'stroke';
       delayProgress = 0;
       state.strokeIndex = 0;
       state.progress = 0;
       state.status = 'playing';
       renderer.setStrokeProgress(0, 0);
-      publish();
+      return publish(expectedRevision);
     }
 
-    function advanceElapsed(elapsed) {
+    function advanceElapsed(elapsed, expectedRevision) {
+      if (!Number.isFinite(elapsed)) {
+        throw new RangeError('elapsed animation time must be finite');
+      }
       var remaining = Math.max(0, elapsed);
-      var transitions = 0;
+      if (remaining <= TIME_EPSILON) return timelineRevision === expectedRevision;
+
+      if (state.mode === 'continuous') {
+        var cycleDuration = baseContinuousCycleDuration * SPEED_MULTIPLIERS[state.speed];
+        remaining = reduceFullCycles(remaining, cycleDuration);
+        if (remaining <= TIME_EPSILON) return timelineRevision === expectedRevision;
+      }
 
       while (playbackIntent && !destroyed) {
-        transitions += 1;
-        if (transitions > 100000) {
-          throw new Error('Animation controller exceeded its transition safety limit');
-        }
-
         if (phase === 'stroke') {
           var duration = strokeDurations[state.strokeIndex] * SPEED_MULTIPLIERS[state.speed];
           var neededForStroke = (1 - state.progress) * duration;
           if (remaining + TIME_EPSILON < neededForStroke) {
-            if (remaining > 0) renderStrokeProgress(state.progress + (remaining / duration));
-            return;
+            if (remaining > 0) {
+              return renderStrokeProgress(
+                state.progress + (remaining / duration),
+                expectedRevision
+              );
+            }
+            return timelineRevision === expectedRevision;
           }
           remaining = Math.max(0, remaining - neededForStroke);
-          finishStroke();
-          if (!playbackIntent || remaining <= TIME_EPSILON) return;
+          if (!finishStroke(expectedRevision)) return false;
+          if (!playbackIntent || remaining <= TIME_EPSILON) return true;
         } else if (phase === 'between') {
           var gapDuration = BETWEEN_STROKE_PAUSE * SPEED_MULTIPLIERS[state.speed];
           var neededForGap = (1 - delayProgress) * gapDuration;
           if (remaining + TIME_EPSILON < neededForGap) {
             delayProgress = clampUnit(delayProgress + (remaining / gapDuration));
-            return;
+            return timelineRevision === expectedRevision;
           }
           remaining = Math.max(0, remaining - neededForGap);
-          startNextStroke();
-          if (remaining <= TIME_EPSILON) return;
+          if (!startNextStroke(expectedRevision)) return false;
+          if (remaining <= TIME_EPSILON) return true;
         } else {
           var holdDuration = COMPLETED_CHARACTER_PAUSE * SPEED_MULTIPLIERS[state.speed];
           var neededForHold = (1 - delayProgress) * holdDuration;
           if (remaining + TIME_EPSILON < neededForHold) {
             delayProgress = clampUnit(delayProgress + (remaining / holdDuration));
-            return;
+            return timelineRevision === expectedRevision;
           }
           remaining = Math.max(0, remaining - neededForHold);
-          startLoop();
-          if (remaining <= TIME_EPSILON) return;
+          if (!startLoop(expectedRevision)) return false;
+          if (remaining <= TIME_EPSILON) return true;
         }
       }
+      return timelineRevision === expectedRevision;
     }
 
     function cancelScheduledFrame() {
@@ -306,47 +331,53 @@
         var currentTime = readNow();
         var elapsed = currentTime - phaseAnchor;
         phaseAnchor = currentTime;
-        advanceElapsed(elapsed);
+        advanceElapsed(elapsed, timelineRevision);
         scheduleFrame();
       });
     }
 
-    function settleToNow() {
+    function settleToNow(expectedRevision) {
       var currentTime = readNow();
       var elapsed = currentTime - phaseAnchor;
       phaseAnchor = currentTime;
-      advanceElapsed(elapsed);
+      return advanceElapsed(elapsed, expectedRevision);
     }
 
     function play() {
       assertAlive();
       if (playbackIntent) return false;
+      var currentTime = readNow();
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
       if (state.mode === 'step' && phase === 'stroke' && state.progress === 1) {
         state.progress = 0;
         renderer.setStrokeProgress(state.strokeIndex, 0);
       }
       playbackIntent = true;
       state.status = statusForPhase();
-      phaseAnchor = readNow();
-      publish();
-      scheduleFrame();
+      phaseAnchor = currentTime;
+      if (publish(commandRevision)) scheduleFrame();
       return true;
     }
 
     function pause() {
       assertAlive();
       if (!playbackIntent) return false;
-      if (!hidden) settleToNow();
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
+      if (!hidden && !settleToNow(commandRevision)) return true;
       cancelScheduledFrame();
       playbackIntent = false;
       state.status = 'paused';
-      publish();
+      publish(commandRevision);
       return true;
     }
 
     function replay() {
       assertAlive();
       var currentTime = readNow();
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
       cancelScheduledFrame();
       phase = 'stroke';
       delayProgress = 0;
@@ -357,12 +388,13 @@
       state.progress = 0;
       phaseAnchor = currentTime;
       renderer.setStrokeProgress(0, 0);
-      publish();
-      scheduleFrame();
+      if (publish(commandRevision)) scheduleFrame();
     }
 
     function playStep(targetIndex) {
       var currentTime = readNow();
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
       cancelScheduledFrame();
       phase = 'stroke';
       delayProgress = 0;
@@ -373,8 +405,7 @@
       state.progress = 0;
       phaseAnchor = currentTime;
       renderer.setStrokeProgress(targetIndex, 0);
-      publish();
-      scheduleFrame();
+      if (publish(commandRevision)) scheduleFrame();
       return true;
     }
 
@@ -394,14 +425,15 @@
       assertAlive();
       requireSpeed(speed, 'speed');
       if (state.speed === speed) return false;
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
 
       if (playbackIntent && !hidden) {
         cancelScheduledFrame();
-        settleToNow();
+        if (!settleToNow(commandRevision)) return true;
       }
       state.speed = speed;
-      publish();
-      scheduleFrame();
+      if (publish(commandRevision)) scheduleFrame();
       return true;
     }
 
@@ -409,13 +441,16 @@
       assertAlive();
       if (typeof isHidden !== 'boolean') reject('hidden', 'must be a boolean');
       if (hidden === isHidden) return false;
+      timelineRevision += 1;
+      var commandRevision = timelineRevision;
 
       if (isHidden) {
-        if (playbackIntent) {
-          cancelScheduledFrame();
-          settleToNow();
-        }
+        var wasPlaying = playbackIntent;
+        if (wasPlaying) cancelScheduledFrame();
         hidden = true;
+        if (wasPlaying) {
+          if (!settleToNow(commandRevision)) return true;
+        }
       } else {
         hidden = false;
         if (playbackIntent) {
@@ -433,6 +468,7 @@
 
     function destroy() {
       if (destroyed) return;
+      timelineRevision += 1;
       destroyed = true;
       playbackIntent = false;
       cancelScheduledFrame();
