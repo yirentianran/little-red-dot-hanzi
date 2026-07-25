@@ -28,9 +28,9 @@
     step: '单笔练习'
   });
   var SPEED_LABELS = Object.freeze({
-    slow: '慢',
-    normal: '标准',
-    fast: '快'
+    slow: '慢速',
+    normal: '适中',
+    fast: '快速'
   });
   var STORE_METHODS = Object.freeze([
     'getUnits', 'getUnit', 'getLesson', 'getEntries'
@@ -136,10 +136,11 @@
       reject(path, 'recognize counts must be internally consistent');
     }
     lesson.recognizeDisplayed = recognizeDisplayed;
+    lesson.recognize = recognizeDisplayed;
     lesson.recognizeCounted = recognizeCounted;
     lesson.polyphonicReviews = polyphonicReviews;
     lesson.write = write;
-    lesson.total = recognizeDisplayed + write;
+    lesson.total = lesson.recognize + write;
     lesson.defaultGroup = defaultGroup;
     return lesson;
   }
@@ -192,12 +193,41 @@
     }
     var selected = group === 'write' ? writeEntries : recognizeEntries;
     var lesson = copyLesson(sourceLesson, 'store.getLesson()');
+    var declaredWrite = requireInteger(
+      requireOwn(sourceLesson, 'write', 'store.getLesson()'),
+      'store.getLesson().write',
+      0
+    );
+    var recognizeDisplayed = requireInteger(
+      requireOwn(sourceLesson, 'recognizeDisplayed', 'store.getLesson()'),
+      'store.getLesson().recognizeDisplayed',
+      0
+    );
     var recognizeCounted = requireInteger(
-      sourceLesson.recognizeCounted, 'store.getLesson().recognizeCounted', 0
+      requireOwn(sourceLesson, 'recognizeCounted', 'store.getLesson()'),
+      'store.getLesson().recognizeCounted',
+      0
     );
     var reviews = requireInteger(
-      sourceLesson.polyphonicReviews, 'store.getLesson().polyphonicReviews', 0
+      requireOwn(sourceLesson, 'polyphonicReviews', 'store.getLesson()'),
+      'store.getLesson().polyphonicReviews',
+      0
     );
+    if (declaredWrite !== writeEntries.length) {
+      reject('store.getLesson().write', 'must match store.getEntries() write length');
+    }
+    if (recognizeDisplayed !== recognizeEntries.length) {
+      reject(
+        'store.getLesson().recognizeDisplayed',
+        'must match store.getEntries() recognize length'
+      );
+    }
+    if (recognizeCounted + reviews !== recognizeEntries.length) {
+      reject(
+        'store.getLesson().recognizeCounted + store.getLesson().polyphonicReviews',
+        'must match store.getEntries() recognize length'
+      );
+    }
     var groups = {
       write: {
         id: 'write',
@@ -425,6 +455,9 @@
   }
 
   function characterButton(documentObject, model, entry, extraClass, label) {
+    var accessibleName = label
+      ? label + '，' + entry.character + '，' + entry.pinyin
+      : entry.character + '，' + entry.pinyin + (entry.isReview ? '，复习' : '');
     var attributes = {
       'class': extraClass,
       'type': 'button',
@@ -432,7 +465,7 @@
       'data-lesson-id': model.lesson.id,
       'data-group': model.group,
       'data-character': entry.character,
-      'aria-label': entry.character + '，' + entry.pinyin
+      'aria-label': accessibleName
     };
     if (label) return node(documentObject, 'button', attributes, label);
     var pieces = [
@@ -480,11 +513,13 @@
       heading,
       groupControl
     ]);
-    var grid = node(documentObject, 'div', {
+    var grid = node(documentObject, 'ul', {
       'class': 'character-grid',
       'aria-label': model.groups[model.group].label + '字表'
     }, undefined, model.entries.map(function (entry) {
-      return characterButton(documentObject, model, entry, 'character-card');
+      return node(documentObject, 'li', { 'class': 'character-grid__item' }, undefined, [
+        characterButton(documentObject, model, entry, 'character-card')
+      ]);
     }));
     var first = model.entries.length > 0 ? model.entries[0] : null;
     var start = first
@@ -587,7 +622,7 @@
       'class': 'button button--audio',
       'type': 'button',
       'data-action': 'play-audio',
-      'aria-label': '听' + model.character + '的读音，' + model.pinyin
+      'aria-label': '听读音，' + model.character + '，' + model.pinyin
     }, undefined, [icon(documentObject, '♪'), node(documentObject, 'span', {}, '听读音')]);
     var audioFeedback = node(documentObject, 'p', {
       'class': 'control-feedback',
@@ -712,7 +747,8 @@
       audioFeedback.textContent = message;
       setHidden(audioFeedback, state === 'ready');
       setDisabled(audioButton, state === 'loading' || state === 'unavailable');
-      setBooleanAttribute(audioButton, 'aria-busy', state === 'loading');
+      if (state === 'loading') audioButton.setAttribute('aria-busy', 'true');
+      else audioButton.removeAttribute('aria-busy');
     }
 
     function showBoardError() {

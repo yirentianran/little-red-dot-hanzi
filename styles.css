@@ -295,7 +295,7 @@ a:focus-visible,
 }
 
 .back-button {
-  margin: -6px 0 4px -10px;
+  margin: 0 0 4px;
 }
 
 .segmented-control {
@@ -334,6 +334,13 @@ a:focus-visible,
   grid-template-columns: repeat(auto-fill, minmax(76px, 96px));
   gap: 10px;
   align-items: stretch;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.character-grid__item {
+  min-width: 0;
 }
 
 .character-card {
@@ -353,7 +360,7 @@ a:focus-visible,
 }
 
 .character-card:hover:not(:disabled) {
-  border-color: var(--tracking-red);
+  border-color: var(--action-blue);
 }
 
 .character-card__pinyin {

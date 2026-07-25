@@ -154,6 +154,7 @@ test('builds an immutable eight-unit directory from the real curriculum', async 
       id: first.id,
       number: first.number,
       title: first.title,
+      recognize: first.recognize,
       recognizeDisplayed: first.recognizeDisplayed,
       recognizeCounted: first.recognizeCounted,
       polyphonicReviews: first.polyphonicReviews,
@@ -166,6 +167,7 @@ test('builds an immutable eight-unit directory from the real curriculum', async 
       id: 'lesson-1',
       number: 1,
       title: '观潮',
+      recognize: 13,
       recognizeDisplayed: 13,
       recognizeCounted: 12,
       polyphonicReviews: 1,
@@ -174,6 +176,7 @@ test('builds an immutable eight-unit directory from the real curriculum', async 
       defaultGroup: 'write'
     }
   );
+  assert.equal(first.total, first.recognize + first.write);
   assert.equal(store.getUnits(), before);
   assert.ok(deepFrozen(model));
 });
@@ -247,6 +250,37 @@ test('models validate collaborators and selectors without accepting malformed in
   assert.throws(() => views.createCharacterModel({}), /resolved/);
 });
 
+test('lesson models reject declared counts that disagree with the returned entry arrays', async () => {
+  const { createLessonModel } = loadViews();
+  const store = await createRuntimeStore();
+  const lesson = store.getLesson('lesson-1');
+  const withLesson = (overrides) => ({
+    getUnits: () => store.getUnits(),
+    getUnit: (id) => store.getUnit(id),
+    getLesson: (id) => (id === 'lesson-1' ? { ...lesson, ...overrides } : store.getLesson(id)),
+    getEntries: (lessonId, group) => store.getEntries(lessonId, group)
+  });
+
+  assert.throws(
+    () => createLessonModel(withLesson({ write: lesson.write + 1 }), {
+      lessonId: 'lesson-1', group: 'write'
+    }),
+    /write.*match/i
+  );
+  assert.throws(
+    () => createLessonModel(withLesson({ recognizeDisplayed: lesson.recognizeDisplayed + 1 }), {
+      lessonId: 'lesson-1', group: 'recognize'
+    }),
+    /recognizeDisplayed.*match/i
+  );
+  assert.throws(
+    () => createLessonModel(withLesson({ recognizeCounted: lesson.recognizeCounted + 1 }), {
+      lessonId: 'lesson-1', group: 'recognize'
+    }),
+    /recognizeCounted.*polyphonicReviews.*match/i
+  );
+});
+
 test('renders directory bands, accessible lesson actions, and a stable resume handle', async () => {
   const { createDirectoryModel, renderDirectory } = loadViews();
   const store = await createRuntimeStore();
@@ -306,14 +340,22 @@ test('renders lesson segmented groups, review labels, character routes, and star
   assert.deepEqual(groupButtons.map((button) => button.getAttribute('aria-pressed')), ['true', 'false']);
   assert.equal(byAction(writeDom.container, 'go-directory').length, 1);
   assert.equal(byAction(writeDom.container, 'open-character').length, 16);
-  assert.equal(byAction(writeDom.container, 'open-character')[0].getAttribute('aria-label'), '潮，cháo');
-  assert.equal(byAction(writeDom.container, 'open-character')[0].getAttribute('data-character'), '潮');
-  assert.equal(byAction(writeDom.container, 'open-character')[0].getAttribute('data-lesson-id'), 'lesson-1');
-  assert.equal(byAction(writeDom.container, 'open-character')[0].getAttribute('data-group'), 'write');
+  assert.match(
+    byAction(writeDom.container, 'open-character')[0].getAttribute('aria-label'),
+    /^从第一个字开始学习.*潮.*cháo$/
+  );
+  const firstCard = byAction(writeDom.container, 'open-character')[1];
+  assert.equal(firstCard.getAttribute('aria-label'), '潮，cháo');
+  assert.equal(firstCard.getAttribute('data-character'), '潮');
+  assert.equal(firstCard.getAttribute('data-lesson-id'), 'lesson-1');
+  assert.equal(firstCard.getAttribute('data-group'), 'write');
   const reviewButton = byAction(reviewDom.container, 'open-character').find((button) => (
     button.getAttribute('data-character') === '薄' && button.textContent.includes('复习')
   ));
   assert.ok(reviewButton);
+  assert.match(reviewButton.getAttribute('aria-label'), /复习/);
+  assert.equal(byTag(writeDom.container, 'ul').length, 1);
+  assert.equal(byTag(writeDom.container, 'li').length, 15);
   assert.equal(byAction(gardenDom.container, 'select-group')[0].getAttribute('disabled'), '');
   assert.equal(writeHandle.heading.getAttribute('data-view-heading'), '');
   assert.ok(Object.isFrozen(writeHandle));
@@ -332,12 +374,18 @@ test('renders character work surface and updates only coarse animation state', a
   assert.equal(byTag(container, 'h1').length, 1);
   assert.match(byAction(container, 'back-lesson')[0].getAttribute('aria-label'), /返回.*观潮/);
   assert.equal(byAction(container, 'play-audio').length, 1);
-  assert.equal(byAction(container, 'play-audio')[0].getAttribute('aria-label'), '听潮的读音，cháo');
+  assert.match(
+    byAction(container, 'play-audio')[0].getAttribute('aria-label'),
+    /^听读音.*潮.*cháo$/
+  );
   assert.equal(byAction(container, 'previous-stroke').length, 1);
   assert.equal(byAction(container, 'toggle-play').length, 1);
   assert.equal(byAction(container, 'replay').length, 1);
   assert.equal(byAction(container, 'next-stroke').length, 1);
   assert.equal(byAction(container, 'set-speed').length, 3);
+  assert.deepEqual(byAction(container, 'set-speed').map((button) => button.textContent), [
+    '慢速', '适中', '快速'
+  ]);
   assert.equal(byAttribute(container, 'data-slot', 'speed-group')[0].getAttribute('role'), 'group');
   assert.equal(byAction(container, 'previous-character').length, 1);
   assert.equal(byAction(container, 'next-character').length, 1);
@@ -400,10 +448,12 @@ test('updates audio feedback and keeps pronunciation and character navigation af
 
   handle.setAudioState('loading');
   assert.equal(audioButton.getAttribute('disabled'), '');
+  assert.equal(audioButton.getAttribute('aria-busy'), 'true');
   assert.equal(feedback.hasAttribute('hidden'), false);
   assert.equal(feedback.textContent, '正在准备读音…');
   handle.setAudioState('ready');
   assert.equal(audioButton.hasAttribute('disabled'), false);
+  assert.equal(audioButton.hasAttribute('aria-busy'), false);
   assert.equal(feedback.getAttribute('hidden'), '');
   handle.setAudioState('unavailable');
   assert.equal(feedback.textContent, '该字读音暂不可用');
@@ -487,4 +537,17 @@ test('styles define the responsive bright-classroom system without unsafe visual
   assert.doesNotMatch(css, /(?:^|[^a-z-])-?\d*\.?\d+vw\b/im);
   assert.doesNotMatch(css, /letter-spacing:\s*-/i);
   assert.doesNotMatch(css, /border-radius:\s*(?:[9-9]|[1-9]\d)px/i);
+  assert.match(
+    css,
+    /\.character-grid\s*\{[^}]*padding:\s*0[^}]*margin:\s*0[^}]*list-style:\s*none/is
+  );
+  assert.match(
+    css,
+    /\.character-card:hover:not\(:disabled\)\s*\{[^}]*border-color:\s*var\(--action-blue\)/is
+  );
+  assert.doesNotMatch(
+    css,
+    /\.character-card:hover:not\(:disabled\)\s*\{[^}]*var\(--tracking-red\)/is
+  );
+  assert.doesNotMatch(css, /\.back-button\s*\{[^}]*margin:\s*-/is);
 });
