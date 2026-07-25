@@ -96,6 +96,19 @@ test('reports SVG arc paths with non-binary flags', () => {
   assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i);
 });
 
+test('reports decimal and exponent SVG arc flag spellings', () => {
+  for (const path of [
+    'M0 0 A1 1 0 1.0 0 5 5',
+    'M0 0 a1 1 0 1 1e0 5 5'
+  ]) {
+    const characters = clone(validCharacters);
+    characters.郭.strokes[0] = path;
+
+    const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+    assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i, path);
+  }
+});
+
 test('accepts SVG arc paths with binary flags', () => {
   const characters = clone(validCharacters);
   characters.郭.strokes[0] = 'M0 0 A1 1 0 1 0 5 5';

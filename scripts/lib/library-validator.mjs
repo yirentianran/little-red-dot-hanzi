@@ -27,7 +27,7 @@ function isValidPath(path) {
     if (command === 'A' || command === 'a') {
       return argumentsForCommand.every((argument, index) => {
         const isArcFlag = index % expected === 3 || index % expected === 4;
-        return !isArcFlag || Number(argument) === 0 || Number(argument) === 1;
+        return !isArcFlag || argument === '0' || argument === '1';
       });
     }
 
