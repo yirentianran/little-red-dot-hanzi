@@ -73,10 +73,14 @@ export function validateLibrary(curriculum, characters, audioIds) {
     errors.push('curriculum.units: must be an array');
     return errors;
   }
+  if (!isRecord(characters)) {
+    errors.push('characters: must be an object');
+    return errors;
+  }
 
   const lessonIds = new Set();
   const unitIds = new Set();
-  const geometryByCharacter = isRecord(characters) ? characters : {};
+  const geometryByCharacter = characters;
   const availableAudioIds = audioIds instanceof Set ? audioIds : new Set(audioIds ?? []);
 
   for (const [unitIndex, unit] of curriculum.units.entries()) {

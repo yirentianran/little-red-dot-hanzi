@@ -45,6 +45,14 @@ test('rejects a null curriculum and a non-array units field', () => {
   assert.match(validateLibrary({ units: {} }, validCharacters, validAudioIds).join('\n'), /units.*array/i);
 });
 
+test('rejects malformed character geometry roots instead of treating them as empty', () => {
+  for (const characters of [null, [], 'bad']) {
+    assert.deepEqual(validateLibrary(validCurriculum, characters, validAudioIds), [
+      'characters: must be an object'
+    ]);
+  }
+});
+
 test('reports lesson and character for missing geometry', () => {
   const errors = validateLibrary(validCurriculum, {}, validAudioIds);
 
