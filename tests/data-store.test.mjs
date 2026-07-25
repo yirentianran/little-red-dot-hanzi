@@ -107,6 +107,14 @@ function fixtureLibrary() {
   };
 }
 
+function inheritField(record, field) {
+  const inherited = Object.create({ [field]: record[field] });
+  for (const key of Object.keys(record)) {
+    if (key !== field) inherited[key] = record[key];
+  }
+  return inherited;
+}
+
 async function loadRuntimeLibrary() {
   const source = await readFile(new URL('../data/library-data.js', import.meta.url), 'utf8');
   const context = { window: {} };
@@ -243,6 +251,35 @@ test('shares geometry identity while keeping resolve read-only and exposes froze
   assert.ok(Object.isFrozen(store.getNotices()));
 });
 
+test('marks shared geometry recursively read-only without copying or changing values', () => {
+  const library = fixtureLibrary();
+  const originalGeometry = library.characters['潮'];
+  const originalValues = structuredClone(originalGeometry);
+  const store = createDataStore(library);
+  const state = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+
+  assert.equal(store.getGeometry('潮'), originalGeometry);
+  assert.equal(state.geometry, originalGeometry);
+  assert.deepEqual(originalGeometry, originalValues);
+  assert.ok(Object.isFrozen(originalGeometry));
+  assert.ok(Object.isFrozen(originalGeometry.strokes));
+  assert.ok(Object.isFrozen(originalGeometry.medians));
+  assert.ok(Object.isFrozen(originalGeometry.medians[0]));
+  assert.ok(Object.isFrozen(originalGeometry.medians[0][0]));
+
+  assert.throws(() => { originalGeometry.strokeCount = 99; }, TypeError);
+  assert.throws(() => { originalGeometry.strokes[0] = 'M 9 9'; }, TypeError);
+  assert.throws(() => { originalGeometry.strokes.push('M 2 2'); }, TypeError);
+  assert.throws(() => { originalGeometry.medians.push([[2, 2], [3, 3]]); }, TypeError);
+  assert.throws(() => { originalGeometry.medians[0].push([2, 2]); }, TypeError);
+  assert.throws(() => { originalGeometry.medians[0][0][0] = 99; }, TypeError);
+  assert.throws(() => { delete originalGeometry.medians; }, TypeError);
+
+  const resolvedAgain = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  assert.equal(resolvedAgain.geometry.strokeCount, originalValues.strokeCount);
+  assert.deepEqual(resolvedAgain.geometry, originalValues);
+});
+
 test('validates runtime shape, duplicate ids, duplicate group characters, and own references with paths', () => {
   assert.throws(() => createDataStore(null), /library.*object/i);
 
@@ -282,6 +319,175 @@ test('validates runtime shape, duplicate ids, duplicate group characters, and ow
     重: geometry(), 薄: geometry(), 潮: geometry(), 巢: geometry(), 驻: geometry()
   });
   assert.throws(() => createDataStore(inheritedGeometry), /write\[0\]\.character.*geometry.*郭/i);
+});
+
+test('strictly validates geometry own fields, lengths, paths, medians, and finite points', () => {
+  const cases = [
+    [
+      geometryRecord => inheritField(geometryRecord, 'strokeCount'),
+      /library\.characters\.郭\.strokeCount.*own property/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, strokeCount: 0 }),
+      /library\.characters\.郭\.strokeCount.*positive integer/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, strokes: [] }),
+      /library\.characters\.郭\.strokeCount.*match/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, strokes: [''] }),
+      /library\.characters\.郭\.strokes\[0\].*non-blank/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, medians: [[[0, 0]]] }),
+      /library\.characters\.郭\.medians\[0\].*at least two/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, medians: [[[0, 0, 1], [1, 1]]] }),
+      /library\.characters\.郭\.medians\[0\]\[0\].*exactly two/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, medians: [[[0, 0], [Infinity, 1]]] }),
+      /library\.characters\.郭\.medians\[0\]\[1\].*finite/i
+    ],
+    [
+      geometryRecord => ({ ...geometryRecord, extra: true }),
+      /library\.characters\.郭\.extra.*unknown field/i
+    ]
+  ];
+
+  for (const [mutate, expected] of cases) {
+    const library = fixtureLibrary();
+    library.characters['郭'] = mutate(geometry());
+    assert.throws(() => createDataStore(library), expected);
+  }
+});
+
+test('requires runtime fields to be own properties at every store input layer', () => {
+  const cases = [
+    [
+      library => inheritField(library, 'schemaVersion'),
+      /library\.schemaVersion.*own property/i
+    ],
+    [
+      library => {
+        library.geometryNotice = inheritField(library.geometryNotice, 'source');
+        return library;
+      },
+      /library\.geometryNotice\.source.*own property/i
+    ],
+    [
+      library => {
+        library.curriculum = inheritField(library.curriculum, 'units');
+        return library;
+      },
+      /library\.curriculum\.units.*own property/i
+    ],
+    [
+      library => {
+        library.curriculum.book = inheritField(library.curriculum.book, 'publisher');
+        return library;
+      },
+      /library\.curriculum\.book\.publisher.*own property/i
+    ],
+    [
+      library => {
+        library.audio = inheritField(library.audio, 'format');
+        return library;
+      },
+      /library\.audio\.format.*own property/i
+    ],
+    [
+      library => {
+        library.curriculum.units[0] = inheritField(library.curriculum.units[0], 'id');
+        return library;
+      },
+      /curriculum\.units\[0\]\.id.*own property/i
+    ],
+    [
+      library => {
+        library.curriculum.units[0].lessons[0] = inheritField(
+          library.curriculum.units[0].lessons[0],
+          'recognize'
+        );
+        return library;
+      },
+      /lessons\[0\]\.recognize.*own property/i
+    ],
+    [
+      library => {
+        const section = library.curriculum.units[0].lessons[0];
+        section.write[0] = inheritField(section.write[0], 'character');
+        return library;
+      },
+      /write\[0\]\.character.*own property/i
+    ],
+    [
+      library => {
+        library.characters['郭'] = inheritField(library.characters['郭'], 'medians');
+        return library;
+      },
+      /library\.characters\.郭\.medians.*own property/i
+    ],
+    [
+      library => {
+        library.audio.readings.guo1 = inheritField(library.audio.readings.guo1, 'file');
+        return library;
+      },
+      /library\.audio\.readings\.guo1\.file.*own property/i
+    ],
+    [
+      library => {
+        library.notices = inheritField(library.notices, 'audioLicense');
+        return library;
+      },
+      /library\.notices\.audioLicense.*own property/i
+    ]
+  ];
+
+  for (const [mutate, expected] of cases) {
+    assert.throws(() => createDataStore(mutate(fixtureLibrary())), expected);
+  }
+});
+
+test('ignores inherited counted pollution and always removes the global prototype test value', () => {
+  Object.prototype.counted = false;
+  try {
+    const store = createDataStore(fixtureLibrary());
+    const entries = store.getEntries('lesson-1', 'recognize');
+
+    assert.equal(Object.hasOwn(entries[0], 'counted'), false);
+    assert.equal(entries[1].counted, false);
+    assert.equal(store.getLesson('lesson-1').recognizeCounted, 1);
+    assert.equal(store.getLesson('lesson-1').polyphonicReviews, 1);
+  } finally {
+    delete Object.prototype.counted;
+  }
+  assert.equal(Object.hasOwn(Object.prototype, 'counted'), false);
+});
+
+test('resolve requires own lesson, group, and selector fields while preserving character precedence', () => {
+  const store = createDataStore(fixtureLibrary());
+  const fullyInherited = Object.create({ lessonId: 'lesson-1', group: 'write', index: 0 });
+  const inheritedLesson = Object.assign(Object.create({ lessonId: 'lesson-1' }), {
+    group: 'write', index: 0
+  });
+  const inheritedGroup = Object.assign(Object.create({ group: 'write' }), {
+    lessonId: 'lesson-1', index: 0
+  });
+  const inheritedIndex = Object.assign(Object.create({ index: 0 }), {
+    lessonId: 'lesson-1', group: 'write'
+  });
+  const inheritedCharacter = Object.assign(Object.create({ character: '潮' }), {
+    lessonId: 'lesson-1', group: 'write', index: 0
+  });
+
+  assert.equal(store.resolve(fullyInherited), null);
+  assert.equal(store.resolve(inheritedLesson), null);
+  assert.equal(store.resolve(inheritedGroup), null);
+  assert.equal(store.resolve(inheritedIndex), null);
+  assert.equal(store.resolve(inheritedCharacter).entry.character, '郭');
 });
 
 test('copies only known notice fields without allowing prototype-shaped keys to alter the result', () => {

@@ -74,19 +74,24 @@
   }
 
   function serializeHash(route) {
-    if (!isRecord(route)) return '#/';
-    if (route.view === 'directory') return '#/';
-    if (route.view !== 'lesson' && route.view !== 'character') return '#/';
-    var allowed = route.view === 'lesson'
+    if (!isRecord(route) || !Object.hasOwn(route, 'view')) return '#/';
+    var view = route.view;
+    if (view === 'directory') return '#/';
+    if (view !== 'lesson' && view !== 'character') return '#/';
+    var allowed = view === 'lesson'
       ? ['view', 'lessonId', 'group']
       : ['view', 'lessonId', 'group', 'character'];
     if (!hasOnlyKeys(route, allowed)
+      || !Object.hasOwn(route, 'lessonId')
+      || !Object.hasOwn(route, 'group')
       || !isNonBlankString(route.lessonId)
       || (route.group !== 'write' && route.group !== 'recognize')) {
       return '#/';
     }
-    if (route.view === 'character'
-      && (typeof route.character !== 'string' || Array.from(route.character).length !== 1)) {
+    if (view === 'character'
+      && (!Object.hasOwn(route, 'character')
+        || typeof route.character !== 'string'
+        || Array.from(route.character).length !== 1)) {
       return '#/';
     }
 
@@ -94,46 +99,56 @@
       var parameters = new URLSearchParams();
       parameters.append('lesson', route.lessonId);
       parameters.append('group', route.group);
-      if (route.view === 'character') parameters.append('character', route.character);
-      return '#/' + route.view + '?' + parameters.toString();
+      if (view === 'character') parameters.append('character', route.character);
+      return '#/' + view + '?' + parameters.toString();
     } catch (_error) {
       return '#/';
     }
   }
 
   function normalizeRoute(route, store) {
-    if (!isRecord(route) || route._invalid === true) return directoryRoute();
-    if (route.view === 'directory') return directoryRoute();
-    if (route.view !== 'lesson' && route.view !== 'character') return directoryRoute();
+    if (!isRecord(route)
+      || (Object.hasOwn(route, '_invalid') && route._invalid === true)
+      || !Object.hasOwn(route, 'view')) {
+      return directoryRoute();
+    }
+    var view = route.view;
+    if (view === 'directory') return directoryRoute();
+    if (view !== 'lesson' && view !== 'character') return directoryRoute();
     var allowed = ['view', 'lessonId', 'group', 'character'];
     if (!hasOnlyKeys(route, allowed)) return directoryRoute();
-    if (!isNonBlankString(route.lessonId) || !store.hasLesson(route.lessonId)) {
+    if (!Object.hasOwn(route, 'lessonId')
+      || !isNonBlankString(route.lessonId)
+      || !store.hasLesson(route.lessonId)) {
       return directoryRoute();
     }
 
-    var defaultGroup = store.getDefaultGroup(route.lessonId);
-    var groupIsNamed = route.group === 'write' || route.group === 'recognize';
-    var selectedEntries = groupIsNamed ? store.getEntries(route.lessonId, route.group) : null;
+    var lessonId = route.lessonId;
+    var defaultGroup = store.getDefaultGroup(lessonId);
+    var group = Object.hasOwn(route, 'group') ? route.group : undefined;
+    var groupIsNamed = group === 'write' || group === 'recognize';
+    var selectedEntries = groupIsNamed ? store.getEntries(lessonId, group) : null;
     var groupIsUsable = selectedEntries !== null && selectedEntries.length > 0;
     if (!groupIsUsable) {
-      return Object.freeze({ view: 'lesson', lessonId: route.lessonId, group: defaultGroup });
+      return Object.freeze({ view: 'lesson', lessonId: lessonId, group: defaultGroup });
     }
-    if (route.view === 'lesson') {
-      return Object.freeze({ view: 'lesson', lessonId: route.lessonId, group: route.group });
+    if (view === 'lesson') {
+      return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
     }
-    if (typeof route.character !== 'string'
+    if (!Object.hasOwn(route, 'character')
+      || typeof route.character !== 'string'
       || Array.from(route.character).length !== 1
       || store.resolve({
-        lessonId: route.lessonId,
-        group: route.group,
+        lessonId: lessonId,
+        group: group,
         character: route.character
       }) === null) {
-      return Object.freeze({ view: 'lesson', lessonId: route.lessonId, group: route.group });
+      return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
     }
     return Object.freeze({
       view: 'character',
-      lessonId: route.lessonId,
-      group: route.group,
+      lessonId: lessonId,
+      group: group,
       character: route.character
     });
   }

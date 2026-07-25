@@ -99,6 +99,26 @@ test('serializeHash safely returns the directory hash for invalid route objects'
   for (const route of invalidRoutes) assert.equal(serializeHash(route), '#/');
 });
 
+test('serializeHash never accepts required route fields inherited from a prototype', () => {
+  const inheritedRoute = Object.create({
+    view: 'character', lessonId: 'lesson-1', group: 'write', character: '潮'
+  });
+  const inheritedLesson = Object.assign(Object.create({ lessonId: 'lesson-1' }), {
+    view: 'lesson', group: 'write'
+  });
+  const inheritedGroup = Object.assign(Object.create({ group: 'write' }), {
+    view: 'lesson', lessonId: 'lesson-1'
+  });
+  const inheritedCharacter = Object.assign(Object.create({ character: '潮' }), {
+    view: 'character', lessonId: 'lesson-1', group: 'write'
+  });
+
+  assert.equal(serializeHash(inheritedRoute), '#/');
+  assert.equal(serializeHash(inheritedLesson), '#/');
+  assert.equal(serializeHash(inheritedGroup), '#/');
+  assert.equal(serializeHash(inheritedCharacter), '#/');
+});
+
 test('normalizes lesson and garden routes with canonical default-group behavior', async () => {
   const store = createDataStore(await loadRuntimeLibrary());
 
@@ -148,6 +168,31 @@ test('normalizes character routes only when the selected character exists in a n
     view: 'character', lessonId: 'garden-2', group: 'recognize', character: '驻'
   }, store), {
     view: 'character', lessonId: 'garden-2', group: 'recognize', character: '驻'
+  });
+});
+
+test('normalization ignores inherited route fields and retains hierarchical fallbacks', async () => {
+  const store = createDataStore(await loadRuntimeLibrary());
+  const inheritedRoute = Object.create({
+    view: 'character', lessonId: 'lesson-1', group: 'write', character: '潮'
+  });
+  const inheritedLesson = Object.assign(Object.create({ lessonId: 'lesson-1' }), {
+    view: 'lesson', group: 'write'
+  });
+  const inheritedGroup = Object.assign(Object.create({ group: 'recognize' }), {
+    view: 'lesson', lessonId: 'lesson-1'
+  });
+  const inheritedCharacter = Object.assign(Object.create({ character: '潮' }), {
+    view: 'character', lessonId: 'lesson-1', group: 'write'
+  });
+
+  assert.deepEqual(normalizeRoute(inheritedRoute, store), { view: 'directory' });
+  assert.deepEqual(normalizeRoute(inheritedLesson, store), { view: 'directory' });
+  assert.deepEqual(normalizeRoute(inheritedGroup, store), {
+    view: 'lesson', lessonId: 'lesson-1', group: 'write'
+  });
+  assert.deepEqual(normalizeRoute(inheritedCharacter, store), {
+    view: 'lesson', lessonId: 'lesson-1', group: 'write'
   });
 });
 
