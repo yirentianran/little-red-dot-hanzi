@@ -506,7 +506,8 @@ test('index is offline-first, accessible, and loads classic scripts in dependenc
     'js/svg-renderer.js',
     'js/animation-controller.js',
     'js/audio-controller.js',
-    'js/views.js'
+    'js/views.js',
+    'js/app.js'
   ]);
   assert.doesNotMatch(html, /https?:\/\//i);
   assert.doesNotMatch(html, /type="module"/i);

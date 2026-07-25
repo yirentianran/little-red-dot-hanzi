@@ -25,5 +25,18 @@
   <script defer src="js/animation-controller.js"></script>
   <script defer src="js/audio-controller.js"></script>
   <script defer src="js/views.js"></script>
+  <script defer src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        if (window.HanziApp && typeof window.HanziApp.bootstrapApp === 'function') {
+          window.HanziApp.bootstrapApp(window);
+        }
+      } catch (error) {
+        var status = document.getElementById('announcer');
+        if (status) status.textContent = '应用启动失败，请重新打开页面。';
+      }
+    });
+  </script>
 </body>
 </html>
