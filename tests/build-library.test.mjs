@@ -72,7 +72,7 @@ const audioManifest = {
   format: 'audio/mpeg',
   source: {
     repository: 'https://example.invalid/upstream-audio',
-    commit: 'fixture-commit',
+    commit: 'b'.repeat(40),
     subset: '64k/syllabs',
     license: 'CC-BY-SA-3.0',
     licenseUrl: 'https://example.invalid/license',
@@ -107,6 +107,10 @@ async function fixtureRoot(t) {
 
 async function candidateFiles(rootDir) {
   return (await readdir(path.join(rootDir, 'data'))).filter(name => name.includes('.candidate-'));
+}
+
+function escaped(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 test('builds a classic offline script with structured provenance and slim audio data', () => {
@@ -185,6 +189,106 @@ test('rejects malformed source documents and missing cross-references with sourc
   }
 });
 
+test('rejects unknown fields at every source schema layer with the complete field location', () => {
+  const cases = [
+    ['data/curriculum.json.extraField', ({ curriculum: candidate }) => { candidate.extraField = true; }],
+    ['data/curriculum.json.book.extraField', ({ curriculum: candidate }) => { candidate.book.extraField = true; }],
+    ['data/curriculum.json.units[0].extraField', ({ curriculum: candidate }) => { candidate.units[0].extraField = true; }],
+    ['data/curriculum.json.units[0].lessons[0].extraField', ({ curriculum: candidate }) => { candidate.units[0].lessons[0].extraField = true; }],
+    ['data/curriculum.json.units[0].lessons[0].extraField', ({ curriculum: candidate }) => {
+      candidate.units[0].lessons[0].kind = 'garden';
+      delete candidate.units[0].lessons[0].number;
+      candidate.units[0].lessons[0].extraField = true;
+    }],
+    ['data/curriculum.json.units[0].lessons[0].recognize[0].extraField', ({ curriculum: candidate }) => {
+      candidate.units[0].lessons[0].recognize[0].extraField = true;
+    }],
+    ['data/curriculum.json.units[0].lessons[0].write[0].extraField', ({ curriculum: candidate }) => {
+      candidate.units[0].lessons[0].write.push({
+        character: '郭', pinyin: 'guō', audio: 'guo1', extraField: true
+      });
+    }],
+    ['data/characters.json.extraField', ({ characters: candidate }) => { candidate.extraField = true; }],
+    ['data/characters.json.modificationNotice.extraField', ({ characters: candidate }) => {
+      candidate.modificationNotice.extraField = true;
+    }],
+    ['data/characters.json.characters.郭.extraField', ({ characters: candidate }) => {
+      candidate.characters.郭.extraField = true;
+    }],
+    ['assets/audio/manifest.json.extraField', ({ audio: candidate }) => { candidate.extraField = true; }],
+    ['assets/audio/manifest.json.source.extraField', ({ audio: candidate }) => {
+      candidate.source.extraField = true;
+    }],
+    ['assets/audio/manifest.json.readings.guo1.extraField', ({ audio: candidate }) => {
+      candidate.readings.guo1.extraField = true;
+    }]
+  ];
+
+  for (const [location, mutate] of cases) {
+    const documents = {
+      curriculum: structuredClone(curriculum),
+      characters: structuredClone(characterDocument),
+      audio: structuredClone(audioManifest)
+    };
+    mutate(documents);
+    assert.throws(
+      () => buildRuntimeSource(documents.curriculum, documents.characters, documents.audio),
+      new RegExp(`${escaped(location)}.*unknown field`, 'i'),
+      location
+    );
+  }
+});
+
+test('enforces section number and counted-field rules by classification', () => {
+  const missingLessonNumber = structuredClone(curriculum);
+  delete missingLessonNumber.units[0].lessons[0].number;
+  assert.throws(
+    () => buildRuntimeSource(missingLessonNumber, characterDocument, audioManifest),
+    /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.number.*positive integer/i
+  );
+
+  const numberedGarden = structuredClone(curriculum);
+  numberedGarden.units[0].lessons[0].kind = 'garden';
+  assert.throws(
+    () => buildRuntimeSource(numberedGarden, characterDocument, audioManifest),
+    /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.number.*unknown field/i
+  );
+
+  const countedRecognize = structuredClone(curriculum);
+  countedRecognize.units[0].lessons[0].recognize[0].counted = true;
+  assert.throws(
+    () => buildRuntimeSource(countedRecognize, characterDocument, audioManifest),
+    /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.recognize\[0\]\.counted.*false/i
+  );
+  countedRecognize.units[0].lessons[0].recognize[0].counted = false;
+  assert.doesNotThrow(
+    () => buildRuntimeSource(countedRecognize, characterDocument, audioManifest)
+  );
+
+  const countedWrite = structuredClone(curriculum);
+  countedWrite.units[0].lessons[0].write.push({
+    character: '郭', pinyin: 'guō', audio: 'guo1', counted: false
+  });
+  assert.throws(
+    () => buildRuntimeSource(countedWrite, characterDocument, audioManifest),
+    /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.write\[0\]\.counted.*unknown field/i
+  );
+});
+
+test('encodes closing-script text in the header while preserving structured notice data', () => {
+  const unsafeCharacters = structuredClone(characterDocument);
+  unsafeCharacters.modificationNotice.changes[0] = 'Changed </script> marker';
+
+  const output = buildRuntimeSource(curriculum, unsafeCharacters, audioManifest);
+
+  assert.doesNotMatch(output, /<\/script/i);
+  assert.match(output.slice(0, output.indexOf('window.HANZI_LIBRARY')), /Changed \\u003c\/script> marker/);
+  assert.equal(
+    runtimePayload(output).geometryNotice.changes[0],
+    unsafeCharacters.modificationNotice.changes[0]
+  );
+});
+
 test('requires exact curriculum geometry and audio mappings plus MP3 format', () => {
   const extraGeometry = {
     ...characterDocument,
@@ -216,6 +320,33 @@ test('requires exact curriculum geometry and audio mappings plus MP3 format', ()
     }),
     /assets\/audio\/manifest\.json\.format.*audio\/mpeg/i
   );
+});
+
+test('validates retained audio audit fields before stripping them from runtime data', () => {
+  const cases = [
+    ['source.repository', ({ source }) => { source.repository = 'not-a-url'; }, /HTTPS URL/i],
+    ['source.commit', ({ source }) => { source.commit = 'short'; }, /40.*hex/i],
+    ['source.subset', ({ source }) => { source.subset = '../outside'; }, /safe relative path/i],
+    ['source.license', ({ source }) => { source.license = ''; }, /non-blank string/i],
+    ['source.licenseUrl', ({ source }) => { source.licenseUrl = 'http://example.invalid/license'; }, /HTTPS URL/i],
+    ['source.attribution', ({ source }) => { source.attribution = 42; }, /non-blank string/i],
+    ['readings.guo1.sourceFile', ({ readings }) => { readings.guo1.sourceFile = 'https://example.invalid/guo1.mp3'; }, /safe relative MP3 path/i],
+    ['readings.guo1.sourceLabel', ({ readings }) => { readings.guo1.sourceLabel = 'GUO1'; }, /numbered lowercase reading id/i],
+    ['readings.guo1.bytes', ({ readings }) => { readings.guo1.bytes = 0; }, /positive integer/i],
+    ['readings.guo1.sha256', ({ readings }) => { readings.guo1.sha256 = 'A'.repeat(64); }, /lowercase 64-digit hexadecimal/i],
+    ['readings.guo1.metadataVerified', ({ readings }) => { readings.guo1.metadataVerified = false; }, /equal true/i],
+    ['readings.guo1.auditoryReviewed', ({ readings }) => { readings.guo1.auditoryReviewed = 'false'; }, /boolean/i]
+  ];
+
+  for (const [suffix, mutate, requirement] of cases) {
+    const invalidAudio = structuredClone(audioManifest);
+    mutate(invalidAudio);
+    assert.throws(
+      () => buildRuntimeSource(curriculum, characterDocument, invalidAudio),
+      new RegExp(`assets/audio/manifest\\.json\\.${escaped(suffix)}.*${requirement.source}`, 'i'),
+      suffix
+    );
+  }
 });
 
 test('refuses any network URL or fetch token that survives into generated source', () => {

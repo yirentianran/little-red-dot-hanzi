@@ -23,7 +23,8 @@ function commentText(value) {
   return String(value)
     .replace(/\*\//g, '* /')
     .replace(/[\r\n\u2028\u2029]+/g, ' ')
-    .replace(/:\/\//g, ':\\/\\/');
+    .replace(/:\/\//g, ':\\/\\/')
+    .replace(/</g, '\\u003c');
 }
 
 function formatGeometryLicenseHeader(notice) {
@@ -61,10 +62,43 @@ function requireNonBlankString(value, location) {
   if (!isNonBlankString(value)) reject(location, 'must be a non-blank string');
 }
 
+function requireHttpsUrl(value, location) {
+  requireNonBlankString(value, location);
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch {
+    reject(location, 'must be a valid HTTPS URL');
+  }
+  if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password) {
+    reject(location, 'must be a valid HTTPS URL without credentials');
+  }
+}
+
+function isSafeRelativePath(value) {
+  return isNonBlankString(value)
+    && !path.posix.isAbsolute(value)
+    && !value.includes('\\')
+    && !value.split('/').some(segment => segment === '' || segment === '.' || segment === '..');
+}
+
+function requireExactKeys(value, allowedKeys, location) {
+  const allowed = new Set(allowedKeys);
+  for (const field of Object.keys(value)) {
+    if (!allowed.has(field)) reject(`${location}.${field}`, 'unknown field');
+  }
+}
+
 function validateCurriculum(curriculum) {
   requireRecord(curriculum, CURRICULUM_SOURCE);
+  requireExactKeys(curriculum, ['schemaVersion', 'book', 'units'], CURRICULUM_SOURCE);
   if (curriculum.schemaVersion !== 1) reject(`${CURRICULUM_SOURCE}.schemaVersion`, 'must equal 1');
   requireRecord(curriculum.book, `${CURRICULUM_SOURCE}.book`);
+  requireExactKeys(
+    curriculum.book,
+    ['publisher', 'approvalYear', 'grade', 'volume'],
+    `${CURRICULUM_SOURCE}.book`
+  );
   requireNonBlankString(curriculum.book.publisher, `${CURRICULUM_SOURCE}.book.publisher`);
   if (!Number.isInteger(curriculum.book.approvalYear)) {
     reject(`${CURRICULUM_SOURCE}.book.approvalYear`, 'must be an integer');
@@ -80,6 +114,7 @@ function validateCurriculum(curriculum) {
   for (const [unitIndex, unit] of curriculum.units.entries()) {
     const unitLocation = `${CURRICULUM_SOURCE}.units[${unitIndex}]`;
     requireRecord(unit, unitLocation);
+    requireExactKeys(unit, ['id', 'title', 'lessons'], unitLocation);
     requireNonBlankString(unit.id, `${unitLocation}.id`);
     requireNonBlankString(unit.title, `${unitLocation}.title`);
     if (!Array.isArray(unit.lessons) || unit.lessons.length === 0) {
@@ -92,6 +127,13 @@ function validateCurriculum(curriculum) {
       if (lesson.kind !== 'lesson' && lesson.kind !== 'garden') {
         reject(`${lessonLocation}.kind`, 'must equal lesson or garden');
       }
+      requireExactKeys(
+        lesson,
+        lesson.kind === 'lesson'
+          ? ['kind', 'id', 'number', 'title', 'recognize', 'write']
+          : ['kind', 'id', 'title', 'recognize', 'write'],
+        lessonLocation
+      );
       requireNonBlankString(lesson.id, `${lessonLocation}.id`);
       requireNonBlankString(lesson.title, `${lessonLocation}.title`);
       if (lesson.kind === 'lesson' && (!Number.isInteger(lesson.number) || lesson.number <= 0)) {
@@ -103,6 +145,13 @@ function validateCurriculum(curriculum) {
         for (const [entryIndex, entry] of lesson[group].entries()) {
           const entryLocation = `${lessonLocation}.${group}[${entryIndex}]`;
           requireRecord(entry, entryLocation);
+          requireExactKeys(
+            entry,
+            group === 'recognize'
+              ? ['character', 'pinyin', 'audio', 'counted']
+              : ['character', 'pinyin', 'audio'],
+            entryLocation
+          );
           if (typeof entry.character !== 'string' || Array.from(entry.character).length !== 1) {
             reject(`${entryLocation}.character`, 'must be one code point');
           }
@@ -116,8 +165,8 @@ function validateCurriculum(curriculum) {
           if (typeof entry.audio !== 'string' || !/^[a-z]+[1-5]$/.test(entry.audio)) {
             reject(`${entryLocation}.audio`, 'must be a numbered lowercase reading id');
           }
-          if (Object.hasOwn(entry, 'counted') && typeof entry.counted !== 'boolean') {
-            reject(`${entryLocation}.counted`, 'must be a boolean when present');
+          if (Object.hasOwn(entry, 'counted') && entry.counted !== false) {
+            reject(`${entryLocation}.counted`, 'must equal false when present');
           }
         }
       }
@@ -127,9 +176,19 @@ function validateCurriculum(curriculum) {
 
 function validateCharacterDocument(characterDocument) {
   requireRecord(characterDocument, CHARACTER_SOURCE);
+  requireExactKeys(
+    characterDocument,
+    ['schemaVersion', 'modificationNotice', 'characters'],
+    CHARACTER_SOURCE
+  );
   if (characterDocument.schemaVersion !== 1) reject(`${CHARACTER_SOURCE}.schemaVersion`, 'must equal 1');
   const notice = characterDocument.modificationNotice;
   requireRecord(notice, `${CHARACTER_SOURCE}.modificationNotice`);
+  requireExactKeys(
+    notice,
+    ['date', 'source', 'license', 'changes'],
+    `${CHARACTER_SOURCE}.modificationNotice`
+  );
   for (const field of ['date', 'source', 'license']) {
     requireNonBlankString(notice[field], `${CHARACTER_SOURCE}.modificationNotice.${field}`);
   }
@@ -146,6 +205,7 @@ function validateCharacterDocument(characterDocument) {
     const location = `${CHARACTER_SOURCE}.characters.${character}`;
     if (Array.from(character).length !== 1) reject(location, 'key must be one code point');
     requireRecord(geometry, location);
+    requireExactKeys(geometry, ['strokeCount', 'strokes', 'medians'], location);
     if (!Number.isInteger(geometry.strokeCount) || geometry.strokeCount <= 0) {
       reject(`${location}.strokeCount`, 'must be a positive integer');
     }
@@ -171,14 +231,28 @@ function validateCharacterDocument(characterDocument) {
 
 function validateAudioManifest(audioManifest) {
   requireRecord(audioManifest, AUDIO_SOURCE);
+  requireExactKeys(audioManifest, ['schemaVersion', 'format', 'source', 'readings'], AUDIO_SOURCE);
   if (audioManifest.schemaVersion !== 1) reject(`${AUDIO_SOURCE}.schemaVersion`, 'must equal 1');
   if (audioManifest.format !== 'audio/mpeg') {
     reject(`${AUDIO_SOURCE}.format`, 'must equal audio/mpeg');
   }
   requireRecord(audioManifest.source, `${AUDIO_SOURCE}.source`);
-  for (const field of ['repository', 'commit', 'subset', 'license', 'licenseUrl', 'attribution']) {
-    requireNonBlankString(audioManifest.source[field], `${AUDIO_SOURCE}.source.${field}`);
+  requireExactKeys(
+    audioManifest.source,
+    ['repository', 'commit', 'subset', 'license', 'licenseUrl', 'attribution'],
+    `${AUDIO_SOURCE}.source`
+  );
+  requireHttpsUrl(audioManifest.source.repository, `${AUDIO_SOURCE}.source.repository`);
+  if (typeof audioManifest.source.commit !== 'string'
+    || !/^[a-f0-9]{40}$/.test(audioManifest.source.commit)) {
+    reject(`${AUDIO_SOURCE}.source.commit`, 'must be a lowercase 40-digit hexadecimal commit');
   }
+  if (!isSafeRelativePath(audioManifest.source.subset)) {
+    reject(`${AUDIO_SOURCE}.source.subset`, 'must be a safe relative path');
+  }
+  requireNonBlankString(audioManifest.source.license, `${AUDIO_SOURCE}.source.license`);
+  requireHttpsUrl(audioManifest.source.licenseUrl, `${AUDIO_SOURCE}.source.licenseUrl`);
+  requireNonBlankString(audioManifest.source.attribution, `${AUDIO_SOURCE}.source.attribution`);
   requireRecord(audioManifest.readings, `${AUDIO_SOURCE}.readings`);
   if (Object.keys(audioManifest.readings).length === 0) {
     reject(`${AUDIO_SOURCE}.readings`, 'must not be empty');
@@ -188,13 +262,22 @@ function validateAudioManifest(audioManifest) {
     const location = `${AUDIO_SOURCE}.readings.${id}`;
     if (!/^[a-z]+[1-5]$/.test(id)) reject(location, 'key must be a numbered lowercase reading id');
     requireRecord(record, location);
+    requireExactKeys(
+      record,
+      ['file', 'sourceFile', 'sourceLabel', 'bytes', 'sha256', 'metadataVerified', 'auditoryReviewed'],
+      location
+    );
     if (typeof record.file !== 'string'
       || record.file !== `assets/audio/${id}.mp3`
       || record.file.includes('..')) {
       reject(`${location}.file`, 'must be the relative local MP3 path assets/audio/<id>.mp3');
     }
-    requireNonBlankString(record.sourceFile, `${location}.sourceFile`);
-    requireNonBlankString(record.sourceLabel, `${location}.sourceLabel`);
+    if (!isSafeRelativePath(record.sourceFile) || !record.sourceFile.endsWith('.mp3')) {
+      reject(`${location}.sourceFile`, 'must be a safe relative MP3 path');
+    }
+    if (typeof record.sourceLabel !== 'string' || !/^[a-z]+[1-5]$/.test(record.sourceLabel)) {
+      reject(`${location}.sourceLabel`, 'must be a numbered lowercase reading id');
+    }
     if (!Number.isInteger(record.bytes) || record.bytes <= 0) {
       reject(`${location}.bytes`, 'must be a positive integer');
     }
@@ -270,6 +353,9 @@ export function buildRuntimeSource(curriculum, characterDocument, audioManifest)
   }
   if (/\bfetch\b/i.test(source)) {
     throw new TypeError('Generated runtime source contains a forbidden fetch token from retained source data');
+  }
+  if (/<\/script/i.test(source)) {
+    throw new TypeError('Generated runtime source contains a forbidden closing script token');
   }
   return source;
 }
