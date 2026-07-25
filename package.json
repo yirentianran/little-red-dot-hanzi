@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "test": "node --test tests/*.test.mjs",
+    "test:browser": "node scripts/run-browser-tests.mjs",
     "validate": "node scripts/validate-library.mjs",
     "sync:audio": "node scripts/sync-audio.mjs",
     "verify:audio": "node scripts/sync-audio.mjs --verify",

@@ -237,6 +237,23 @@ test('uses unique safe clip ids for multiple renderers', () => {
   allIds.forEach((id) => assert.match(id, /^[a-z][a-z0-9-]*$/));
 });
 
+test('exposes exactly one stable core tracking dot hook per renderer', () => {
+  const renderers = [createDom(), createDom()];
+
+  renderers.forEach(({ container }) => {
+    createSvgRenderer(container, fixtureGeometry(1));
+    const [coreDot] = withClass(container, 'hanzi-tracking-dot--core');
+    const [outerDot] = withClass(container, 'hanzi-tracking-dot--outer');
+    const hookedDots = withTag(container, 'circle').filter((circle) => (
+      circle.getAttribute('data-tracking-dot') === 'core'
+    ));
+
+    assert.equal(hookedDots.length, 1);
+    assert.equal(hookedDots[0], coreDot);
+    assert.equal(outerDot.getAttribute('data-tracking-dot'), null);
+  });
+});
+
 test('reveals one clipped median, completes prior strokes, and tracks native path metrics', () => {
   const { container, document } = createDom({
     metricLength: 100,

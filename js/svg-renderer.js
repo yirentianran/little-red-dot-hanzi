@@ -278,6 +278,7 @@
     });
     var coreDot = createElement(documentObject, 'circle', {
       'class': 'hanzi-tracking-dot hanzi-tracking-dot--core',
+      'data-tracking-dot': 'core',
       'r': 13,
       'fill': '#d92d20',
       'stroke': '#ffffff',
