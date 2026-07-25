@@ -610,6 +610,46 @@ test('partial listener installation rolls back in reverse order and destroys sha
   ]);
 });
 
+test('listener rollback removes the current registration when add registers then throws', () => {
+  const harness = createHarness({ hash: '#/' });
+  const documentAdd = harness.documentObject.addEventListener;
+  harness.documentObject.addEventListener = function (...args) {
+    documentAdd.apply(this, args);
+    throw new Error('listener threw after registering');
+  };
+
+  assert.throws(
+    () => loadApp().createApp(harness.createOptions),
+    /listener threw after registering/
+  );
+  assert.equal(harness.root.listenerCount('click'), 0);
+  assert.equal(harness.windowObject.listenerCount('hashchange'), 0);
+  assert.equal(harness.documentObject.listenerCount('visibilitychange'), 0);
+  assert.equal(
+    harness.state.log.filter((entry) => entry === 'audio.destroy').length,
+    1
+  );
+});
+
+test('pre-handle character model failures propagate through complete createApp rollback', () => {
+  const harness = createHarness({ hash: characterHash() });
+  harness.api.createCharacterModel = () => {
+    throw new Error('character model failed');
+  };
+
+  assert.throws(
+    () => loadApp().createApp(harness.createOptions),
+    /character model failed/
+  );
+  assert.equal(harness.root.listenerCount('click'), 0);
+  assert.equal(harness.windowObject.listenerCount('hashchange'), 0);
+  assert.equal(harness.documentObject.listenerCount('visibilitychange'), 0);
+  assert.equal(
+    harness.state.log.filter((entry) => entry === 'audio.destroy').length,
+    1
+  );
+});
+
 test('a nested navigate from old-controller destroy owns the final route and controllers', () => {
   const harness = createHarness({ hash: characterHash() });
   const app = loadApp().createApp(harness.createOptions);
@@ -652,6 +692,28 @@ test('character render reentrancy cannot split the nested route from URL or stor
   assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
   assert.equal(app.debugControllers().animation, harness.state.animations.at(-1));
   assert.equal(app.debugControllers().renderer, harness.state.renderers.at(-1));
+});
+
+test('a superseded storage write is reconciled to the nested winning character route', () => {
+  const storage = createStorage();
+  const harness = createHarness({ hash: '#/', storage, reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  const setItem = storage.setItem;
+  let nested = false;
+  storage.setItem = function (key, value) {
+    if (!nested && value === characterHash()) {
+      nested = true;
+      app.navigate(characterRoute('城'));
+    }
+    setItem.call(this, key, value);
+  };
+
+  const changed = app.navigate(characterRoute());
+
+  assert.equal(changed, false);
+  assert.deepEqual(app.getRoute(), characterRoute('城'));
+  assert.equal(harness.location.hash, characterHash('城'));
+  assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
 });
 
 test('stale animation callbacks cannot update or announce into a later view', () => {
@@ -723,6 +785,23 @@ test('a nested same-view next-stroke callback keeps ownership of the final annou
   assert.equal(harness.announcer.textContent, '正在书写第2笔');
 });
 
+test('a state setter that navigates then throws cannot announce into the winning view', () => {
+  const harness = createHarness({ hash: characterHash(), reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  const animation = harness.state.animations[0];
+  const announcement = harness.announcer.textContent;
+  harness.state.onSetAnimationState = () => {
+    harness.state.onSetAnimationState = null;
+    app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+    throw new Error('old state setter failed');
+  };
+
+  animation.emit({ status: 'playing', mode: 'continuous', strokeIndex: 0, progress: 0.25 });
+
+  assert.equal(app.getRoute().view, 'lesson');
+  assert.equal(harness.announcer.textContent, announcement);
+});
+
 test('public dispatch accepts own-field command objects without weakening delegated actions', () => {
   const harness = createHarness({ hash: characterHash(), reducedMotion: true });
   const app = loadApp().createApp(harness.createOptions);
@@ -768,6 +847,27 @@ test('storage accepts only canonical character routes and contains corrupt or th
   assert.doesNotThrow(() => loadApp().createApp(corruptHarness.createOptions));
   assert.equal(currentHandle(corruptHarness).resumeAvailable, false);
   assert.ok(corrupt.calls.some(([operation]) => operation === 'remove'));
+
+  const reentrantRemoval = createStorage();
+  const reentrantHarness = createHarness({
+    hash: characterHash(),
+    storage: reentrantRemoval,
+    reducedMotion: true
+  });
+  const reentrantApp = loadApp().createApp(reentrantHarness.createOptions);
+  reentrantRemoval.setItem(STORAGE_KEY, 'corrupt');
+  const removeItem = reentrantRemoval.removeItem;
+  let resumedDuringRemoval = null;
+  reentrantRemoval.removeItem = function (key) {
+    resumedDuringRemoval = reentrantApp.dispatch('resume-learning');
+    removeItem.call(this, key);
+  };
+
+  reentrantApp.navigate({ view: 'directory' });
+
+  assert.equal(resumedDuringRemoval, false);
+  assert.deepEqual(reentrantApp.getRoute(), { view: 'directory' });
+  assert.equal(currentHandle(reentrantHarness).resumeAvailable, false);
 
   const throwing = {};
   Object.defineProperty(throwing, 'getItem', {

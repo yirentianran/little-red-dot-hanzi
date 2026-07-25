@@ -10,6 +10,7 @@
   'use strict';
 
   var STORAGE_KEY = 'hanzi-tracking:last-route:v1';
+  var MAX_STORAGE_RECONCILIATIONS = 16;
   var SPEEDS = Object.freeze(['slow', 'normal', 'fast']);
   var ROUTE_ACTIONS = Object.freeze({
     'open-lesson': Object.freeze(['lessonId', 'group']),
@@ -109,7 +110,10 @@
     var transitionRevision = 0;
     var audioRequestGeneration = 0;
     var resumeRoute = null;
+    var resumeRouteKey = null;
     var storageEnabled = isRecord(storage);
+    var storageReconcileActive = false;
+    var storageReconcileRequested = false;
     var destroyed = false;
     var lastAnimationAnnouncementKey = null;
     var installedListeners = [];
@@ -164,6 +168,7 @@
     function disableStorage() {
       storageEnabled = false;
       resumeRoute = null;
+      resumeRouteKey = null;
       if (route && route.view === 'directory' && currentHandle
           && typeof currentHandle.setResumeAvailable === 'function') {
         try {
@@ -190,6 +195,8 @@
     }
 
     function removeCorruptResume() {
+      resumeRoute = null;
+      resumeRouteKey = null;
       var result = storageOperation('removeItem', [STORAGE_KEY]);
       return result.ok;
     }
@@ -206,15 +213,60 @@
         removeCorruptResume();
         return null;
       }
-      return info.route;
+      return Object.freeze({ route: info.route, key: info.key });
+    }
+
+    function reconcileStoredResume() {
+      if (!storageEnabled) return false;
+      if (storageReconcileActive) {
+        storageReconcileRequested = true;
+        return false;
+      }
+
+      storageReconcileActive = true;
+      storageReconcileRequested = true;
+      var attempts = 0;
+      try {
+        while (storageEnabled
+            && storageReconcileRequested
+            && attempts < MAX_STORAGE_RECONCILIATIONS) {
+          storageReconcileRequested = false;
+          attempts += 1;
+          var expectedRevision = transitionRevision;
+          var expectedRoute = resumeRoute;
+          var expectedKey = resumeRouteKey;
+          if (expectedRoute && expectedKey) {
+            storageOperation('setItem', [STORAGE_KEY, expectedKey]);
+          } else {
+            storageOperation('removeItem', [STORAGE_KEY]);
+          }
+          if (storageEnabled
+              && (expectedRevision !== transitionRevision
+                || expectedRoute !== resumeRoute
+                || expectedKey !== resumeRouteKey)) {
+            storageReconcileRequested = true;
+          }
+        }
+        if (storageEnabled && storageReconcileRequested) disableStorage();
+      } finally {
+        storageReconcileActive = false;
+        storageReconcileRequested = false;
+      }
+      return storageEnabled;
     }
 
     function saveResumeRoute(info, revision) {
       if (!ownsTransition(revision)) return false;
       if (info.route.view !== 'character' || !storageEnabled) return true;
       var result = storageOperation('setItem', [STORAGE_KEY, info.key]);
-      if (!ownsTransition(revision)) return false;
-      if (result.ok) resumeRoute = info.route;
+      if (!ownsTransition(revision)) {
+        reconcileStoredResume();
+        return false;
+      }
+      if (result.ok) {
+        resumeRoute = info.route;
+        resumeRouteKey = info.key;
+      }
       return ownsTransition(revision);
     }
 
@@ -287,7 +339,11 @@
           try {
             handle.setAnimationState(state);
           } catch (ignored) {
-            if (callbackSequence !== session.callbackSequence) return;
+            if (destroyed
+                || !session.active
+                || epoch !== viewEpoch
+                || currentHandle !== handle
+                || callbackSequence !== session.callbackSequence) return;
             announce('笔顺状态暂时无法更新');
             return;
           }
@@ -425,11 +481,11 @@
         }
         return true;
       } catch (error) {
+        if (ownsTransition(revision) && !handle) throw error;
         if (!ownsTransition(revision) || currentHandle !== handle) {
           abandonUnadoptedCandidates();
           return false;
         }
-        if (!handle) throw error;
         return degradeBoard(revision, session, handle);
       }
     }
@@ -458,10 +514,11 @@
           var directoryHandle = api.renderDirectory(root, directoryModel);
           if (!ownsTransition(revision)) return null;
           currentHandle = directoryHandle;
-          var storedRoute = readResumeRoute();
+          var storedResume = readResumeRoute();
           if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
-          resumeRoute = storedRoute;
-          directoryHandle.setResumeAvailable(storedRoute !== null);
+          resumeRoute = storedResume ? storedResume.route : null;
+          resumeRouteKey = storedResume ? storedResume.key : null;
+          directoryHandle.setResumeAvailable(storedResume !== null);
           if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
         } else if (route.view === 'lesson') {
           var lessonModel = api.createLessonModel(store, {
@@ -776,8 +833,9 @@
     }
 
     function installListener(target, type, listener) {
+      var record = { target: target, type: type, listener: listener };
+      installedListeners.push(record);
       target.addEventListener(type, listener);
-      installedListeners.push({ target: target, type: type, listener: listener });
     }
 
     try {
