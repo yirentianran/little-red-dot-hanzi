@@ -104,12 +104,19 @@
     var currentModel = null;
     var renderer = null;
     var animation = null;
+    var currentAnimationSession = null;
     var viewEpoch = 0;
+    var transitionRevision = 0;
     var audioRequestGeneration = 0;
     var resumeRoute = null;
     var storageEnabled = isRecord(storage);
     var destroyed = false;
     var lastAnimationAnnouncementKey = null;
+    var installedListeners = [];
+
+    function ownsTransition(revision) {
+      return !destroyed && revision === transitionRevision;
+    }
 
     function announce(message) {
       if (typeof message !== 'string' || message === '') return;
@@ -184,12 +191,10 @@
 
     function removeCorruptResume() {
       var result = storageOperation('removeItem', [STORAGE_KEY]);
-      resumeRoute = null;
       return result.ok;
     }
 
     function readResumeRoute() {
-      resumeRoute = null;
       var result = storageOperation('getItem', [STORAGE_KEY]);
       if (!result.ok || result.value === null) return null;
       if (typeof result.value !== 'string') {
@@ -201,14 +206,16 @@
         removeCorruptResume();
         return null;
       }
-      resumeRoute = info.route;
-      return resumeRoute;
+      return info.route;
     }
 
-    function saveResumeRoute(info) {
-      if (info.route.view !== 'character' || !storageEnabled) return;
+    function saveResumeRoute(info, revision) {
+      if (!ownsTransition(revision)) return false;
+      if (info.route.view !== 'character' || !storageEnabled) return true;
       var result = storageOperation('setItem', [STORAGE_KEY, info.key]);
+      if (!ownsTransition(revision)) return false;
       if (result.ok) resumeRoute = info.route;
+      return ownsTransition(revision);
     }
 
     function focusElement(element) {
@@ -220,16 +227,19 @@
       }
     }
 
-    function cleanupPage() {
+    function cleanupPage(revision, forceSharedStop) {
       var oldAnimation = animation;
       var oldRenderer = renderer;
+      var oldSession = currentAnimationSession;
       viewEpoch += 1;
       audioRequestGeneration += 1;
       currentHandle = null;
       currentModel = null;
       animation = null;
       renderer = null;
+      currentAnimationSession = null;
       lastAnimationAnnouncementKey = null;
+      if (oldSession) oldSession.active = false;
 
       try {
         if (oldAnimation && typeof oldAnimation.destroy === 'function') oldAnimation.destroy();
@@ -241,11 +251,14 @@
       } catch (ignored) {
         // Cleanup is deliberately isolated so every owned resource gets a chance to release.
       }
-      try {
-        audio.stop();
-      } catch (ignored) {
-        // A media implementation cannot block navigation.
+      if (forceSharedStop === true || ownsTransition(revision)) {
+        try {
+          audio.stop();
+        } catch (ignored) {
+          // A media implementation cannot block navigation.
+        }
       }
+      return forceSharedStop === true || ownsTransition(revision);
     }
 
     function documentIsHidden() {
@@ -268,14 +281,21 @@
     function animationOptions(epoch, session, handle, model) {
       var settings = {
         onStateChange: function (state) {
+          session.callbackSequence += 1;
+          var callbackSequence = session.callbackSequence;
           if (destroyed || !session.active || epoch !== viewEpoch || currentHandle !== handle) return;
           try {
             handle.setAnimationState(state);
           } catch (ignored) {
+            if (callbackSequence !== session.callbackSequence) return;
             announce('笔顺状态暂时无法更新');
             return;
           }
-          if (destroyed || !session.active || epoch !== viewEpoch || currentHandle !== handle) return;
+          if (destroyed
+              || !session.active
+              || epoch !== viewEpoch
+              || currentHandle !== handle
+              || callbackSequence !== session.callbackSequence) return;
           var discreteKey = [state.status, state.mode, state.strokeIndex].join('|');
           if (discreteKey === lastAnimationAnnouncementKey) return;
           lastAnimationAnnouncementKey = discreteKey;
@@ -292,98 +312,188 @@
       return settings;
     }
 
-    function degradeBoard(epoch, session, handle, candidateAnimation, candidateRenderer) {
+    function destroyCandidate(candidate) {
+      try {
+        if (!candidate) return;
+        var destroyMethod = candidate.destroy;
+        if (typeof destroyMethod === 'function') destroyMethod.call(candidate);
+      } catch (ignored) {
+        // Candidate cleanup is isolated from the winning transition.
+      }
+    }
+
+    function degradeBoard(revision, session, handle) {
+      if (!ownsTransition(revision) || currentHandle !== handle) return false;
+      var ownedAnimation = animation;
+      var ownedRenderer = renderer;
       session.active = false;
-      try {
-        if (candidateAnimation && typeof candidateAnimation.destroy === 'function') {
-          candidateAnimation.destroy();
-        }
-      } catch (ignored) {
-        // Board degradation still proceeds if controller cleanup fails.
-      }
-      try {
-        if (candidateRenderer && typeof candidateRenderer.destroy === 'function') {
-          candidateRenderer.destroy();
-        }
-      } catch (ignored) {
-        // Board degradation still proceeds if SVG cleanup fails.
-      }
-      if (epoch !== viewEpoch || currentHandle !== handle) return;
       animation = null;
       renderer = null;
+      currentAnimationSession = null;
+      destroyCandidate(ownedAnimation);
+      destroyCandidate(ownedRenderer);
+      if (!ownsTransition(revision) || currentHandle !== handle) return false;
       try {
         handle.showBoardError();
       } catch (ignored) {
         // Pinyin, audio, and character navigation remain usable without the board.
       }
+      if (!ownsTransition(revision) || currentHandle !== handle) return false;
       announce('该字笔画暂时无法显示');
+      return ownsTransition(revision) && currentHandle === handle;
     }
 
-    function renderCharacterView(info) {
-      var resolved = store.resolve(info.route);
-      var model = api.createCharacterModel(resolved);
-      var handle = api.renderCharacter(root, model);
+    function renderCharacterView(info, revision) {
+      var resolved;
+      var model;
+      var handle;
       var epoch = viewEpoch;
-      var session = { active: true };
+      var session = { active: true, callbackSequence: 0 };
       var candidateRenderer = null;
       var candidateAnimation = null;
+      var rendererAdopted = false;
+      var animationAdopted = false;
 
-      currentModel = model;
-      currentHandle = handle;
-
-      try {
-        if (!audio.isAvailable(model.audioId)) handle.setAudioState('unavailable');
-      } catch (ignored) {
-        try { handle.setAudioState('unavailable'); } catch (_ignored) {}
+      function abandonUnadoptedCandidates() {
+        if (!animationAdopted) destroyCandidate(candidateAnimation);
+        if (!rendererAdopted) destroyCandidate(candidateRenderer);
       }
 
       try {
+        resolved = store.resolve(info.route);
+        if (!ownsTransition(revision)) return false;
+        model = api.createCharacterModel(resolved);
+        if (!ownsTransition(revision)) return false;
+        handle = api.renderCharacter(root, model);
+        if (!ownsTransition(revision)) return false;
+
+        currentModel = model;
+        currentHandle = handle;
+
+        var audioIsAvailable = false;
+        try {
+          audioIsAvailable = audio.isAvailable(model.audioId) === true;
+        } catch (ignored) {
+          audioIsAvailable = false;
+        }
+        if (!ownsTransition(revision) || currentHandle !== handle) return false;
+        if (!audioIsAvailable) {
+          try {
+            handle.setAudioState('unavailable');
+          } catch (ignored) {
+            // Audio feedback failure does not make the stroke board unusable.
+          }
+          if (!ownsTransition(revision) || currentHandle !== handle) return false;
+        }
+
         candidateRenderer = api.createSvgRenderer(handle.board, resolved.geometry);
+        if (!ownsTransition(revision) || currentHandle !== handle) {
+          abandonUnadoptedCandidates();
+          return false;
+        }
         renderer = candidateRenderer;
-        candidateAnimation = api.createAnimationController(
-          candidateRenderer,
-          animationOptions(epoch, session, handle, model)
-        );
+        rendererAdopted = true;
+
+        var controllerOptions = animationOptions(epoch, session, handle, model);
+        if (!ownsTransition(revision) || currentHandle !== handle) return false;
+        candidateAnimation = api.createAnimationController(candidateRenderer, controllerOptions);
+        if (!ownsTransition(revision) || currentHandle !== handle) {
+          abandonUnadoptedCandidates();
+          return false;
+        }
         animation = candidateAnimation;
-        handle.setAnimationState(candidateAnimation.getState());
+        currentAnimationSession = session;
+        animationAdopted = true;
+
+        var initialState = candidateAnimation.getState();
+        if (!ownsTransition(revision) || currentHandle !== handle) return false;
+        handle.setAnimationState(initialState);
+        if (!ownsTransition(revision) || currentHandle !== handle) return false;
 
         if (model.group === 'write' && !reducedMotion) {
-          if (documentIsHidden()) candidateAnimation.handleVisibilityChange(true);
+          var initiallyHidden = documentIsHidden();
+          if (!ownsTransition(revision) || currentHandle !== handle) return false;
+          if (initiallyHidden) {
+            candidateAnimation.handleVisibilityChange(true);
+            if (!ownsTransition(revision) || currentHandle !== handle) return false;
+          }
           candidateAnimation.replay();
+          if (!ownsTransition(revision) || currentHandle !== handle) return false;
         } else {
           candidateRenderer.showFullCharacter();
+          if (!ownsTransition(revision) || currentHandle !== handle) return false;
         }
-      } catch (ignored) {
-        degradeBoard(epoch, session, handle, candidateAnimation, candidateRenderer);
+        return true;
+      } catch (error) {
+        if (!ownsTransition(revision) || currentHandle !== handle) {
+          abandonUnadoptedCandidates();
+          return false;
+        }
+        if (!handle) throw error;
+        return degradeBoard(revision, session, handle);
       }
     }
 
     function renderRoute(info, shouldFocus) {
-      if (destroyed || info.key === routeKey) return false;
+      if (destroyed) return null;
+      if (info.key === routeKey) {
+        return { changed: false, revision: transitionRevision };
+      }
+      transitionRevision += 1;
+      var revision = transitionRevision;
       if (routeKey === null) {
         viewEpoch += 1;
       } else {
-        cleanupPage();
+        cleanupPage(revision, false);
       }
+      if (!ownsTransition(revision)) return null;
 
       route = info.route;
       routeKey = info.key;
 
-      if (route.view === 'directory') {
-        currentHandle = api.renderDirectory(root, api.createDirectoryModel(store));
-        currentHandle.setResumeAvailable(readResumeRoute() !== null);
-      } else if (route.view === 'lesson') {
-        currentHandle = api.renderLesson(root, api.createLessonModel(store, {
-          lessonId: route.lessonId,
-          group: route.group
-        }));
-      } else {
-        renderCharacterView(info);
-        saveResumeRoute(info);
+      try {
+        if (route.view === 'directory') {
+          var directoryModel = api.createDirectoryModel(store);
+          if (!ownsTransition(revision)) return null;
+          var directoryHandle = api.renderDirectory(root, directoryModel);
+          if (!ownsTransition(revision)) return null;
+          currentHandle = directoryHandle;
+          var storedRoute = readResumeRoute();
+          if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
+          resumeRoute = storedRoute;
+          directoryHandle.setResumeAvailable(storedRoute !== null);
+          if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
+        } else if (route.view === 'lesson') {
+          var lessonModel = api.createLessonModel(store, {
+            lessonId: route.lessonId,
+            group: route.group
+          });
+          if (!ownsTransition(revision)) return null;
+          var lessonHandle = api.renderLesson(root, lessonModel);
+          if (!ownsTransition(revision)) return null;
+          currentHandle = lessonHandle;
+        } else {
+          if (!renderCharacterView(info, revision)) return null;
+          if (!saveResumeRoute(info, revision)) return null;
+        }
+      } catch (error) {
+        if (!ownsTransition(revision)) return null;
+        throw error;
       }
 
-      if (shouldFocus && currentHandle) focusElement(currentHandle.heading);
-      return true;
+      if (shouldFocus && currentHandle) {
+        var focusedHandle = currentHandle;
+        var heading = null;
+        try {
+          heading = focusedHandle.heading;
+        } catch (ignored) {
+          heading = null;
+        }
+        if (!ownsTransition(revision) || currentHandle !== focusedHandle) return null;
+        focusElement(heading);
+        if (!ownsTransition(revision) || currentHandle !== focusedHandle) return null;
+      }
+      return { changed: true, revision: revision };
     }
 
     function navigate(candidate) {
@@ -394,13 +504,15 @@
       } catch (ignored) {
         info = routeInfo({ view: 'directory' });
       }
-      var changed = renderRoute(info, true);
+      var result = renderRoute(info, true);
+      if (!result || !ownsTransition(result.revision)) return false;
       var currentHash = safeLocationHash();
+      if (!ownsTransition(result.revision)) return false;
       if (currentHash !== info.key) {
         if (typeof candidate === 'string') replaceHash(info.key);
         else assignHash(info.key);
       }
-      return changed;
+      return ownsTransition(result.revision) ? result.changed : false;
     }
 
     function attribute(source, name) {
@@ -620,7 +732,8 @@
       } catch (ignored) {
         info = routeInfo({ view: 'directory' });
       }
-      renderRoute(info, true);
+      var result = renderRoute(info, true);
+      if (!result || !ownsTransition(result.revision)) return;
       if (hash !== info.key) replaceHash(info.key);
     }
 
@@ -644,18 +757,38 @@
     function destroy() {
       if (destroyed) return;
       destroyed = true;
-      try { root.removeEventListener('click', handleRootClick); } catch (ignored) {}
-      try { windowObject.removeEventListener('hashchange', handleHashChange); } catch (ignored) {}
-      try {
-        documentObject.removeEventListener('visibilitychange', handleVisibilityChange);
-      } catch (ignored) {}
-      if (routeKey !== null) cleanupPage();
+      transitionRevision += 1;
+      removeInstalledListeners();
+      if (routeKey !== null) cleanupPage(transitionRevision, true);
       try { audio.destroy(); } catch (ignored) {}
     }
 
-    root.addEventListener('click', handleRootClick);
-    windowObject.addEventListener('hashchange', handleHashChange);
-    documentObject.addEventListener('visibilitychange', handleVisibilityChange);
+    function removeInstalledListeners() {
+      for (var index = installedListeners.length - 1; index >= 0; index -= 1) {
+        var record = installedListeners[index];
+        try {
+          record.target.removeEventListener(record.type, record.listener);
+        } catch (ignored) {
+          // Listener rollback must continue through all prior successful installs.
+        }
+      }
+      installedListeners = [];
+    }
+
+    function installListener(target, type, listener) {
+      target.addEventListener(type, listener);
+      installedListeners.push({ target: target, type: type, listener: listener });
+    }
+
+    try {
+      installListener(root, 'click', handleRootClick);
+      installListener(windowObject, 'hashchange', handleHashChange);
+      installListener(documentObject, 'visibilitychange', handleVisibilityChange);
+    } catch (error) {
+      removeInstalledListeners();
+      try { audio.destroy(); } catch (ignored) {}
+      throw error;
+    }
 
     var initialCandidate = Object.hasOwn(options, 'initialRoute')
       ? options.initialRoute
@@ -666,13 +799,19 @@
     } catch (ignored) {
       initialInfo = routeInfo({ view: 'directory' });
     }
+    var initialResult;
     try {
-      renderRoute(initialInfo, false);
+      initialResult = renderRoute(initialInfo, false);
     } catch (error) {
       destroy();
       throw error;
     }
-    if (safeLocationHash() !== initialInfo.key) replaceHash(initialInfo.key);
+    if (initialResult && ownsTransition(initialResult.revision)) {
+      var initialHash = safeLocationHash();
+      if (ownsTransition(initialResult.revision) && initialHash !== initialInfo.key) {
+        replaceHash(initialInfo.key);
+      }
+    }
 
     return Object.freeze({
       navigate: navigate,

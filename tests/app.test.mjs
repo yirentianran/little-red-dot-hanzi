@@ -300,6 +300,7 @@ function createHarness(options = {}) {
         setAnimationState(value) {
           this.animationStates.push(value);
           log.push('view.animation=' + value.status + ':' + value.strokeIndex);
+          if (state.onSetAnimationState) state.onSetAnimationState(value, this);
         },
         setAudioState(value) {
           this.audioStates.push(value);
@@ -580,6 +581,79 @@ test('page cleanup clears controller refs first and isolates destroy failures in
   assert.equal(app.getRoute().view, 'lesson');
 });
 
+test('partial listener installation rolls back in reverse order and destroys shared audio', () => {
+  const harness = createHarness({ hash: '#/' });
+  const rootRemove = harness.root.removeEventListener;
+  const windowRemove = harness.windowObject.removeEventListener;
+  harness.root.removeEventListener = function (...args) {
+    harness.state.log.push('rollback.root');
+    return rootRemove.apply(this, args);
+  };
+  harness.windowObject.removeEventListener = function (...args) {
+    harness.state.log.push('rollback.window');
+    return windowRemove.apply(this, args);
+  };
+  harness.documentObject.addEventListener = function (type) {
+    assert.equal(type, 'visibilitychange');
+    throw new Error('listener setup failed');
+  };
+
+  assert.throws(
+    () => loadApp().createApp(harness.createOptions),
+    /listener setup failed/
+  );
+  assert.equal(harness.root.listenerCount('click'), 0);
+  assert.equal(harness.windowObject.listenerCount('hashchange'), 0);
+  assert.equal(harness.documentObject.listenerCount('visibilitychange'), 0);
+  assert.deepEqual(harness.state.log.slice(-3), [
+    'rollback.window', 'rollback.root', 'audio.destroy'
+  ]);
+});
+
+test('a nested navigate from old-controller destroy owns the final route and controllers', () => {
+  const harness = createHarness({ hash: characterHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const oldAnimation = harness.state.animations[0];
+  harness.state.onAnimationDestroy = () => {
+    harness.state.onAnimationDestroy = null;
+    app.navigate(characterRoute('城'));
+  };
+  harness.state.log.length = 0;
+
+  const changed = app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+
+  assert.equal(changed, false);
+  assert.deepEqual(app.getRoute(), characterRoute('城'));
+  assert.equal(harness.location.hash, characterHash('城'));
+  assert.equal(app.debugControllers().animation, harness.state.animations[1]);
+  assert.equal(app.debugControllers().renderer, harness.state.renderers[1]);
+  assert.equal(oldAnimation, harness.state.animations[0]);
+  assert.ok(
+    harness.state.log.lastIndexOf('animation.destroy')
+      < harness.state.log.lastIndexOf('animation.create')
+  );
+});
+
+test('character render reentrancy cannot split the nested route from URL or stored resume state', () => {
+  const storage = createStorage();
+  const harness = createHarness({ hash: '#/', storage, reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  harness.state.onSetAnimationState = () => {
+    harness.state.onSetAnimationState = null;
+    app.navigate(characterRoute('城'));
+  };
+  harness.state.log.length = 0;
+
+  const changed = app.navigate(characterRoute());
+
+  assert.equal(changed, false);
+  assert.deepEqual(app.getRoute(), characterRoute('城'));
+  assert.equal(harness.location.hash, characterHash('城'));
+  assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
+  assert.equal(app.debugControllers().animation, harness.state.animations.at(-1));
+  assert.equal(app.debugControllers().renderer, harness.state.renderers.at(-1));
+});
+
 test('stale animation callbacks cannot update or announce into a later view', () => {
   const harness = createHarness({ hash: characterHash() });
   const app = loadApp().createApp(harness.createOptions);
@@ -631,6 +705,22 @@ test('toggle pauses active continuous completion, resumes paused state, and disp
   assert.ok(harness.state.log.includes('animation.previousStroke'));
   assert.ok(harness.state.log.includes('animation.nextStroke'));
   assert.ok(harness.state.log.includes('animation.setSpeed=fast'));
+});
+
+test('a nested same-view next-stroke callback keeps ownership of the final announcement', () => {
+  const harness = createHarness({ hash: characterHash(), reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  const animation = harness.state.animations[0];
+  harness.state.onSetAnimationState = (state) => {
+    if (state.status !== 'playing' || state.mode !== 'continuous' || state.strokeIndex !== 0) return;
+    harness.state.onSetAnimationState = null;
+    app.dispatch({ action: 'next-stroke' });
+  };
+
+  animation.emit({ status: 'playing', mode: 'continuous', strokeIndex: 0, progress: 0.25 });
+
+  assert.equal(currentHandle(harness).animationStates.at(-1).strokeIndex, 1);
+  assert.equal(harness.announcer.textContent, '正在书写第2笔');
 });
 
 test('public dispatch accepts own-field command objects without weakening delegated actions', () => {
