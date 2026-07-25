@@ -29,6 +29,25 @@ test('reports a mismatched stroke count', () => {
   assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount/i);
 });
 
+test('requires array geometry and a positive integer strokeCount', () => {
+  const characters = clone(validCharacters);
+  characters.郭 = { strokeCount: 0, strokes: 'bad', medians: 'bad' };
+
+  const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*strokes.*array/i);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*medians.*array/i);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount.*positive integer/i);
+});
+
+test('requires strokeCount to be an integer matching both geometry arrays', () => {
+  const characters = clone(validCharacters);
+  characters.郭.strokeCount = 1.5;
+
+  const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount.*positive integer/i);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount.*strokes.*medians/i);
+});
+
 test('accumulates duplicate lesson and group character errors', () => {
   const curriculum = clone(validCurriculum);
   curriculum.units[0].lessons[0].write.push(clone(curriculum.units[0].lessons[0].write[0]));
@@ -67,6 +86,21 @@ test('reports malformed stroke paths', () => {
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 2.*path/i);
+});
+
+test('reports SVG arc paths with non-binary flags', () => {
+  const characters = clone(validCharacters);
+  characters.郭.strokes[0] = 'M0 0 A1 1 0 2 2 5 5';
+
+  const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i);
+});
+
+test('accepts SVG arc paths with binary flags', () => {
+  const characters = clone(validCharacters);
+  characters.郭.strokes[0] = 'M0 0 A1 1 0 1 0 5 5';
+
+  assert.deepEqual(validateLibrary(validCurriculum, characters, validAudioIds), []);
 });
 
 test('reports medians without two numeric coordinate points', () => {

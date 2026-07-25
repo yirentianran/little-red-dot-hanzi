@@ -20,8 +20,18 @@ function isValidPath(path) {
 
   const argumentsAreValid = () => {
     const expected = PATH_COMMANDS.get(command);
-    return expected !== undefined
-      && (expected === 0 ? argumentsForCommand.length === 0 : argumentsForCommand.length >= expected && argumentsForCommand.length % expected === 0);
+    if (expected === undefined) return false;
+    if (expected === 0) return argumentsForCommand.length === 0;
+    if (argumentsForCommand.length < expected || argumentsForCommand.length % expected !== 0) return false;
+
+    if (command === 'A' || command === 'a') {
+      return argumentsForCommand.every((argument, index) => {
+        const isArcFlag = index % expected === 3 || index % expected === 4;
+        return !isArcFlag || Number(argument) === 0 || Number(argument) === 1;
+      });
+    }
+
+    return true;
   };
 
   for (const token of tokens) {
@@ -89,8 +99,15 @@ export function validateLibrary(curriculum, characters, audioIds) {
             continue;
           }
 
-          const strokes = asArray(geometry.strokes);
-          const medians = asArray(geometry.medians);
+          const hasStrokes = Array.isArray(geometry.strokes);
+          const hasMedians = Array.isArray(geometry.medians);
+          const strokes = hasStrokes ? geometry.strokes : [];
+          const medians = hasMedians ? geometry.medians : [];
+          if (!hasStrokes) errors.push(`${label}: strokes must be an array`);
+          if (!hasMedians) errors.push(`${label}: medians must be an array`);
+          if (!Number.isInteger(geometry.strokeCount) || geometry.strokeCount <= 0) {
+            errors.push(`${label}: strokeCount must be a positive integer`);
+          }
           if (geometry.strokeCount !== strokes.length || geometry.strokeCount !== medians.length) {
             errors.push(`${label}: strokeCount does not match strokes and medians`);
           }
