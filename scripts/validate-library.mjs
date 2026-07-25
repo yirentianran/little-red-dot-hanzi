@@ -1,13 +1,13 @@
 import { readdir, readFile } from 'node:fs/promises';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { validateLibrary } from './lib/library-validator.mjs';
 
-const projectRoot = fileURLToPath(new URL('../', import.meta.url));
+const defaultRootDir = fileURLToPath(new URL('../', import.meta.url));
 
-async function readJson(relativePath, errors) {
-  const sourcePath = path.join(projectRoot, relativePath);
+async function readJson(rootDir, relativePath, errors) {
+  const sourcePath = path.join(rootDir, relativePath);
   let source;
   try {
     source = await readFile(sourcePath, 'utf8');
@@ -25,10 +25,10 @@ async function readJson(relativePath, errors) {
   }
 }
 
-async function readAudioIds(errors) {
+async function readAudioIds(rootDir, errors) {
   const relativePath = 'assets/audio';
   try {
-    const entries = await readdir(path.join(projectRoot, relativePath), { withFileTypes: true });
+    const entries = await readdir(path.join(rootDir, relativePath), { withFileTypes: true });
     return new Set(entries.filter(entry => entry.isFile()).map(entry => path.parse(entry.name).name));
   } catch (error) {
     if (error.code === 'ENOENT') errors.push(`Missing source directory: ${relativePath}`);
@@ -37,23 +37,31 @@ async function readAudioIds(errors) {
   }
 }
 
-async function main() {
+export async function runValidation({
+  rootDir = defaultRootDir,
+  stdout = message => console.log(message),
+  stderr = message => console.error(message)
+} = {}) {
   const errors = [];
   const [curriculum, characters, audioIds] = await Promise.all([
-    readJson('data/curriculum.json', errors),
-    readJson('data/characters.json', errors),
-    readAudioIds(errors)
+    readJson(rootDir, 'data/curriculum.json', errors),
+    readJson(rootDir, 'data/characters.json', errors),
+    readAudioIds(rootDir, errors)
   ]);
 
-  if (curriculum && characters) errors.push(...validateLibrary(curriculum, characters, audioIds));
+  if (curriculum !== undefined && characters !== undefined) {
+    errors.push(...validateLibrary(curriculum, characters, audioIds));
+  }
 
   if (errors.length > 0) {
-    errors.forEach(error => console.error(error));
+    errors.forEach(error => stderr(error));
     return 1;
   }
 
-  console.log('Library valid');
+  stdout('Library valid');
   return 0;
 }
 
-process.exitCode = await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  process.exitCode = await runValidation();
+}

@@ -15,6 +15,36 @@ test('accepts matching curriculum, character geometry, and audio ids', () => {
   assert.deepEqual(validateLibrary(validCurriculum, validCharacters, validAudioIds), []);
 });
 
+test('rejects malformed curriculum containers, identifiers, and lesson groups', () => {
+  const malformedCurriculum = {
+    units: [
+      { id: 'unit-1', lessons: [{ id: 'lesson-1', recognize: [], write: [] }] },
+      { id: 'unit-1', lessons: [] },
+      { id: ' ', lessons: {} },
+      {
+        id: 'unit-2',
+        lessons: [null, { id: ' ', recognize: {}, write: null }]
+      },
+      null
+    ]
+  };
+
+  const errors = validateLibrary(malformedCurriculum, validCharacters, validAudioIds);
+  assert.match(errors.join('\n'), /duplicate unit id: unit-1/i);
+  assert.match(errors.join('\n'), /unit.*blank id/i);
+  assert.match(errors.join('\n'), /unit.*lessons.*array/i);
+  assert.match(errors.join('\n'), /unit.*must be an object/i);
+  assert.match(errors.join('\n'), /lesson.*must be an object/i);
+  assert.match(errors.join('\n'), /lesson.*blank id/i);
+  assert.match(errors.join('\n'), /recognize.*array/i);
+  assert.match(errors.join('\n'), /write.*array/i);
+});
+
+test('rejects a null curriculum and a non-array units field', () => {
+  assert.match(validateLibrary(null, validCharacters, validAudioIds).join('\n'), /curriculum.*object/i);
+  assert.match(validateLibrary({ units: {} }, validCharacters, validAudioIds).join('\n'), /units.*array/i);
+});
+
 test('reports lesson and character for missing geometry', () => {
   const errors = validateLibrary(validCurriculum, {}, validAudioIds);
 
@@ -116,10 +146,31 @@ test('accepts SVG arc paths with binary flags', () => {
   assert.deepEqual(validateLibrary(validCurriculum, characters, validAudioIds), []);
 });
 
+test('reports SVG arcs with negative radii', () => {
+  for (const path of [
+    'M0 0 A-1 1 0 0 0 5 5',
+    'M0 0 a1 -1 0 0 0 5 5'
+  ]) {
+    const characters = clone(validCharacters);
+    characters.郭.strokes[0] = path;
+
+    const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+    assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i, path);
+  }
+});
+
 test('reports medians without two numeric coordinate points', () => {
   const characters = clone(validCharacters);
   characters.郭.medians[1] = [[50, 0], ['x', 100]];
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*median 2/i);
+});
+
+test('reports median points that contain extra coordinates', () => {
+  const characters = clone(validCharacters);
+  characters.郭.medians[0] = [[0, 0, 1], [100, 0]];
+
+  const errors = validateLibrary(validCurriculum, characters, validAudioIds);
+  assert.match(errors.join('\n'), /lesson-1.*郭.*median 1/i);
 });

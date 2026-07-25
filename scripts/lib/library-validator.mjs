@@ -5,8 +5,8 @@ const PATH_COMMANDS = new Map([
 ]);
 const PATH_TOKEN = /[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
 
-const asArray = value => Array.isArray(value) ? value : [];
-const asRecord = value => value && typeof value === 'object' ? value : {};
+const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+const hasNonBlankString = value => typeof value === 'string' && value.trim() !== '';
 
 function isValidPath(path) {
   if (typeof path !== 'string' || path.trim() === '') return false;
@@ -25,10 +25,14 @@ function isValidPath(path) {
     if (argumentsForCommand.length < expected || argumentsForCommand.length % expected !== 0) return false;
 
     if (command === 'A' || command === 'a') {
-      return argumentsForCommand.every((argument, index) => {
-        const isArcFlag = index % expected === 3 || index % expected === 4;
-        return !isArcFlag || argument === '0' || argument === '1';
-      });
+      for (let index = 0; index < argumentsForCommand.length; index += expected) {
+        const radiusX = Number(argumentsForCommand[index]);
+        const radiusY = Number(argumentsForCommand[index + 1]);
+        const largeArcFlag = argumentsForCommand[index + 3];
+        const sweepFlag = argumentsForCommand[index + 4];
+        if (!Number.isFinite(radiusX) || radiusX < 0 || !Number.isFinite(radiusY) || radiusY < 0) return false;
+        if ((largeArcFlag !== '0' && largeArcFlag !== '1') || (sweepFlag !== '0' && sweepFlag !== '1')) return false;
+      }
     }
 
     return true;
@@ -54,30 +58,67 @@ function hasValidMedianPoints(median) {
   return Array.isArray(median)
     && median.length >= 2
     && median.every(point => Array.isArray(point)
-      && point.length >= 2
+      && point.length === 2
       && Number.isFinite(point[0])
       && Number.isFinite(point[1]));
 }
 
 export function validateLibrary(curriculum, characters, audioIds) {
   const errors = [];
+  if (!isRecord(curriculum)) {
+    errors.push('curriculum: must be an object');
+    return errors;
+  }
+  if (!Array.isArray(curriculum.units)) {
+    errors.push('curriculum.units: must be an array');
+    return errors;
+  }
+
   const lessonIds = new Set();
-  const geometryByCharacter = asRecord(characters);
+  const unitIds = new Set();
+  const geometryByCharacter = isRecord(characters) ? characters : {};
   const availableAudioIds = audioIds instanceof Set ? audioIds : new Set(audioIds ?? []);
 
-  for (const unit of asArray(asRecord(curriculum).units)) {
-    for (const lesson of asArray(asRecord(unit).lessons)) {
-      const lessonRecord = asRecord(lesson);
-      const lessonId = lessonRecord.id ?? '<missing lesson id>';
+  for (const [unitIndex, unit] of curriculum.units.entries()) {
+    const unitPosition = `unit ${unitIndex + 1}`;
+    if (!isRecord(unit)) {
+      errors.push(`${unitPosition}: must be an object`);
+      continue;
+    }
+
+    const unitId = hasNonBlankString(unit.id) ? unit.id : undefined;
+    if (!unitId) errors.push(`${unitPosition}: missing or blank id`);
+    else if (unitIds.has(unitId)) errors.push(`duplicate unit id: ${unitId}`);
+    if (unitId) unitIds.add(unitId);
+
+    if (!Array.isArray(unit.lessons)) {
+      errors.push(`${unitId ?? unitPosition}: lessons must be an array`);
+      continue;
+    }
+
+    for (const [lessonIndex, lesson] of unit.lessons.entries()) {
+      const lessonPosition = `lesson ${lessonIndex + 1} in ${unitId ?? unitPosition}`;
+      if (!isRecord(lesson)) {
+        errors.push(`${lessonPosition}: must be an object`);
+        continue;
+      }
+
+      const lessonId = hasNonBlankString(lesson.id) ? lesson.id : undefined;
+      if (!lessonId) errors.push(`${lessonPosition}: missing or blank id`);
       if (lessonIds.has(lessonId)) errors.push(`duplicate lesson id: ${lessonId}`);
-      lessonIds.add(lessonId);
+      if (lessonId) lessonIds.add(lessonId);
 
       for (const group of ['recognize', 'write']) {
+        if (!Array.isArray(lesson[group])) {
+          errors.push(`${lessonId ?? lessonPosition}: ${group} must be an array`);
+          continue;
+        }
+
         const seenCharacters = new Set();
-        for (const candidate of asArray(lessonRecord[group])) {
-          const entry = asRecord(candidate);
+        for (const candidate of lesson[group]) {
+          const entry = isRecord(candidate) ? candidate : {};
           const character = typeof entry.character === 'string' ? entry.character : '';
-          const label = `${lessonId} ${character || '<missing character>'}`;
+          const label = `${lessonId ?? lessonPosition} ${character || '<missing character>'}`;
 
           if (Array.from(character).length !== 1) errors.push(`${label}: character must be one code point`);
           if (seenCharacters.has(character)) errors.push(`${label}: duplicate in ${group}`);
