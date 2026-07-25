@@ -1,0 +1,754 @@
+(function (root, factory) {
+  'use strict';
+
+  var api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root && root.window) {
+    root.window.HanziApp = Object.assign(root.window.HanziApp || {}, api);
+  }
+}(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+
+  var GROUPS = Object.freeze(['write', 'recognize']);
+  var ANIMATION_STATUSES = Object.freeze([
+    'idle', 'playing', 'paused', 'between-strokes', 'completed'
+  ]);
+  var ANIMATION_MODES = Object.freeze(['continuous', 'step']);
+  var SPEEDS = Object.freeze(['slow', 'normal', 'fast']);
+  var AUDIO_STATES = Object.freeze(['ready', 'loading', 'unavailable', 'error']);
+  var ANIMATION_LABELS = Object.freeze({
+    idle: '准备开始',
+    playing: '正在书写',
+    paused: '已暂停',
+    'between-strokes': '准备下一笔',
+    completed: '书写完成'
+  });
+  var MODE_LABELS = Object.freeze({
+    continuous: '连续播放',
+    step: '单笔练习'
+  });
+  var SPEED_LABELS = Object.freeze({
+    slow: '慢',
+    normal: '标准',
+    fast: '快'
+  });
+  var STORE_METHODS = Object.freeze([
+    'getUnits', 'getUnit', 'getLesson', 'getEntries'
+  ]);
+
+  function isRecord(value) {
+    return value !== null && typeof value === 'object' && !Array.isArray(value);
+  }
+
+  function reject(path, requirement) {
+    throw new TypeError(path + ': ' + requirement);
+  }
+
+  function requireRecord(value, path) {
+    if (!isRecord(value)) reject(path, 'must be an object');
+    return value;
+  }
+
+  function requireFunction(value, path) {
+    if (typeof value !== 'function') reject(path, 'must be a function');
+    return value;
+  }
+
+  function requireNonBlankString(value, path) {
+    if (typeof value !== 'string' || value.trim() === '') {
+      reject(path, 'must be a non-blank string');
+    }
+    return value;
+  }
+
+  function requireOwn(record, field, path) {
+    if (!Object.hasOwn(record, field)) reject(path + '.' + field, 'must be an own property');
+    return record[field];
+  }
+
+  function requireInteger(value, path, minimum) {
+    if (!Number.isInteger(value) || value < minimum) {
+      reject(path, 'must be an integer greater than or equal to ' + minimum);
+    }
+    return value;
+  }
+
+  function requireOneOf(value, allowed, path) {
+    if (allowed.indexOf(value) === -1) reject(path, 'has an unsupported value');
+    return value;
+  }
+
+  function freezeTree(value, seen) {
+    if (!value || typeof value !== 'object' || Object.isFrozen(value)) return value;
+    var visited = seen || new Set();
+    if (visited.has(value)) return value;
+    visited.add(value);
+    Object.keys(value).forEach(function (key) { freezeTree(value[key], visited); });
+    return Object.freeze(value);
+  }
+
+  function requireStore(store) {
+    requireRecord(store, 'store');
+    STORE_METHODS.forEach(function (method) {
+      requireFunction(store[method], 'store.' + method);
+    });
+    return store;
+  }
+
+  function copyUnit(unit, path) {
+    requireRecord(unit, path);
+    return {
+      id: requireNonBlankString(requireOwn(unit, 'id', path), path + '.id'),
+      title: requireNonBlankString(requireOwn(unit, 'title', path), path + '.title')
+    };
+  }
+
+  function copyLesson(lesson, path) {
+    requireRecord(lesson, path);
+    var kind = requireOneOf(requireOwn(lesson, 'kind', path), ['lesson', 'garden'], path + '.kind');
+    var copy = {
+      kind: kind,
+      id: requireNonBlankString(requireOwn(lesson, 'id', path), path + '.id'),
+      title: requireNonBlankString(requireOwn(lesson, 'title', path), path + '.title')
+    };
+    if (kind === 'lesson') {
+      copy.number = requireInteger(requireOwn(lesson, 'number', path), path + '.number', 1);
+    }
+    return copy;
+  }
+
+  function copyDirectoryLesson(section, path) {
+    var lesson = copyLesson(section, path);
+    var recognizeDisplayed = requireInteger(
+      requireOwn(section, 'recognizeDisplayed', path), path + '.recognizeDisplayed', 0
+    );
+    var recognizeCounted = requireInteger(
+      requireOwn(section, 'recognizeCounted', path), path + '.recognizeCounted', 0
+    );
+    var polyphonicReviews = requireInteger(
+      requireOwn(section, 'polyphonicReviews', path), path + '.polyphonicReviews', 0
+    );
+    var write = requireInteger(requireOwn(section, 'write', path), path + '.write', 0);
+    var defaultGroup = requireOneOf(
+      requireOwn(section, 'defaultGroup', path), GROUPS, path + '.defaultGroup'
+    );
+    if (recognizeCounted + polyphonicReviews !== recognizeDisplayed) {
+      reject(path, 'recognize counts must be internally consistent');
+    }
+    lesson.recognizeDisplayed = recognizeDisplayed;
+    lesson.recognizeCounted = recognizeCounted;
+    lesson.polyphonicReviews = polyphonicReviews;
+    lesson.write = write;
+    lesson.total = recognizeDisplayed + write;
+    lesson.defaultGroup = defaultGroup;
+    return lesson;
+  }
+
+  function copyEntry(entry, index, path) {
+    requireRecord(entry, path);
+    var character = requireNonBlankString(requireOwn(entry, 'character', path), path + '.character');
+    if (Array.from(character).length !== 1) reject(path + '.character', 'must be one code point');
+    return {
+      character: character,
+      pinyin: requireNonBlankString(requireOwn(entry, 'pinyin', path), path + '.pinyin'),
+      audioId: requireNonBlankString(requireOwn(entry, 'audio', path), path + '.audio'),
+      index: index,
+      isReview: Object.hasOwn(entry, 'counted') && entry.counted === false
+    };
+  }
+
+  function createDirectoryModel(store) {
+    requireStore(store);
+    var sourceUnits = store.getUnits();
+    if (!Array.isArray(sourceUnits)) reject('store.getUnits()', 'must return an array');
+    var units = sourceUnits.map(function (sourceUnit, unitIndex) {
+      var path = 'store.getUnits()[' + unitIndex + ']';
+      var unit = copyUnit(sourceUnit, path);
+      var sections = requireOwn(sourceUnit, 'sections', path);
+      if (!Array.isArray(sections)) reject(path + '.sections', 'must be an array');
+      unit.lessons = sections.map(function (section, sectionIndex) {
+        return copyDirectoryLesson(section, path + '.sections[' + sectionIndex + ']');
+      });
+      return unit;
+    });
+    return freezeTree({ units: units });
+  }
+
+  function createLessonModel(store, options) {
+    requireStore(store);
+    requireRecord(options, 'options');
+    var lessonId = requireNonBlankString(
+      requireOwn(options, 'lessonId', 'options'), 'options.lessonId'
+    );
+    var group = requireOneOf(requireOwn(options, 'group', 'options'), GROUPS, 'options.group');
+    var sourceLesson = store.getLesson(lessonId);
+    if (!sourceLesson) reject('options.lessonId', 'must identify a known lesson');
+    var sourceUnit = store.getUnit(sourceLesson.unitId);
+    if (!sourceUnit) reject('store.getUnit()', 'must return the lesson unit');
+    var writeEntries = store.getEntries(lessonId, 'write');
+    var recognizeEntries = store.getEntries(lessonId, 'recognize');
+    if (!Array.isArray(writeEntries) || !Array.isArray(recognizeEntries)) {
+      reject('store.getEntries()', 'must return both lesson groups');
+    }
+    var selected = group === 'write' ? writeEntries : recognizeEntries;
+    var lesson = copyLesson(sourceLesson, 'store.getLesson()');
+    var recognizeCounted = requireInteger(
+      sourceLesson.recognizeCounted, 'store.getLesson().recognizeCounted', 0
+    );
+    var reviews = requireInteger(
+      sourceLesson.polyphonicReviews, 'store.getLesson().polyphonicReviews', 0
+    );
+    var groups = {
+      write: {
+        id: 'write',
+        label: '会写',
+        count: writeEntries.length,
+        available: writeEntries.length > 0
+      },
+      recognize: {
+        id: 'recognize',
+        label: '会认',
+        count: recognizeEntries.length,
+        counted: recognizeCounted,
+        reviews: reviews,
+        available: recognizeEntries.length > 0
+      }
+    };
+    var entries = selected.map(function (entry, index) {
+      return copyEntry(entry, index, 'store.getEntries()[' + index + ']');
+    });
+    return freezeTree({
+      unit: copyUnit(sourceUnit, 'store.getUnit()'),
+      lesson: lesson,
+      group: group,
+      groups: groups,
+      entries: entries
+    });
+  }
+
+  function copyNeighbor(entry, path) {
+    if (entry === null) return null;
+    requireRecord(entry, path);
+    return {
+      character: requireNonBlankString(requireOwn(entry, 'character', path), path + '.character'),
+      pinyin: requireNonBlankString(requireOwn(entry, 'pinyin', path), path + '.pinyin')
+    };
+  }
+
+  function createCharacterModel(resolved) {
+    requireRecord(resolved, 'resolved');
+    var unit = copyUnit(requireOwn(resolved, 'unit', 'resolved'), 'resolved.unit');
+    var lesson = copyLesson(requireOwn(resolved, 'lesson', 'resolved'), 'resolved.lesson');
+    var group = requireOneOf(requireOwn(resolved, 'group', 'resolved'), GROUPS, 'resolved.group');
+    var entry = requireRecord(requireOwn(resolved, 'entry', 'resolved'), 'resolved.entry');
+    var geometry = requireRecord(requireOwn(resolved, 'geometry', 'resolved'), 'resolved.geometry');
+    var index = requireInteger(requireOwn(resolved, 'index', 'resolved'), 'resolved.index', 0);
+    var total = requireInteger(requireOwn(resolved, 'total', 'resolved'), 'resolved.total', 1);
+    if (index >= total) reject('resolved.index', 'must be less than resolved.total');
+    var character = requireNonBlankString(
+      requireOwn(entry, 'character', 'resolved.entry'), 'resolved.entry.character'
+    );
+    if (Array.from(character).length !== 1) {
+      reject('resolved.entry.character', 'must be one code point');
+    }
+    var previous = copyNeighbor(requireOwn(resolved, 'previous', 'resolved'), 'resolved.previous');
+    var next = copyNeighbor(requireOwn(resolved, 'next', 'resolved'), 'resolved.next');
+    return freezeTree({
+      unit: unit,
+      lesson: lesson,
+      group: group,
+      character: character,
+      pinyin: requireNonBlankString(
+        requireOwn(entry, 'pinyin', 'resolved.entry'), 'resolved.entry.pinyin'
+      ),
+      audioId: requireNonBlankString(
+        requireOwn(entry, 'audio', 'resolved.entry'), 'resolved.entry.audio'
+      ),
+      strokeCount: requireInteger(
+        requireOwn(geometry, 'strokeCount', 'resolved.geometry'), 'resolved.geometry.strokeCount', 1
+      ),
+      index: index,
+      total: total,
+      isReview: Object.hasOwn(entry, 'counted') && entry.counted === false,
+      previous: previous,
+      next: next,
+      previousDisabled: previous === null,
+      nextDisabled: next === null
+    });
+  }
+
+  function requireContainer(container) {
+    if (!container || typeof container !== 'object') reject('container', 'must be an element');
+    requireFunction(container.replaceChildren, 'container.replaceChildren');
+    var documentObject = container.ownerDocument;
+    if (!documentObject || typeof documentObject !== 'object') {
+      reject('container.ownerDocument', 'must be a document');
+    }
+    requireFunction(documentObject.createElement, 'container.ownerDocument.createElement');
+    return documentObject;
+  }
+
+  function node(documentObject, tagName, attributes, text, children) {
+    var result = documentObject.createElement(tagName);
+    Object.keys(attributes || {}).forEach(function (name) {
+      if (attributes[name] !== null && attributes[name] !== undefined) {
+        result.setAttribute(name, attributes[name]);
+      }
+    });
+    if (children) result.replaceChildren.apply(result, children);
+    else if (text !== undefined) result.textContent = text;
+    return result;
+  }
+
+  function setBooleanAttribute(element, name, enabled) {
+    if (enabled) element.setAttribute(name, '');
+    else element.removeAttribute(name);
+  }
+
+  function setHidden(element, hidden) {
+    setBooleanAttribute(element, 'hidden', hidden);
+  }
+
+  function setDisabled(element, disabled) {
+    setBooleanAttribute(element, 'disabled', disabled);
+  }
+
+  function viewHeading(documentObject, text) {
+    return node(documentObject, 'h1', {
+      'class': 'view-heading',
+      'data-view-heading': '',
+      'tabindex': '-1'
+    }, text);
+  }
+
+  function icon(documentObject, symbol) {
+    return node(documentObject, 'span', {
+      'class': 'button-icon',
+      'aria-hidden': 'true'
+    }, symbol);
+  }
+
+  function lessonAccessibleName(lesson) {
+    var name = lesson.kind === 'lesson'
+      ? '第' + lesson.number + '课《' + lesson.title + '》'
+      : lesson.title;
+    name += '，会认' + lesson.recognizeDisplayed + '个';
+    if (lesson.polyphonicReviews > 0) {
+      name += '，其中复习' + lesson.polyphonicReviews + '个';
+    }
+    return name + '，会写' + lesson.write + '个';
+  }
+
+  function renderDirectory(container, model) {
+    var documentObject = requireContainer(container);
+    requireRecord(model, 'model');
+    if (!Array.isArray(model.units)) reject('model.units', 'must be an array');
+    var root = node(documentObject, 'div', {
+      'class': 'view view--directory',
+      'data-view': 'directory'
+    });
+    var heading = viewHeading(documentObject, '课程目录');
+    var resumeButton = node(documentObject, 'button', {
+      'class': 'button button--primary directory-resume',
+      'type': 'button',
+      'data-action': 'resume-learning',
+      'hidden': ''
+    }, '继续上次学习');
+    var intro = node(documentObject, 'div', { 'class': 'directory-heading' }, undefined, [
+      heading,
+      resumeButton
+    ]);
+    var unitBands = model.units.map(function (unit, unitIndex) {
+      var headingId = 'unit-heading-' + (unitIndex + 1);
+      var unitHeading = node(documentObject, 'h2', {
+        'class': 'unit-heading',
+        'id': headingId
+      }, unit.title);
+      var lessonRows = unit.lessons.map(function (lesson) {
+        var titleText = lesson.kind === 'lesson'
+          ? lesson.number + '  ' + lesson.title
+          : lesson.title;
+        var title = node(documentObject, 'span', { 'class': 'lesson-row__title' }, titleText);
+        var counts = node(documentObject, 'span', { 'class': 'lesson-row__counts' }, undefined, [
+          node(documentObject, 'span', { 'class': 'count count--recognize' },
+            '会认 ' + lesson.recognizeDisplayed),
+          node(documentObject, 'span', { 'class': 'count count--write' },
+            '会写 ' + lesson.write)
+        ]);
+        var button = node(documentObject, 'button', {
+          'class': 'lesson-row',
+          'type': 'button',
+          'data-action': 'open-lesson',
+          'data-lesson-id': lesson.id,
+          'data-group': lesson.defaultGroup,
+          'aria-label': lessonAccessibleName(lesson)
+        }, undefined, [title, counts]);
+        return node(documentObject, 'li', { 'class': 'lesson-list__item' }, undefined, [button]);
+      });
+      return node(documentObject, 'section', {
+        'class': 'unit-band',
+        'data-unit-band': unit.id,
+        'aria-labelledby': headingId
+      }, undefined, [
+        unitHeading,
+        node(documentObject, 'ul', { 'class': 'lesson-list' }, undefined, lessonRows)
+      ]);
+    });
+    root.replaceChildren.apply(root, [intro].concat(unitBands));
+    container.replaceChildren(root);
+
+    function setResumeAvailable(available) {
+      if (typeof available !== 'boolean') reject('available', 'must be a boolean');
+      setHidden(resumeButton, !available);
+    }
+
+    return Object.freeze({
+      root: root,
+      heading: heading,
+      resumeButton: resumeButton,
+      setResumeAvailable: setResumeAvailable
+    });
+  }
+
+  function groupButton(documentObject, model, group) {
+    var groupModel = model.groups[group];
+    var button = node(documentObject, 'button', {
+      'class': 'segmented-control__button',
+      'type': 'button',
+      'data-action': 'select-group',
+      'data-lesson-id': model.lesson.id,
+      'data-group': group,
+      'aria-pressed': String(model.group === group)
+    }, groupModel.label + ' ' + groupModel.count);
+    setDisabled(button, !groupModel.available);
+    return button;
+  }
+
+  function characterButton(documentObject, model, entry, extraClass, label) {
+    var attributes = {
+      'class': extraClass,
+      'type': 'button',
+      'data-action': 'open-character',
+      'data-lesson-id': model.lesson.id,
+      'data-group': model.group,
+      'data-character': entry.character,
+      'aria-label': entry.character + '，' + entry.pinyin
+    };
+    if (label) return node(documentObject, 'button', attributes, label);
+    var pieces = [
+      node(documentObject, 'span', { 'class': 'character-card__pinyin' }, entry.pinyin),
+      node(documentObject, 'span', { 'class': 'character-card__hanzi' }, entry.character)
+    ];
+    if (entry.isReview) {
+      pieces.push(node(documentObject, 'span', { 'class': 'character-card__review' }, '复习'));
+    }
+    return node(documentObject, 'button', attributes, undefined, pieces);
+  }
+
+  function renderLesson(container, model) {
+    var documentObject = requireContainer(container);
+    requireRecord(model, 'model');
+    requireRecord(model.unit, 'model.unit');
+    requireRecord(model.lesson, 'model.lesson');
+    requireRecord(model.groups, 'model.groups');
+    if (!Array.isArray(model.entries)) reject('model.entries', 'must be an array');
+    var root = node(documentObject, 'div', {
+      'class': 'view view--lesson',
+      'data-view': 'lesson'
+    });
+    var back = node(documentObject, 'button', {
+      'class': 'button button--quiet back-button',
+      'type': 'button',
+      'data-action': 'go-directory',
+      'aria-label': '返回课程目录'
+    }, undefined, [icon(documentObject, '←'), node(documentObject, 'span', {}, '课程目录')]);
+    var lessonTitle = model.lesson.kind === 'lesson'
+      ? model.lesson.number + '  ' + model.lesson.title
+      : model.lesson.title;
+    var heading = viewHeading(documentObject, lessonTitle);
+    var eyebrow = node(documentObject, 'p', { 'class': 'view-eyebrow' }, model.unit.title);
+    var groupControl = node(documentObject, 'div', {
+      'class': 'segmented-control',
+      'role': 'group',
+      'aria-label': '选择学习类型'
+    }, undefined, GROUPS.map(function (group) {
+      return groupButton(documentObject, model, group);
+    }));
+    var header = node(documentObject, 'div', { 'class': 'lesson-heading' }, undefined, [
+      back,
+      eyebrow,
+      heading,
+      groupControl
+    ]);
+    var grid = node(documentObject, 'div', {
+      'class': 'character-grid',
+      'aria-label': model.groups[model.group].label + '字表'
+    }, undefined, model.entries.map(function (entry) {
+      return characterButton(documentObject, model, entry, 'character-card');
+    }));
+    var first = model.entries.length > 0 ? model.entries[0] : null;
+    var start = first
+      ? characterButton(
+        documentObject,
+        model,
+        first,
+        'button button--primary lesson-start',
+        '从第一个字开始学习'
+      )
+      : node(documentObject, 'button', {
+        'class': 'button button--primary lesson-start',
+        'type': 'button',
+        'disabled': ''
+      }, '暂无可学习的汉字');
+    root.replaceChildren(header, start, grid);
+    container.replaceChildren(root);
+    return Object.freeze({ root: root, heading: heading });
+  }
+
+  function actionIconButton(documentObject, action, symbol, label, title) {
+    return node(documentObject, 'button', {
+      'class': 'icon-button',
+      'type': 'button',
+      'data-action': action,
+      'aria-label': label,
+      'title': title || label
+    }, undefined, [icon(documentObject, symbol)]);
+  }
+
+  function characterNavigationButton(documentObject, model, direction) {
+    var isPrevious = direction === 'previous';
+    var neighbor = isPrevious ? model.previous : model.next;
+    var action = isPrevious ? 'previous-character' : 'next-character';
+    var label = isPrevious ? '上一个字' : '下一个字';
+    var symbol = isPrevious ? '←' : '→';
+    if (neighbor) label += '：' + neighbor.character + '，' + neighbor.pinyin;
+    var attributes = {
+      'class': 'button character-navigation__button',
+      'type': 'button',
+      'data-action': action,
+      'data-lesson-id': model.lesson.id,
+      'data-group': model.group,
+      'aria-label': label
+    };
+    if (neighbor) attributes['data-character'] = neighbor.character;
+    else attributes.disabled = '';
+    return node(documentObject, 'button', attributes, undefined, [
+      icon(documentObject, symbol),
+      node(documentObject, 'span', {}, neighbor ? neighbor.character + ' ' + neighbor.pinyin : label)
+    ]);
+  }
+
+  function renderCharacter(container, model) {
+    var documentObject = requireContainer(container);
+    requireRecord(model, 'model');
+    requireRecord(model.unit, 'model.unit');
+    requireRecord(model.lesson, 'model.lesson');
+    requireNonBlankString(model.character, 'model.character');
+    requireInteger(model.strokeCount, 'model.strokeCount', 1);
+    requireInteger(model.index, 'model.index', 0);
+    requireInteger(model.total, 'model.total', 1);
+
+    var root = node(documentObject, 'div', {
+      'class': 'view view--character',
+      'data-view': 'character'
+    });
+    var back = node(documentObject, 'button', {
+      'class': 'button button--quiet back-button',
+      'type': 'button',
+      'data-action': 'back-lesson',
+      'data-lesson-id': model.lesson.id,
+      'data-group': model.group,
+      'aria-label': '返回《' + model.lesson.title + '》字表'
+    }, undefined, [icon(documentObject, '←'), node(documentObject, 'span', {}, model.lesson.title)]);
+    var position = node(documentObject, 'p', {
+      'class': 'character-position',
+      'data-slot': 'character-position'
+    }, '第 ' + (model.index + 1) + ' 个，共 ' + model.total + ' 个');
+    var topbar = node(documentObject, 'div', { 'class': 'character-topbar' }, undefined, [back, position]);
+    var heading = viewHeading(documentObject, '学习“' + model.character + '”');
+    var boardError = node(documentObject, 'p', {
+      'class': 'board-error',
+      'data-slot': 'board-error',
+      'hidden': ''
+    }, '该字数据待补充，可先学习读音或切换前后字。');
+    var board = node(documentObject, 'div', {
+      'class': 'character-board',
+      'data-slot': 'character-board',
+      'role': 'img',
+      'aria-label': model.character + '，笔顺演示，准备开始'
+    }, undefined, [boardError]);
+    var boardColumn = node(documentObject, 'div', { 'class': 'board-column' }, undefined, [board]);
+
+    var pinyin = node(documentObject, 'p', { 'class': 'character-pinyin' }, model.pinyin);
+    var hanzi = node(documentObject, 'p', { 'class': 'character-display' }, model.character);
+    var strokeCount = node(documentObject, 'p', { 'class': 'stroke-count' },
+      '共 ' + model.strokeCount + ' 笔');
+    var audioButton = node(documentObject, 'button', {
+      'class': 'button button--audio',
+      'type': 'button',
+      'data-action': 'play-audio',
+      'aria-label': '听' + model.character + '的读音，' + model.pinyin
+    }, undefined, [icon(documentObject, '♪'), node(documentObject, 'span', {}, '听读音')]);
+    var audioFeedback = node(documentObject, 'p', {
+      'class': 'control-feedback',
+      'data-slot': 'audio-feedback',
+      'hidden': ''
+    }, '');
+    var animationStatus = node(documentObject, 'p', {
+      'class': 'animation-status',
+      'data-slot': 'animation-status'
+    }, '');
+
+    var previousStroke = actionIconButton(
+      documentObject, 'previous-stroke', '↤', '上一笔', '上一笔'
+    );
+    var togglePlay = actionIconButton(
+      documentObject, 'toggle-play', '▶', '播放笔顺', '播放笔顺'
+    );
+    var toggleIcon = togglePlay.childNodes[0];
+    var replay = actionIconButton(
+      documentObject, 'replay', '↻', '重新播放笔顺', '重新播放笔顺'
+    );
+    var nextStroke = actionIconButton(
+      documentObject, 'next-stroke', '↦', '下一笔', '下一笔'
+    );
+    var strokeControls = [previousStroke, togglePlay, replay, nextStroke];
+    var controls = node(documentObject, 'div', {
+      'class': 'stroke-controls',
+      'role': 'group',
+      'aria-label': '笔顺控制'
+    }, undefined, strokeControls);
+
+    var speedButtons = SPEEDS.map(function (speed) {
+      return node(documentObject, 'button', {
+        'class': 'segmented-control__button speed-button',
+        'type': 'button',
+        'data-action': 'set-speed',
+        'data-speed': speed,
+        'aria-pressed': String(speed === 'normal')
+      }, SPEED_LABELS[speed]);
+    });
+    var speedGroup = node(documentObject, 'div', {
+      'class': 'segmented-control speed-control',
+      'data-slot': 'speed-group',
+      'role': 'group',
+      'aria-label': '笔顺播放速度'
+    }, undefined, speedButtons);
+    var tools = node(documentObject, 'section', {
+      'class': 'character-tools',
+      'aria-label': model.character + '的读音和笔顺控制'
+    }, undefined, [
+      pinyin,
+      hanzi,
+      strokeCount,
+      audioButton,
+      audioFeedback,
+      animationStatus,
+      controls,
+      speedGroup
+    ]);
+    var workSurface = node(documentObject, 'div', { 'class': 'character-work-surface' }, undefined, [
+      boardColumn,
+      tools
+    ]);
+    var characterNavigation = node(documentObject, 'nav', {
+      'class': 'character-navigation',
+      'aria-label': '前后汉字'
+    }, undefined, [
+      characterNavigationButton(documentObject, model, 'previous'),
+      characterNavigationButton(documentObject, model, 'next')
+    ]);
+    root.replaceChildren(topbar, heading, workSurface, characterNavigation);
+    container.replaceChildren(root);
+
+    var boardFailed = false;
+    var animationKey = null;
+    var lastAudioState = null;
+
+    function setAnimationState(state) {
+      requireRecord(state, 'animation state');
+      var status = requireOneOf(state.status, ANIMATION_STATUSES, 'animation state.status');
+      var mode = requireOneOf(state.mode, ANIMATION_MODES, 'animation state.mode');
+      var speed = requireOneOf(state.speed, SPEEDS, 'animation state.speed');
+      var strokeIndex = requireInteger(state.strokeIndex, 'animation state.strokeIndex', 0);
+      if (strokeIndex >= model.strokeCount) {
+        reject('animation state.strokeIndex', 'must be within the character stroke count');
+      }
+      var nextKey = [status, mode, speed, strokeIndex].join('|');
+      if (nextKey === animationKey) return;
+      animationKey = nextKey;
+
+      var statusLabel = ANIMATION_LABELS[status];
+      animationStatus.textContent = statusLabel + '，第 ' + (strokeIndex + 1) + ' / '
+        + model.strokeCount + ' 笔，' + MODE_LABELS[mode];
+      if (!boardFailed) {
+        board.setAttribute('aria-label', model.character + '，笔顺演示，第 '
+          + (strokeIndex + 1) + ' 笔，' + statusLabel);
+      }
+      var isPlaying = status === 'playing'
+        || status === 'between-strokes'
+        || (status === 'completed' && mode === 'continuous');
+      toggleIcon.textContent = isPlaying ? '⏸' : '▶';
+      togglePlay.setAttribute('aria-label', isPlaying ? '暂停笔顺' : '播放笔顺');
+      togglePlay.setAttribute('title', isPlaying ? '暂停笔顺' : '播放笔顺');
+      setDisabled(previousStroke, boardFailed || strokeIndex === 0);
+      setDisabled(nextStroke, boardFailed || strokeIndex === model.strokeCount - 1);
+      setDisabled(togglePlay, boardFailed);
+      setDisabled(replay, boardFailed);
+      speedButtons.forEach(function (button, index) {
+        button.setAttribute('aria-pressed', String(SPEEDS[index] === speed));
+        setDisabled(button, boardFailed);
+      });
+    }
+
+    function setAudioState(state) {
+      requireOneOf(state, AUDIO_STATES, 'audio state');
+      if (state === lastAudioState) return;
+      lastAudioState = state;
+      var message = '';
+      if (state === 'loading') message = '正在准备读音…';
+      if (state === 'unavailable') message = '该字读音暂不可用';
+      if (state === 'error') message = '读音播放失败';
+      audioFeedback.textContent = message;
+      setHidden(audioFeedback, state === 'ready');
+      setDisabled(audioButton, state === 'loading' || state === 'unavailable');
+      setBooleanAttribute(audioButton, 'aria-busy', state === 'loading');
+    }
+
+    function showBoardError() {
+      if (boardFailed) return;
+      boardFailed = true;
+      setHidden(boardError, false);
+      board.replaceChildren(boardError);
+      board.setAttribute('aria-label', model.character + '，该字笔画数据待补充');
+      strokeControls.forEach(function (button) { setDisabled(button, true); });
+      speedButtons.forEach(function (button) { setDisabled(button, true); });
+    }
+
+    setAnimationState({
+      status: 'idle',
+      mode: 'continuous',
+      strokeIndex: 0,
+      speed: 'normal'
+    });
+    setAudioState('ready');
+
+    return Object.freeze({
+      root: root,
+      heading: heading,
+      board: board,
+      setAnimationState: setAnimationState,
+      setAudioState: setAudioState,
+      showBoardError: showBoardError
+    });
+  }
+
+  return Object.freeze({
+    createDirectoryModel: createDirectoryModel,
+    createLessonModel: createLessonModel,
+    createCharacterModel: createCharacterModel,
+    renderDirectory: renderDirectory,
+    renderLesson: renderLesson,
+    renderCharacter: renderCharacter
+  });
+}));
