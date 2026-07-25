@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
 
@@ -108,8 +107,6 @@ const expectedPolyphonicReviews = [
   ['lesson-27', '纪', 'jǐ']
 ];
 
-const expectedCurriculumDigest = '0e935ec9bc0db9701fccbf10650c6a0a8ed6d37cd96503d8cd9a1058fb81bfc4';
-
 const pinyinToneMarks = new Map([
   ['\u0304', '1'],
   ['\u0301', '2'],
@@ -145,6 +142,67 @@ function entry(sectionId, group, character) {
   const match = section[group].find(candidate => candidate.character === character);
   assert.ok(match, `missing ${sectionId}.${group} ${character}`);
   return match;
+}
+
+function expectedAuditRows() {
+  return sections().flatMap(section => ['recognize', 'write'].flatMap(group => section[group].map(item => ({
+    section: section.id,
+    group,
+    character: item.character,
+    pinyin: item.pinyin,
+    audio: item.audio,
+    counting: group === 'write' ? 'write' : item.counted === false ? 'review' : 'new'
+  }))));
+}
+
+function parseReadingsAudit(content) {
+  const rows = [];
+  let headerSeen = false;
+
+  for (const [index, line] of content.split(/\r?\n/).entries()) {
+    if (line === '' || line.startsWith('#')) continue;
+    if (!headerSeen) {
+      assert.equal(line, 'section\tgroup\tcharacter\tpinyin\taudio\tcounting', 'TSV header');
+      headerSeen = true;
+      continue;
+    }
+
+    const values = line.split('\t');
+    assert.equal(values.length, 6, `docs/curriculum-readings.tsv:${index + 1}`);
+    rows.push({
+      section: values[0],
+      group: values[1],
+      character: values[2],
+      pinyin: values[3],
+      audio: values[4],
+      counting: values[5],
+      lineNumber: index + 1
+    });
+  }
+
+  assert.equal(headerSeen, true, 'TSV header missing');
+  return rows;
+}
+
+function parseAuditSectionTable(content) {
+  return content.split(/\r?\n/)
+    .filter(line => /^\| [^|]+ \| (?:lesson|garden)-\d+ \|/.test(line))
+    .map((line, index) => {
+      const [unit, id, title, recognizeDisplayed, recognizeCounted, write, reviewed] = line
+        .slice(1, -1)
+        .split('|')
+        .map(value => value.trim());
+      return {
+        unit,
+        id,
+        title,
+        recognizeDisplayed: Number(recognizeDisplayed),
+        recognizeCounted: Number(recognizeCounted),
+        write: Number(write),
+        reviewed,
+        rowNumber: index + 1
+      };
+    });
 }
 
 test('identifies the approved 2019 PEP textbook edition', () => {
@@ -211,24 +269,69 @@ test('preserves all displayed readings while matching the two appendix totals', 
   assert.equal(sections().reduce((sum, section) => sum + section.write.length, 0), 250);
 });
 
-test('locks every contextual pinyin and counted flag to the audited source', () => {
-  const rows = [];
-  for (const section of sections()) {
-    for (const group of ['recognize', 'write']) {
-      for (const item of section[group]) {
-        rows.push([
-          section.id,
-          group,
-          item.character,
-          item.pinyin,
-          item.counted === false ? 'review' : 'counted'
-        ].join('|'));
-      }
-    }
-  }
+test('matches every curriculum entry to the human-reviewable readings audit', () => {
+  const content = readFileSync(new URL('../docs/curriculum-readings.tsv', import.meta.url), 'utf8');
+  const actualRows = parseReadingsAudit(content);
+  const expectedRows = expectedAuditRows();
 
-  const digest = createHash('sha256').update(rows.join('\n')).digest('hex');
-  assert.equal(digest, expectedCurriculumDigest);
+  for (const [index, expected] of expectedRows.entries()) {
+    const actual = actualRows[index];
+    const label = `${expected.section}/${expected.group}/${expected.character} at TSV line ${actual?.lineNumber ?? '<missing>'}`;
+    assert.deepEqual(actual && {
+      section: actual.section,
+      group: actual.group,
+      character: actual.character,
+      pinyin: actual.pinyin,
+      audio: actual.audio,
+      counting: actual.counting
+    }, expected, label);
+  }
+  const extra = actualRows[expectedRows.length];
+  assert.equal(
+    actualRows.length,
+    expectedRows.length,
+    extra
+      ? `unexpected ${extra.section}/${extra.group}/${extra.character} at TSV line ${extra.lineNumber}`
+      : 'TSV ended before all 521 curriculum entries'
+  );
+  assert.equal(actualRows.length, 521, 'TSV row count');
+});
+
+test('keeps the audit document section checklist synchronized with curriculum data', () => {
+  const content = readFileSync(new URL('../docs/data-audit.md', import.meta.url), 'utf8');
+  assert.match(content, /`docs\/curriculum-readings\.tsv`/);
+  assert.match(content, /人工核对[^。]*审计基准/);
+
+  const actualRows = parseAuditSectionTable(content);
+  const expectedRows = curriculum.units.flatMap(unit => unit.lessons.map(section => ({
+    unit: unit.title,
+    id: section.id,
+    title: section.title,
+    recognizeDisplayed: section.recognize.length,
+    recognizeCounted: section.recognize.filter(item => item.counted !== false).length,
+    write: section.write.length,
+    reviewed: '[x]'
+  })));
+
+  for (const [index, expected] of expectedRows.entries()) {
+    const actual = actualRows[index];
+    const label = `${expected.id} at audit checklist row ${actual?.rowNumber ?? '<missing>'}`;
+    assert.deepEqual(actual && {
+      unit: actual.unit,
+      id: actual.id,
+      title: actual.title,
+      recognizeDisplayed: actual.recognizeDisplayed,
+      recognizeCounted: actual.recognizeCounted,
+      write: actual.write,
+      reviewed: actual.reviewed
+    }, expected, label);
+  }
+  const extra = actualRows[expectedRows.length];
+  assert.equal(
+    actualRows.length,
+    expectedRows.length,
+    extra ? `unexpected ${extra.id} at audit checklist row ${extra.rowNumber}` : 'audit checklist ended early'
+  );
 });
 
 test('uses unique unit metadata and section ids', () => {
