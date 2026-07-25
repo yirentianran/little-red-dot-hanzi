@@ -419,10 +419,15 @@ git commit -m "data: add offline Mandarin pronunciation"
 ```js
 test('writes a classic script with no network URLs', async () => {
   const output = buildRuntimeSource(curriculum, characterDocument, manifest);
-  assert.match(output, /^window\.HANZI_LIBRARY = /);
+  assert.match(output, /^\/\*[\s\S]*Character geometry modification notice/);
+  assert.match(output, /window\.HANZI_LIBRARY = /);
   assert.doesNotMatch(output, /https?:\/\//);
-  const parsed = JSON.parse(output.slice(output.indexOf('{'), -2));
+  const assignment = 'window.HANZI_LIBRARY = ';
+  const parsed = JSON.parse(output.slice(output.indexOf(assignment) + assignment.length, -2));
   assert.equal(parsed.curriculum.schemaVersion, 1);
+  assert.equal(Object.keys(parsed.characters).length, 428);
+  assert.equal(Object.keys(parsed.audio.readings).length, 335);
+  assert.deepEqual(parsed.audio.readings.chao2, { file: 'assets/audio/chao2.mp3' });
 });
 ```
 
@@ -436,12 +441,28 @@ Expected: FAIL because `buildRuntimeSource` does not exist.
 
 ```js
 export function buildRuntimeSource(curriculum, characterDocument, audioManifest) {
-  const payload = { curriculum, characters: characterDocument.characters, audio: audioManifest };
-  return `window.HANZI_LIBRARY = ${JSON.stringify(payload)};\n`;
+  const payload = {
+    schemaVersion: 1,
+    geometryNotice: characterDocument.modificationNotice,
+    curriculum,
+    characters: characterDocument.characters,
+    audio: {
+      format: audioManifest.format,
+      readings: Object.fromEntries(Object.entries(audioManifest.readings)
+        .map(([id, record]) => [id, { file: record.file }]))
+    },
+    notices: {
+      geometryLicense: 'data/ARPHICPL.TXT',
+      geometrySource: 'data/source-data-license.md',
+      audioAttribution: 'assets/audio/THIRD_PARTY_NOTICES.md',
+      audioLicense: 'assets/audio/CC-BY-SA-3.0.html'
+    }
+  };
+  return `${formatGeometryLicenseHeader(characterDocument.modificationNotice)}\nwindow.HANZI_LIBRARY = ${JSON.stringify(payload)};\n`;
 }
 ```
 
-Sort generated character and audio keys, write atomically, and report byte size and record counts.
+The generated header must be a prominent in-file ARPHICPL modification notice derived from the audited character document, including the date, locked source, license, and all transformation descriptions. The runtime payload retains that notice as structured data and points to bundled licenses with relative paths. Strip audio source URLs, hashes, ID3 audit fields, and listening status from the browser payload; retain only `format` and sorted local `{ file }` mappings. Sort generated character and audio keys without mutating source objects, write atomically, and report byte size and record counts. Reject malformed source documents rather than emitting a partial bundle.
 
 - [ ] **Step 4: Generate and verify stable output**
 
