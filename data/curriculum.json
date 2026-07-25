@@ -1,0 +1,2980 @@
+{
+  "schemaVersion": 1,
+  "book": {
+    "publisher": "人民教育出版社",
+    "approvalYear": 2019,
+    "grade": 4,
+    "volume": "上册"
+  },
+  "units": [
+    {
+      "id": "unit-1",
+      "title": "第一单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-1",
+          "number": 1,
+          "title": "观潮",
+          "recognize": [
+            {
+              "character": "盐",
+              "pinyin": "yán",
+              "audio": "yan2"
+            },
+            {
+              "character": "薄",
+              "pinyin": "bó",
+              "audio": "bo2",
+              "counted": false
+            },
+            {
+              "character": "屹",
+              "pinyin": "yì",
+              "audio": "yi4"
+            },
+            {
+              "character": "昂",
+              "pinyin": "áng",
+              "audio": "ang2"
+            },
+            {
+              "character": "顿",
+              "pinyin": "dùn",
+              "audio": "dun4"
+            },
+            {
+              "character": "鼎",
+              "pinyin": "dǐng",
+              "audio": "ding3"
+            },
+            {
+              "character": "沸",
+              "pinyin": "fèi",
+              "audio": "fei4"
+            },
+            {
+              "character": "贯",
+              "pinyin": "guàn",
+              "audio": "guan4"
+            },
+            {
+              "character": "浩",
+              "pinyin": "hào",
+              "audio": "hao4"
+            },
+            {
+              "character": "崩",
+              "pinyin": "bēng",
+              "audio": "beng1"
+            },
+            {
+              "character": "震",
+              "pinyin": "zhèn",
+              "audio": "zhen4"
+            },
+            {
+              "character": "霎",
+              "pinyin": "shà",
+              "audio": "sha4"
+            },
+            {
+              "character": "余",
+              "pinyin": "yú",
+              "audio": "yu2"
+            }
+          ],
+          "write": [
+            {
+              "character": "潮",
+              "pinyin": "cháo",
+              "audio": "chao2"
+            },
+            {
+              "character": "据",
+              "pinyin": "jù",
+              "audio": "ju4"
+            },
+            {
+              "character": "堤",
+              "pinyin": "dī",
+              "audio": "di1"
+            },
+            {
+              "character": "阔",
+              "pinyin": "kuò",
+              "audio": "kuo4"
+            },
+            {
+              "character": "盼",
+              "pinyin": "pàn",
+              "audio": "pan4"
+            },
+            {
+              "character": "滚",
+              "pinyin": "gǔn",
+              "audio": "gun3"
+            },
+            {
+              "character": "顿",
+              "pinyin": "dùn",
+              "audio": "dun4"
+            },
+            {
+              "character": "逐",
+              "pinyin": "zhú",
+              "audio": "zhu2"
+            },
+            {
+              "character": "渐",
+              "pinyin": "jiàn",
+              "audio": "jian4"
+            },
+            {
+              "character": "堵",
+              "pinyin": "dǔ",
+              "audio": "du3"
+            },
+            {
+              "character": "犹",
+              "pinyin": "yóu",
+              "audio": "you2"
+            },
+            {
+              "character": "崩",
+              "pinyin": "bēng",
+              "audio": "beng1"
+            },
+            {
+              "character": "震",
+              "pinyin": "zhèn",
+              "audio": "zhen4"
+            },
+            {
+              "character": "霎",
+              "pinyin": "shà",
+              "audio": "sha4"
+            },
+            {
+              "character": "余",
+              "pinyin": "yú",
+              "audio": "yu2"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-2",
+          "number": 2,
+          "title": "走月亮",
+          "recognize": [
+            {
+              "character": "鹅",
+              "pinyin": "é",
+              "audio": "e2"
+            },
+            {
+              "character": "卵",
+              "pinyin": "luǎn",
+              "audio": "luan3"
+            },
+            {
+              "character": "俗",
+              "pinyin": "sú",
+              "audio": "su2"
+            },
+            {
+              "character": "跃",
+              "pinyin": "yuè",
+              "audio": "yue4"
+            },
+            {
+              "character": "穗",
+              "pinyin": "suì",
+              "audio": "sui4"
+            },
+            {
+              "character": "镀",
+              "pinyin": "dù",
+              "audio": "du4"
+            },
+            {
+              "character": "埂",
+              "pinyin": "gěng",
+              "audio": "geng3"
+            },
+            {
+              "character": "烁",
+              "pinyin": "shuò",
+              "audio": "shuo4"
+            }
+          ],
+          "write": [
+            {
+              "character": "淘",
+              "pinyin": "táo",
+              "audio": "tao2"
+            },
+            {
+              "character": "牵",
+              "pinyin": "qiān",
+              "audio": "qian1"
+            },
+            {
+              "character": "鹅",
+              "pinyin": "é",
+              "audio": "e2"
+            },
+            {
+              "character": "卵",
+              "pinyin": "luǎn",
+              "audio": "luan3"
+            },
+            {
+              "character": "坑",
+              "pinyin": "kēng",
+              "audio": "keng1"
+            },
+            {
+              "character": "洼",
+              "pinyin": "wā",
+              "audio": "wa1"
+            },
+            {
+              "character": "填",
+              "pinyin": "tián",
+              "audio": "tian2"
+            },
+            {
+              "character": "庄",
+              "pinyin": "zhuāng",
+              "audio": "zhuang1"
+            },
+            {
+              "character": "稼",
+              "pinyin": "jià",
+              "audio": "jia4"
+            },
+            {
+              "character": "俗",
+              "pinyin": "sú",
+              "audio": "su2"
+            },
+            {
+              "character": "跃",
+              "pinyin": "yuè",
+              "audio": "yue4"
+            },
+            {
+              "character": "葡",
+              "pinyin": "pú",
+              "audio": "pu2"
+            },
+            {
+              "character": "萄",
+              "pinyin": "táo",
+              "audio": "tao2"
+            },
+            {
+              "character": "稻",
+              "pinyin": "dào",
+              "audio": "dao4"
+            },
+            {
+              "character": "熟",
+              "pinyin": "shú",
+              "audio": "shu2"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-3",
+          "number": 3,
+          "title": "现代诗二首",
+          "recognize": [
+            {
+              "character": "巢",
+              "pinyin": "cháo",
+              "audio": "chao2"
+            },
+            {
+              "character": "苇",
+              "pinyin": "wěi",
+              "audio": "wei3"
+            },
+            {
+              "character": "罗",
+              "pinyin": "luó",
+              "audio": "luo2"
+            },
+            {
+              "character": "眠",
+              "pinyin": "mián",
+              "audio": "mian2"
+            },
+            {
+              "character": "霸",
+              "pinyin": "bà",
+              "audio": "ba4"
+            },
+            {
+              "character": "占",
+              "pinyin": "zhàn",
+              "audio": "zhan4"
+            }
+          ],
+          "write": []
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-4",
+          "number": 4,
+          "title": "繁星",
+          "recognize": [
+            {
+              "character": "昧",
+              "pinyin": "mèi",
+              "audio": "mei4"
+            },
+            {
+              "character": "坠",
+              "pinyin": "zhuì",
+              "audio": "zhui4"
+            },
+            {
+              "character": "怀",
+              "pinyin": "huái",
+              "audio": "huai2"
+            }
+          ],
+          "write": []
+        }
+      ]
+    },
+    {
+      "id": "unit-2",
+      "title": "第二单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-5",
+          "number": 5,
+          "title": "一个豆荚里的五粒豆",
+          "recognize": [
+            {
+              "character": "豌",
+              "pinyin": "wān",
+              "audio": "wan1"
+            },
+            {
+              "character": "按",
+              "pinyin": "àn",
+              "audio": "an4"
+            },
+            {
+              "character": "僵",
+              "pinyin": "jiāng",
+              "audio": "jiang1"
+            },
+            {
+              "character": "预",
+              "pinyin": "yù",
+              "audio": "yu4"
+            },
+            {
+              "character": "揭",
+              "pinyin": "jiē",
+              "audio": "jie1"
+            },
+            {
+              "character": "苔",
+              "pinyin": "tái",
+              "audio": "tai2"
+            },
+            {
+              "character": "囚",
+              "pinyin": "qiú",
+              "audio": "qiu2"
+            },
+            {
+              "character": "框",
+              "pinyin": "kuàng",
+              "audio": "kuang4"
+            },
+            {
+              "character": "溢",
+              "pinyin": "yì",
+              "audio": "yi4"
+            }
+          ],
+          "write": [
+            {
+              "character": "豌",
+              "pinyin": "wān",
+              "audio": "wan1"
+            },
+            {
+              "character": "按",
+              "pinyin": "àn",
+              "audio": "an4"
+            },
+            {
+              "character": "舒",
+              "pinyin": "shū",
+              "audio": "shu1"
+            },
+            {
+              "character": "适",
+              "pinyin": "shì",
+              "audio": "shi4"
+            },
+            {
+              "character": "暗",
+              "pinyin": "àn",
+              "audio": "an4"
+            },
+            {
+              "character": "恐",
+              "pinyin": "kǒng",
+              "audio": "kong3"
+            },
+            {
+              "character": "僵",
+              "pinyin": "jiāng",
+              "audio": "jiang1"
+            },
+            {
+              "character": "硬",
+              "pinyin": "yìng",
+              "audio": "ying4"
+            },
+            {
+              "character": "枪",
+              "pinyin": "qiāng",
+              "audio": "qiang1"
+            },
+            {
+              "character": "耐",
+              "pinyin": "nài",
+              "audio": "nai4"
+            },
+            {
+              "character": "探",
+              "pinyin": "tàn",
+              "audio": "tan4"
+            },
+            {
+              "character": "愉",
+              "pinyin": "yú",
+              "audio": "yu2"
+            },
+            {
+              "character": "曾",
+              "pinyin": "céng",
+              "audio": "ceng2"
+            },
+            {
+              "character": "沟",
+              "pinyin": "gōu",
+              "audio": "gou1"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-6",
+          "number": 6,
+          "title": "夜间飞行的秘密",
+          "recognize": [
+            {
+              "character": "蝙",
+              "pinyin": "biān",
+              "audio": "bian1"
+            },
+            {
+              "character": "蝠",
+              "pinyin": "fú",
+              "audio": "fu2"
+            },
+            {
+              "character": "即",
+              "pinyin": "jí",
+              "audio": "ji2"
+            },
+            {
+              "character": "锐",
+              "pinyin": "ruì",
+              "audio": "rui4"
+            },
+            {
+              "character": "系",
+              "pinyin": "jì",
+              "audio": "ji4",
+              "counted": false
+            },
+            {
+              "character": "铛",
+              "pinyin": "dāng",
+              "audio": "dang1"
+            },
+            {
+              "character": "蝇",
+              "pinyin": "yíng",
+              "audio": "ying2"
+            },
+            {
+              "character": "证",
+              "pinyin": "zhèng",
+              "audio": "zheng4"
+            },
+            {
+              "character": "障",
+              "pinyin": "zhàng",
+              "audio": "zhang4"
+            },
+            {
+              "character": "碍",
+              "pinyin": "ài",
+              "audio": "ai4"
+            },
+            {
+              "character": "荧",
+              "pinyin": "yíng",
+              "audio": "ying2"
+            },
+            {
+              "character": "屏",
+              "pinyin": "píng",
+              "audio": "ping2"
+            }
+          ],
+          "write": [
+            {
+              "character": "蚊",
+              "pinyin": "wén",
+              "audio": "wen2"
+            },
+            {
+              "character": "即",
+              "pinyin": "jí",
+              "audio": "ji2"
+            },
+            {
+              "character": "科",
+              "pinyin": "kē",
+              "audio": "ke1"
+            },
+            {
+              "character": "横",
+              "pinyin": "héng",
+              "audio": "heng2"
+            },
+            {
+              "character": "竖",
+              "pinyin": "shù",
+              "audio": "shu4"
+            },
+            {
+              "character": "绳",
+              "pinyin": "shéng",
+              "audio": "sheng2"
+            },
+            {
+              "character": "系",
+              "pinyin": "jì",
+              "audio": "ji4"
+            },
+            {
+              "character": "蝇",
+              "pinyin": "yíng",
+              "audio": "ying2"
+            },
+            {
+              "character": "证",
+              "pinyin": "zhèng",
+              "audio": "zheng4"
+            },
+            {
+              "character": "研",
+              "pinyin": "yán",
+              "audio": "yan2"
+            },
+            {
+              "character": "究",
+              "pinyin": "jiū",
+              "audio": "jiu1"
+            },
+            {
+              "character": "达",
+              "pinyin": "dá",
+              "audio": "da2"
+            },
+            {
+              "character": "驾",
+              "pinyin": "jià",
+              "audio": "jia4"
+            },
+            {
+              "character": "驶",
+              "pinyin": "shǐ",
+              "audio": "shi3"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-7",
+          "number": 7,
+          "title": "呼风唤雨的世纪",
+          "recognize": [
+            {
+              "character": "唤",
+              "pinyin": "huàn",
+              "audio": "huan4"
+            },
+            {
+              "character": "获",
+              "pinyin": "huò",
+              "audio": "huo4"
+            },
+            {
+              "character": "赖",
+              "pinyin": "lài",
+              "audio": "lai4"
+            },
+            {
+              "character": "潜",
+              "pinyin": "qián",
+              "audio": "qian2"
+            },
+            {
+              "character": "亿",
+              "pinyin": "yì",
+              "audio": "yi4"
+            },
+            {
+              "character": "索",
+              "pinyin": "suǒ",
+              "audio": "suo3"
+            },
+            {
+              "character": "奥",
+              "pinyin": "ào",
+              "audio": "ao4"
+            },
+            {
+              "character": "舶",
+              "pinyin": "bó",
+              "audio": "bo2"
+            },
+            {
+              "character": "质",
+              "pinyin": "zhì",
+              "audio": "zhi4"
+            },
+            {
+              "character": "哲",
+              "pinyin": "zhé",
+              "audio": "zhe2"
+            },
+            {
+              "character": "兰",
+              "pinyin": "lán",
+              "audio": "lan2"
+            }
+          ],
+          "write": [
+            {
+              "character": "唤",
+              "pinyin": "huàn",
+              "audio": "huan4"
+            },
+            {
+              "character": "纪",
+              "pinyin": "jì",
+              "audio": "ji4"
+            },
+            {
+              "character": "技",
+              "pinyin": "jì",
+              "audio": "ji4"
+            },
+            {
+              "character": "改",
+              "pinyin": "gǎi",
+              "audio": "gai3"
+            },
+            {
+              "character": "程",
+              "pinyin": "chéng",
+              "audio": "cheng2"
+            },
+            {
+              "character": "超",
+              "pinyin": "chāo",
+              "audio": "chao1"
+            },
+            {
+              "character": "亿",
+              "pinyin": "yì",
+              "audio": "yi4"
+            },
+            {
+              "character": "核",
+              "pinyin": "hé",
+              "audio": "he2"
+            },
+            {
+              "character": "奥",
+              "pinyin": "ào",
+              "audio": "ao4"
+            },
+            {
+              "character": "益",
+              "pinyin": "yì",
+              "audio": "yi4"
+            },
+            {
+              "character": "联",
+              "pinyin": "lián",
+              "audio": "lian2"
+            },
+            {
+              "character": "质",
+              "pinyin": "zhì",
+              "audio": "zhi4"
+            },
+            {
+              "character": "哲",
+              "pinyin": "zhé",
+              "audio": "zhe2"
+            },
+            {
+              "character": "任",
+              "pinyin": "rèn",
+              "audio": "ren4"
+            },
+            {
+              "character": "善",
+              "pinyin": "shàn",
+              "audio": "shan4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-8",
+          "number": 8,
+          "title": "蝴蝶的家",
+          "recognize": [
+            {
+              "character": "避",
+              "pinyin": "bì",
+              "audio": "bi4"
+            },
+            {
+              "character": "撼",
+              "pinyin": "hàn",
+              "audio": "han4"
+            },
+            {
+              "character": "喧",
+              "pinyin": "xuān",
+              "audio": "xuan1"
+            },
+            {
+              "character": "雀",
+              "pinyin": "qiǎo",
+              "audio": "qiao3",
+              "counted": false
+            },
+            {
+              "character": "檐",
+              "pinyin": "yán",
+              "audio": "yan2"
+            }
+          ],
+          "write": []
+        },
+        {
+          "kind": "garden",
+          "id": "garden-2",
+          "title": "语文园地二",
+          "recognize": [
+            {
+              "character": "驻",
+              "pinyin": "zhù",
+              "audio": "zhu4"
+            },
+            {
+              "character": "钞",
+              "pinyin": "chāo",
+              "audio": "chao1"
+            },
+            {
+              "character": "培",
+              "pinyin": "péi",
+              "audio": "pei2"
+            },
+            {
+              "character": "赌",
+              "pinyin": "dǔ",
+              "audio": "du3"
+            },
+            {
+              "character": "媒",
+              "pinyin": "méi",
+              "audio": "mei2"
+            },
+            {
+              "character": "氛",
+              "pinyin": "fēn",
+              "audio": "fen1"
+            },
+            {
+              "character": "账",
+              "pinyin": "zhàng",
+              "audio": "zhang4"
+            },
+            {
+              "character": "贺",
+              "pinyin": "hè",
+              "audio": "he4"
+            },
+            {
+              "character": "樟",
+              "pinyin": "zhāng",
+              "audio": "zhang1"
+            },
+            {
+              "character": "杠",
+              "pinyin": "gàng",
+              "audio": "gang4"
+            },
+            {
+              "character": "狡",
+              "pinyin": "jiǎo",
+              "audio": "jiao3"
+            },
+            {
+              "character": "猾",
+              "pinyin": "huá",
+              "audio": "hua2"
+            }
+          ],
+          "write": []
+        }
+      ]
+    },
+    {
+      "id": "unit-3",
+      "title": "第三单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-9",
+          "number": 9,
+          "title": "古诗三首",
+          "recognize": [
+            {
+              "character": "暮",
+              "pinyin": "mù",
+              "audio": "mu4"
+            },
+            {
+              "character": "瑟",
+              "pinyin": "sè",
+              "audio": "se4"
+            },
+            {
+              "character": "缘",
+              "pinyin": "yuán",
+              "audio": "yuan2"
+            },
+            {
+              "character": "降",
+              "pinyin": "xiáng",
+              "audio": "xiang2",
+              "counted": false
+            },
+            {
+              "character": "骚",
+              "pinyin": "sāo",
+              "audio": "sao1"
+            },
+            {
+              "character": "逊",
+              "pinyin": "xùn",
+              "audio": "xun4"
+            },
+            {
+              "character": "输",
+              "pinyin": "shū",
+              "audio": "shu1"
+            }
+          ],
+          "write": [
+            {
+              "character": "暮",
+              "pinyin": "mù",
+              "audio": "mu4"
+            },
+            {
+              "character": "吟",
+              "pinyin": "yín",
+              "audio": "yin2"
+            },
+            {
+              "character": "题",
+              "pinyin": "tí",
+              "audio": "ti2"
+            },
+            {
+              "character": "侧",
+              "pinyin": "cè",
+              "audio": "ce4"
+            },
+            {
+              "character": "峰",
+              "pinyin": "fēng",
+              "audio": "feng1"
+            },
+            {
+              "character": "庐",
+              "pinyin": "lú",
+              "audio": "lu2"
+            },
+            {
+              "character": "缘",
+              "pinyin": "yuán",
+              "audio": "yuan2"
+            },
+            {
+              "character": "降",
+              "pinyin": "xiáng",
+              "audio": "xiang2"
+            },
+            {
+              "character": "费",
+              "pinyin": "fèi",
+              "audio": "fei4"
+            },
+            {
+              "character": "须",
+              "pinyin": "xū",
+              "audio": "xu1"
+            },
+            {
+              "character": "逊",
+              "pinyin": "xùn",
+              "audio": "xun4"
+            },
+            {
+              "character": "输",
+              "pinyin": "shū",
+              "audio": "shu1"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-10",
+          "number": 10,
+          "title": "爬山虎的脚",
+          "recognize": [
+            {
+              "character": "均",
+              "pinyin": "jūn",
+              "audio": "jun1"
+            },
+            {
+              "character": "柄",
+              "pinyin": "bǐng",
+              "audio": "bing3"
+            },
+            {
+              "character": "蜗",
+              "pinyin": "wō",
+              "audio": "wo1"
+            },
+            {
+              "character": "曲",
+              "pinyin": "qū",
+              "audio": "qu1",
+              "counted": false
+            },
+            {
+              "character": "萎",
+              "pinyin": "wěi",
+              "audio": "wei3"
+            }
+          ],
+          "write": [
+            {
+              "character": "虎",
+              "pinyin": "hǔ",
+              "audio": "hu3"
+            },
+            {
+              "character": "操",
+              "pinyin": "cāo",
+              "audio": "cao1"
+            },
+            {
+              "character": "占",
+              "pinyin": "zhàn",
+              "audio": "zhan4"
+            },
+            {
+              "character": "嫩",
+              "pinyin": "nèn",
+              "audio": "nen4"
+            },
+            {
+              "character": "顺",
+              "pinyin": "shùn",
+              "audio": "shun4"
+            },
+            {
+              "character": "均",
+              "pinyin": "jūn",
+              "audio": "jun1"
+            },
+            {
+              "character": "叠",
+              "pinyin": "dié",
+              "audio": "die2"
+            },
+            {
+              "character": "隙",
+              "pinyin": "xì",
+              "audio": "xi4"
+            },
+            {
+              "character": "茎",
+              "pinyin": "jīng",
+              "audio": "jing1"
+            },
+            {
+              "character": "柄",
+              "pinyin": "bǐng",
+              "audio": "bing3"
+            },
+            {
+              "character": "萎",
+              "pinyin": "wěi",
+              "audio": "wei3"
+            },
+            {
+              "character": "瞧",
+              "pinyin": "qiáo",
+              "audio": "qiao2"
+            },
+            {
+              "character": "固",
+              "pinyin": "gù",
+              "audio": "gu4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-11",
+          "number": 11,
+          "title": "蟋蟀的住宅",
+          "recognize": [
+            {
+              "character": "宅",
+              "pinyin": "zhái",
+              "audio": "zhai2"
+            },
+            {
+              "character": "隐",
+              "pinyin": "yǐn",
+              "audio": "yin3"
+            },
+            {
+              "character": "毫",
+              "pinyin": "háo",
+              "audio": "hao2"
+            },
+            {
+              "character": "慎",
+              "pinyin": "shèn",
+              "audio": "shen4"
+            },
+            {
+              "character": "址",
+              "pinyin": "zhǐ",
+              "audio": "zhi3"
+            },
+            {
+              "character": "良",
+              "pinyin": "liáng",
+              "audio": "liang2"
+            },
+            {
+              "character": "掘",
+              "pinyin": "jué",
+              "audio": "jue2"
+            },
+            {
+              "character": "搜",
+              "pinyin": "sōu",
+              "audio": "sou1"
+            },
+            {
+              "character": "倾",
+              "pinyin": "qīng",
+              "audio": "qing1"
+            },
+            {
+              "character": "骤",
+              "pinyin": "zhòu",
+              "audio": "zhou4"
+            },
+            {
+              "character": "置",
+              "pinyin": "zhì",
+              "audio": "zhi4"
+            },
+            {
+              "character": "抛",
+              "pinyin": "pāo",
+              "audio": "pao1"
+            }
+          ],
+          "write": [
+            {
+              "character": "宅",
+              "pinyin": "zhái",
+              "audio": "zhai2"
+            },
+            {
+              "character": "临",
+              "pinyin": "lín",
+              "audio": "lin2"
+            },
+            {
+              "character": "慎",
+              "pinyin": "shèn",
+              "audio": "shen4"
+            },
+            {
+              "character": "选",
+              "pinyin": "xuǎn",
+              "audio": "xuan3"
+            },
+            {
+              "character": "择",
+              "pinyin": "zé",
+              "audio": "ze2"
+            },
+            {
+              "character": "址",
+              "pinyin": "zhǐ",
+              "audio": "zhi3"
+            },
+            {
+              "character": "良",
+              "pinyin": "liáng",
+              "audio": "liang2"
+            },
+            {
+              "character": "穴",
+              "pinyin": "xué",
+              "audio": "xue2"
+            },
+            {
+              "character": "厅",
+              "pinyin": "tīng",
+              "audio": "ting1"
+            },
+            {
+              "character": "卧",
+              "pinyin": "wò",
+              "audio": "wo4"
+            },
+            {
+              "character": "专",
+              "pinyin": "zhuān",
+              "audio": "zhuan1"
+            },
+            {
+              "character": "卫",
+              "pinyin": "wèi",
+              "audio": "wei4"
+            },
+            {
+              "character": "较",
+              "pinyin": "jiào",
+              "audio": "jiao4"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unit-4",
+      "title": "第四单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-12",
+          "number": 12,
+          "title": "盘古开天地",
+          "recognize": [
+            {
+              "character": "劈",
+              "pinyin": "pī",
+              "audio": "pi1"
+            },
+            {
+              "character": "缓",
+              "pinyin": "huǎn",
+              "audio": "huan3"
+            },
+            {
+              "character": "浊",
+              "pinyin": "zhuó",
+              "audio": "zhuo2"
+            },
+            {
+              "character": "丈",
+              "pinyin": "zhàng",
+              "audio": "zhang4"
+            },
+            {
+              "character": "隆",
+              "pinyin": "lóng",
+              "audio": "long2"
+            },
+            {
+              "character": "肢",
+              "pinyin": "zhī",
+              "audio": "zhi1"
+            },
+            {
+              "character": "躯",
+              "pinyin": "qū",
+              "audio": "qu1"
+            },
+            {
+              "character": "液",
+              "pinyin": "yè",
+              "audio": "ye4"
+            }
+          ],
+          "write": [
+            {
+              "character": "睁",
+              "pinyin": "zhēng",
+              "audio": "zheng1"
+            },
+            {
+              "character": "翻",
+              "pinyin": "fān",
+              "audio": "fan1"
+            },
+            {
+              "character": "斧",
+              "pinyin": "fǔ",
+              "audio": "fu3"
+            },
+            {
+              "character": "劈",
+              "pinyin": "pī",
+              "audio": "pi1"
+            },
+            {
+              "character": "缓",
+              "pinyin": "huǎn",
+              "audio": "huan3"
+            },
+            {
+              "character": "浊",
+              "pinyin": "zhuó",
+              "audio": "zhuo2"
+            },
+            {
+              "character": "丈",
+              "pinyin": "zhàng",
+              "audio": "zhang4"
+            },
+            {
+              "character": "撑",
+              "pinyin": "chēng",
+              "audio": "cheng1"
+            },
+            {
+              "character": "竭",
+              "pinyin": "jié",
+              "audio": "jie2"
+            },
+            {
+              "character": "累",
+              "pinyin": "lèi",
+              "audio": "lei4"
+            },
+            {
+              "character": "血",
+              "pinyin": "xuè",
+              "audio": "xue4"
+            },
+            {
+              "character": "液",
+              "pinyin": "yè",
+              "audio": "ye4"
+            },
+            {
+              "character": "奔",
+              "pinyin": "bēn",
+              "audio": "ben1"
+            },
+            {
+              "character": "茂",
+              "pinyin": "mào",
+              "audio": "mao4"
+            },
+            {
+              "character": "滋",
+              "pinyin": "zī",
+              "audio": "zi1"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-13",
+          "number": 13,
+          "title": "精卫填海",
+          "recognize": [
+            {
+              "character": "帝",
+              "pinyin": "dì",
+              "audio": "di4"
+            },
+            {
+              "character": "少",
+              "pinyin": "shào",
+              "audio": "shao4",
+              "counted": false
+            },
+            {
+              "character": "曰",
+              "pinyin": "yuē",
+              "audio": "yue1"
+            },
+            {
+              "character": "溺",
+              "pinyin": "nì",
+              "audio": "ni4"
+            },
+            {
+              "character": "返",
+              "pinyin": "fǎn",
+              "audio": "fan3"
+            }
+          ],
+          "write": [
+            {
+              "character": "帝",
+              "pinyin": "dì",
+              "audio": "di4"
+            },
+            {
+              "character": "曰",
+              "pinyin": "yuē",
+              "audio": "yue1"
+            },
+            {
+              "character": "溺",
+              "pinyin": "nì",
+              "audio": "ni4"
+            },
+            {
+              "character": "返",
+              "pinyin": "fǎn",
+              "audio": "fan3"
+            },
+            {
+              "character": "衔",
+              "pinyin": "xián",
+              "audio": "xian2"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-14",
+          "number": 14,
+          "title": "普罗米修斯",
+          "recognize": [
+            {
+              "character": "斯",
+              "pinyin": "sī",
+              "audio": "si1"
+            },
+            {
+              "character": "惨",
+              "pinyin": "cǎn",
+              "audio": "can3"
+            },
+            {
+              "character": "盗",
+              "pinyin": "dào",
+              "audio": "dao4"
+            },
+            {
+              "character": "驰",
+              "pinyin": "chí",
+              "audio": "chi2"
+            },
+            {
+              "character": "还",
+              "pinyin": "huán",
+              "audio": "huan2",
+              "counted": false
+            },
+            {
+              "character": "恕",
+              "pinyin": "shù",
+              "audio": "shu4"
+            },
+            {
+              "character": "坚",
+              "pinyin": "jiān",
+              "audio": "jian1"
+            },
+            {
+              "character": "押",
+              "pinyin": "yā",
+              "audio": "ya1"
+            },
+            {
+              "character": "锁",
+              "pinyin": "suǒ",
+              "audio": "suo3"
+            },
+            {
+              "character": "遭",
+              "pinyin": "zāo",
+              "audio": "zao1"
+            },
+            {
+              "character": "恶",
+              "pinyin": "è",
+              "audio": "e4"
+            },
+            {
+              "character": "脏",
+              "pinyin": "zàng",
+              "audio": "zang4",
+              "counted": false
+            },
+            {
+              "character": "愤",
+              "pinyin": "fèn",
+              "audio": "fen4"
+            }
+          ],
+          "write": [
+            {
+              "character": "悲",
+              "pinyin": "bēi",
+              "audio": "bei1"
+            },
+            {
+              "character": "惨",
+              "pinyin": "cǎn",
+              "audio": "can3"
+            },
+            {
+              "character": "兽",
+              "pinyin": "shòu",
+              "audio": "shou4"
+            },
+            {
+              "character": "佩",
+              "pinyin": "pèi",
+              "audio": "pei4"
+            },
+            {
+              "character": "坚",
+              "pinyin": "jiān",
+              "audio": "jian1"
+            },
+            {
+              "character": "违",
+              "pinyin": "wéi",
+              "audio": "wei2"
+            },
+            {
+              "character": "抗",
+              "pinyin": "kàng",
+              "audio": "kang4"
+            },
+            {
+              "character": "环",
+              "pinyin": "huán",
+              "audio": "huan2"
+            },
+            {
+              "character": "锁",
+              "pinyin": "suǒ",
+              "audio": "suo3"
+            },
+            {
+              "character": "既",
+              "pinyin": "jì",
+              "audio": "ji4"
+            },
+            {
+              "character": "狠",
+              "pinyin": "hěn",
+              "audio": "hen3"
+            },
+            {
+              "character": "著",
+              "pinyin": "zhù",
+              "audio": "zhu4"
+            },
+            {
+              "character": "愤",
+              "pinyin": "fèn",
+              "audio": "fen4"
+            },
+            {
+              "character": "获",
+              "pinyin": "huò",
+              "audio": "huo4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-15",
+          "number": 15,
+          "title": "女娲补天",
+          "recognize": [
+            {
+              "character": "措",
+              "pinyin": "cuò",
+              "audio": "cuo4"
+            },
+            {
+              "character": "混",
+              "pinyin": "hùn",
+              "audio": "hun4"
+            },
+            {
+              "character": "项",
+              "pinyin": "xiàng",
+              "audio": "xiang4"
+            },
+            {
+              "character": "熄",
+              "pinyin": "xī",
+              "audio": "xi1"
+            },
+            {
+              "character": "浆",
+              "pinyin": "jiāng",
+              "audio": "jiang1"
+            },
+            {
+              "character": "塌",
+              "pinyin": "tā",
+              "audio": "ta1"
+            },
+            {
+              "character": "杀",
+              "pinyin": "shā",
+              "audio": "sha1"
+            },
+            {
+              "character": "颂",
+              "pinyin": "sòng",
+              "audio": "song4"
+            },
+            {
+              "character": "绩",
+              "pinyin": "jì",
+              "audio": "ji4"
+            }
+          ],
+          "write": []
+        },
+        {
+          "kind": "garden",
+          "id": "garden-4",
+          "title": "语文园地四",
+          "recognize": [
+            {
+              "character": "圃",
+              "pinyin": "pǔ",
+              "audio": "pu3"
+            },
+            {
+              "character": "卉",
+              "pinyin": "huì",
+              "audio": "hui4"
+            },
+            {
+              "character": "蕾",
+              "pinyin": "lěi",
+              "audio": "lei3"
+            },
+            {
+              "character": "蕊",
+              "pinyin": "ruǐ",
+              "audio": "rui3"
+            },
+            {
+              "character": "玫",
+              "pinyin": "méi",
+              "audio": "mei2"
+            },
+            {
+              "character": "茉",
+              "pinyin": "mò",
+              "audio": "mo4"
+            },
+            {
+              "character": "莉",
+              "pinyin": "lì",
+              "audio": "li4"
+            },
+            {
+              "character": "牡",
+              "pinyin": "mǔ",
+              "audio": "mu3"
+            },
+            {
+              "character": "丹",
+              "pinyin": "dān",
+              "audio": "dan1"
+            },
+            {
+              "character": "棠",
+              "pinyin": "táng",
+              "audio": "tang2"
+            }
+          ],
+          "write": []
+        }
+      ]
+    },
+    {
+      "id": "unit-5",
+      "title": "第五单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-16",
+          "number": 16,
+          "title": "麻雀",
+          "recognize": [
+            {
+              "character": "嗅",
+              "pinyin": "xiù",
+              "audio": "xiu4"
+            },
+            {
+              "character": "奈",
+              "pinyin": "nài",
+              "audio": "nai4"
+            },
+            {
+              "character": "拯",
+              "pinyin": "zhěng",
+              "audio": "zheng3"
+            },
+            {
+              "character": "嘶",
+              "pinyin": "sī",
+              "audio": "si1"
+            },
+            {
+              "character": "哑",
+              "pinyin": "yǎ",
+              "audio": "ya3"
+            },
+            {
+              "character": "庞",
+              "pinyin": "páng",
+              "audio": "pang2"
+            }
+          ],
+          "write": [
+            {
+              "character": "嗅",
+              "pinyin": "xiù",
+              "audio": "xiu4"
+            },
+            {
+              "character": "呆",
+              "pinyin": "dāi",
+              "audio": "dai1"
+            },
+            {
+              "character": "奈",
+              "pinyin": "nài",
+              "audio": "nai4"
+            },
+            {
+              "character": "巢",
+              "pinyin": "cháo",
+              "audio": "chao2"
+            },
+            {
+              "character": "齿",
+              "pinyin": "chǐ",
+              "audio": "chi3"
+            },
+            {
+              "character": "躯",
+              "pinyin": "qū",
+              "audio": "qu1"
+            },
+            {
+              "character": "掩",
+              "pinyin": "yǎn",
+              "audio": "yan3"
+            },
+            {
+              "character": "护",
+              "pinyin": "hù",
+              "audio": "hu4"
+            },
+            {
+              "character": "幼",
+              "pinyin": "yòu",
+              "audio": "you4"
+            },
+            {
+              "character": "搏",
+              "pinyin": "bó",
+              "audio": "bo2"
+            },
+            {
+              "character": "庞",
+              "pinyin": "páng",
+              "audio": "pang2"
+            },
+            {
+              "character": "量",
+              "pinyin": "liàng",
+              "audio": "liang4"
+            },
+            {
+              "character": "愣",
+              "pinyin": "lèng",
+              "audio": "leng4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-17",
+          "number": 17,
+          "title": "爬天都峰",
+          "recognize": [
+            {
+              "character": "级",
+              "pinyin": "jí",
+              "audio": "ji2"
+            },
+            {
+              "character": "链",
+              "pinyin": "liàn",
+              "audio": "lian4"
+            },
+            {
+              "character": "攀",
+              "pinyin": "pān",
+              "audio": "pan1"
+            },
+            {
+              "character": "相",
+              "pinyin": "xiàng",
+              "audio": "xiang4",
+              "counted": false
+            },
+            {
+              "character": "辫",
+              "pinyin": "biàn",
+              "audio": "bian4"
+            },
+            {
+              "character": "呵",
+              "pinyin": "hē",
+              "audio": "he1"
+            }
+          ],
+          "write": [
+            {
+              "character": "级",
+              "pinyin": "jí",
+              "audio": "ji2"
+            },
+            {
+              "character": "链",
+              "pinyin": "liàn",
+              "audio": "lian4"
+            },
+            {
+              "character": "颤",
+              "pinyin": "chàn",
+              "audio": "chan4"
+            },
+            {
+              "character": "攀",
+              "pinyin": "pān",
+              "audio": "pan1"
+            },
+            {
+              "character": "猴",
+              "pinyin": "hóu",
+              "audio": "hou2"
+            },
+            {
+              "character": "念",
+              "pinyin": "niàn",
+              "audio": "nian4"
+            },
+            {
+              "character": "辫",
+              "pinyin": "biàn",
+              "audio": "bian4"
+            },
+            {
+              "character": "呵",
+              "pinyin": "hē",
+              "audio": "he1"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unit-6",
+      "title": "第六单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-18",
+          "number": 18,
+          "title": "牛和鹅",
+          "recognize": [
+            {
+              "character": "谓",
+              "pinyin": "wèi",
+              "audio": "wei4"
+            },
+            {
+              "character": "拳",
+              "pinyin": "quán",
+              "audio": "quan2"
+            },
+            {
+              "character": "捶",
+              "pinyin": "chuí",
+              "audio": "chui2"
+            },
+            {
+              "character": "顽",
+              "pinyin": "wán",
+              "audio": "wan2"
+            },
+            {
+              "character": "吁",
+              "pinyin": "yū",
+              "audio": "yu1",
+              "counted": false
+            },
+            {
+              "character": "襟",
+              "pinyin": "jīn",
+              "audio": "jin1"
+            },
+            {
+              "character": "膊",
+              "pinyin": "bó",
+              "audio": "bo2"
+            },
+            {
+              "character": "瓶",
+              "pinyin": "píng",
+              "audio": "ping2"
+            },
+            {
+              "character": "怖",
+              "pinyin": "bù",
+              "audio": "bu4"
+            },
+            {
+              "character": "凭",
+              "pinyin": "píng",
+              "audio": "ping2"
+            },
+            {
+              "character": "欺",
+              "pinyin": "qī",
+              "audio": "qi1"
+            },
+            {
+              "character": "掐",
+              "pinyin": "qiā",
+              "audio": "qia1"
+            }
+          ],
+          "write": [
+            {
+              "character": "摸",
+              "pinyin": "mō",
+              "audio": "mo1"
+            },
+            {
+              "character": "甚",
+              "pinyin": "shèn",
+              "audio": "shen4"
+            },
+            {
+              "character": "跪",
+              "pinyin": "guì",
+              "audio": "gui4"
+            },
+            {
+              "character": "捶",
+              "pinyin": "chuí",
+              "audio": "chui2"
+            },
+            {
+              "character": "绕",
+              "pinyin": "rào",
+              "audio": "rao4"
+            },
+            {
+              "character": "顽",
+              "pinyin": "wán",
+              "audio": "wan2"
+            },
+            {
+              "character": "脖",
+              "pinyin": "bó",
+              "audio": "bo2"
+            },
+            {
+              "character": "脱",
+              "pinyin": "tuō",
+              "audio": "tuo1"
+            },
+            {
+              "character": "概",
+              "pinyin": "gài",
+              "audio": "gai4"
+            },
+            {
+              "character": "惹",
+              "pinyin": "rě",
+              "audio": "re3"
+            },
+            {
+              "character": "昏",
+              "pinyin": "hūn",
+              "audio": "hun1"
+            },
+            {
+              "character": "握",
+              "pinyin": "wò",
+              "audio": "wo4"
+            },
+            {
+              "character": "摔",
+              "pinyin": "shuāi",
+              "audio": "shuai1"
+            },
+            {
+              "character": "凭",
+              "pinyin": "píng",
+              "audio": "ping2"
+            },
+            {
+              "character": "掐",
+              "pinyin": "qiā",
+              "audio": "qia1"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-19",
+          "number": 19,
+          "title": "一只窝囊的大老虎",
+          "recognize": [
+            {
+              "character": "囊",
+              "pinyin": "náng",
+              "audio": "nang2"
+            },
+            {
+              "character": "露",
+              "pinyin": "lòu",
+              "audio": "lou4",
+              "counted": false
+            },
+            {
+              "character": "羡",
+              "pinyin": "xiàn",
+              "audio": "xian4"
+            },
+            {
+              "character": "角",
+              "pinyin": "jué",
+              "audio": "jue2",
+              "counted": false
+            },
+            {
+              "character": "殷",
+              "pinyin": "yīn",
+              "audio": "yin1"
+            },
+            {
+              "character": "撇",
+              "pinyin": "piě",
+              "audio": "pie3"
+            },
+            {
+              "character": "啊",
+              "pinyin": "ā",
+              "audio": "a1",
+              "counted": false
+            },
+            {
+              "character": "霉",
+              "pinyin": "méi",
+              "audio": "mei2"
+            },
+            {
+              "character": "亏",
+              "pinyin": "kuī",
+              "audio": "kui1"
+            },
+            {
+              "character": "哄",
+              "pinyin": "hōng",
+              "audio": "hong1",
+              "counted": false
+            },
+            {
+              "character": "拙",
+              "pinyin": "zhuō",
+              "audio": "zhuo1"
+            },
+            {
+              "character": "唉",
+              "pinyin": "āi",
+              "audio": "ai1",
+              "counted": false
+            },
+            {
+              "character": "砸",
+              "pinyin": "zá",
+              "audio": "za2"
+            }
+          ],
+          "write": [
+            {
+              "character": "殷",
+              "pinyin": "yīn",
+              "audio": "yin1"
+            },
+            {
+              "character": "段",
+              "pinyin": "duàn",
+              "audio": "duan4"
+            },
+            {
+              "character": "俩",
+              "pinyin": "liǎ",
+              "audio": "lia3"
+            },
+            {
+              "character": "练",
+              "pinyin": "liàn",
+              "audio": "lian4"
+            },
+            {
+              "character": "套",
+              "pinyin": "tào",
+              "audio": "tao4"
+            },
+            {
+              "character": "裤",
+              "pinyin": "kù",
+              "audio": "ku4"
+            },
+            {
+              "character": "逃",
+              "pinyin": "táo",
+              "audio": "tao2"
+            },
+            {
+              "character": "亏",
+              "pinyin": "kuī",
+              "audio": "kui1"
+            },
+            {
+              "character": "挖",
+              "pinyin": "wā",
+              "audio": "wa1"
+            },
+            {
+              "character": "撤",
+              "pinyin": "chè",
+              "audio": "che4"
+            },
+            {
+              "character": "堂",
+              "pinyin": "táng",
+              "audio": "tang2"
+            },
+            {
+              "character": "砸",
+              "pinyin": "zá",
+              "audio": "za2"
+            },
+            {
+              "character": "锅",
+              "pinyin": "guō",
+              "audio": "guo1"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-20",
+          "number": 20,
+          "title": "陀螺",
+          "recognize": [
+            {
+              "character": "钉",
+              "pinyin": "dīng",
+              "audio": "ding1",
+              "counted": false
+            },
+            {
+              "character": "兵",
+              "pinyin": "bīng",
+              "audio": "bing1"
+            },
+            {
+              "character": "败",
+              "pinyin": "bài",
+              "audio": "bai4"
+            },
+            {
+              "character": "恨",
+              "pinyin": "hèn",
+              "audio": "hen4"
+            },
+            {
+              "character": "帅",
+              "pinyin": "shuài",
+              "audio": "shuai4"
+            },
+            {
+              "character": "彻",
+              "pinyin": "chè",
+              "audio": "che4"
+            },
+            {
+              "character": "溃",
+              "pinyin": "kuì",
+              "audio": "kui4"
+            },
+            {
+              "character": "誉",
+              "pinyin": "yù",
+              "audio": "yu4"
+            },
+            {
+              "character": "丑",
+              "pinyin": "chǒu",
+              "audio": "chou3"
+            },
+            {
+              "character": "豪",
+              "pinyin": "háo",
+              "audio": "hao2"
+            }
+          ],
+          "write": [
+            {
+              "character": "否",
+              "pinyin": "fǒu",
+              "audio": "fou3"
+            },
+            {
+              "character": "旋",
+              "pinyin": "xuán",
+              "audio": "xuan2"
+            },
+            {
+              "character": "况",
+              "pinyin": "kuàng",
+              "audio": "kuang4"
+            },
+            {
+              "character": "兵",
+              "pinyin": "bīng",
+              "audio": "bing1"
+            },
+            {
+              "character": "败",
+              "pinyin": "bài",
+              "audio": "bai4"
+            },
+            {
+              "character": "椅",
+              "pinyin": "yǐ",
+              "audio": "yi3"
+            },
+            {
+              "character": "仍",
+              "pinyin": "réng",
+              "audio": "reng2"
+            },
+            {
+              "character": "尤",
+              "pinyin": "yóu",
+              "audio": "you2"
+            },
+            {
+              "character": "恨",
+              "pinyin": "hèn",
+              "audio": "hen4"
+            },
+            {
+              "character": "帅",
+              "pinyin": "shuài",
+              "audio": "shuai4"
+            },
+            {
+              "character": "预",
+              "pinyin": "yù",
+              "audio": "yu4"
+            },
+            {
+              "character": "溃",
+              "pinyin": "kuì",
+              "audio": "kui4"
+            },
+            {
+              "character": "品",
+              "pinyin": "pǐn",
+              "audio": "pin3"
+            },
+            {
+              "character": "丑",
+              "pinyin": "chǒu",
+              "audio": "chou3"
+            },
+            {
+              "character": "豪",
+              "pinyin": "háo",
+              "audio": "hao2"
+            }
+          ]
+        },
+        {
+          "kind": "garden",
+          "id": "garden-6",
+          "title": "语文园地六",
+          "recognize": [
+            {
+              "character": "韭",
+              "pinyin": "jiǔ",
+              "audio": "jiu3"
+            },
+            {
+              "character": "芥",
+              "pinyin": "jiè",
+              "audio": "jie4"
+            },
+            {
+              "character": "芹",
+              "pinyin": "qín",
+              "audio": "qin2"
+            },
+            {
+              "character": "蒜",
+              "pinyin": "suàn",
+              "audio": "suan4"
+            },
+            {
+              "character": "椒",
+              "pinyin": "jiāo",
+              "audio": "jiao1"
+            },
+            {
+              "character": "藕",
+              "pinyin": "ǒu",
+              "audio": "ou3"
+            },
+            {
+              "character": "薯",
+              "pinyin": "shǔ",
+              "audio": "shu3"
+            },
+            {
+              "character": "芋",
+              "pinyin": "yù",
+              "audio": "yu4"
+            }
+          ],
+          "write": []
+        }
+      ]
+    },
+    {
+      "id": "unit-7",
+      "title": "第七单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-21",
+          "number": 21,
+          "title": "古诗三首",
+          "recognize": [
+            {
+              "character": "塞",
+              "pinyin": "sài",
+              "audio": "sai4"
+            },
+            {
+              "character": "秦",
+              "pinyin": "qín",
+              "audio": "qin2"
+            },
+            {
+              "character": "征",
+              "pinyin": "zhēng",
+              "audio": "zheng1"
+            },
+            {
+              "character": "将",
+              "pinyin": "jiàng",
+              "audio": "jiang4",
+              "counted": false
+            },
+            {
+              "character": "杰",
+              "pinyin": "jié",
+              "audio": "jie2"
+            }
+          ],
+          "write": [
+            {
+              "character": "塞",
+              "pinyin": "sài",
+              "audio": "sai4"
+            },
+            {
+              "character": "秦",
+              "pinyin": "qín",
+              "audio": "qin2"
+            },
+            {
+              "character": "征",
+              "pinyin": "zhēng",
+              "audio": "zheng1"
+            },
+            {
+              "character": "词",
+              "pinyin": "cí",
+              "audio": "ci2"
+            },
+            {
+              "character": "催",
+              "pinyin": "cuī",
+              "audio": "cui1"
+            },
+            {
+              "character": "醉",
+              "pinyin": "zuì",
+              "audio": "zui4"
+            },
+            {
+              "character": "杰",
+              "pinyin": "jié",
+              "audio": "jie2"
+            },
+            {
+              "character": "亦",
+              "pinyin": "yì",
+              "audio": "yi4"
+            },
+            {
+              "character": "雄",
+              "pinyin": "xióng",
+              "audio": "xiong2"
+            },
+            {
+              "character": "项",
+              "pinyin": "xiàng",
+              "audio": "xiang4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-22",
+          "number": 22,
+          "title": "为中华之崛起而读书",
+          "recognize": [
+            {
+              "character": "崛",
+              "pinyin": "jué",
+              "audio": "jue2"
+            },
+            {
+              "character": "范",
+              "pinyin": "fàn",
+              "audio": "fan4"
+            },
+            {
+              "character": "魏",
+              "pinyin": "wèi",
+              "audio": "wei4"
+            },
+            {
+              "character": "晰",
+              "pinyin": "xī",
+              "audio": "xi1"
+            },
+            {
+              "character": "效",
+              "pinyin": "xiào",
+              "audio": "xiao4"
+            },
+            {
+              "character": "淮",
+              "pinyin": "huái",
+              "audio": "huai2"
+            },
+            {
+              "character": "惑",
+              "pinyin": "huò",
+              "audio": "huo4"
+            },
+            {
+              "character": "惩",
+              "pinyin": "chéng",
+              "audio": "cheng2"
+            },
+            {
+              "character": "斥",
+              "pinyin": "chì",
+              "audio": "chi4"
+            }
+          ],
+          "write": [
+            {
+              "character": "肃",
+              "pinyin": "sù",
+              "audio": "su4"
+            },
+            {
+              "character": "晰",
+              "pinyin": "xī",
+              "audio": "xi1"
+            },
+            {
+              "character": "振",
+              "pinyin": "zhèn",
+              "audio": "zhen4"
+            },
+            {
+              "character": "胸",
+              "pinyin": "xiōng",
+              "audio": "xiong1"
+            },
+            {
+              "character": "怀",
+              "pinyin": "huái",
+              "audio": "huai2"
+            },
+            {
+              "character": "赞",
+              "pinyin": "zàn",
+              "audio": "zan4"
+            },
+            {
+              "character": "效",
+              "pinyin": "xiào",
+              "audio": "xiao4"
+            },
+            {
+              "character": "凡",
+              "pinyin": "fán",
+              "audio": "fan2"
+            },
+            {
+              "character": "顾",
+              "pinyin": "gù",
+              "audio": "gu4"
+            },
+            {
+              "character": "训",
+              "pinyin": "xùn",
+              "audio": "xun4"
+            },
+            {
+              "character": "斥",
+              "pinyin": "chì",
+              "audio": "chi4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-23",
+          "number": 23,
+          "title": "梅兰芳蓄须",
+          "recognize": [
+            {
+              "character": "蓄",
+              "pinyin": "xù",
+              "audio": "xu4"
+            },
+            {
+              "character": "迫",
+              "pinyin": "pò",
+              "audio": "po4"
+            },
+            {
+              "character": "租",
+              "pinyin": "zū",
+              "audio": "zu1"
+            },
+            {
+              "character": "纠",
+              "pinyin": "jiū",
+              "audio": "jiu1"
+            },
+            {
+              "character": "缠",
+              "pinyin": "chán",
+              "audio": "chan2"
+            },
+            {
+              "character": "邀",
+              "pinyin": "yāo",
+              "audio": "yao1"
+            },
+            {
+              "character": "扰",
+              "pinyin": "rǎo",
+              "audio": "rao3"
+            },
+            {
+              "character": "拒",
+              "pinyin": "jù",
+              "audio": "ju4"
+            },
+            {
+              "character": "签",
+              "pinyin": "qiān",
+              "audio": "qian1"
+            },
+            {
+              "character": "订",
+              "pinyin": "dìng",
+              "audio": "ding4"
+            },
+            {
+              "character": "宁",
+              "pinyin": "nìng",
+              "audio": "ning4",
+              "counted": false
+            },
+            {
+              "character": "要",
+              "pinyin": "yāo",
+              "audio": "yao1",
+              "counted": false
+            },
+            {
+              "character": "妄",
+              "pinyin": "wàng",
+              "audio": "wang4"
+            }
+          ],
+          "write": []
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-24",
+          "number": 24,
+          "title": "延安，我把你追寻",
+          "recognize": [
+            {
+              "character": "延",
+              "pinyin": "yán",
+              "audio": "yan2"
+            },
+            {
+              "character": "昔",
+              "pinyin": "xī",
+              "audio": "xi1"
+            },
+            {
+              "character": "茅",
+              "pinyin": "máo",
+              "audio": "mao2"
+            },
+            {
+              "character": "炕",
+              "pinyin": "kàng",
+              "audio": "kang4"
+            },
+            {
+              "character": "旦",
+              "pinyin": "dàn",
+              "audio": "dan4"
+            },
+            {
+              "character": "媚",
+              "pinyin": "mèi",
+              "audio": "mei4"
+            }
+          ],
+          "write": []
+        }
+      ]
+    },
+    {
+      "id": "unit-8",
+      "title": "第八单元",
+      "lessons": [
+        {
+          "kind": "lesson",
+          "id": "lesson-25",
+          "number": 25,
+          "title": "王戎不取道旁李",
+          "recognize": [
+            {
+              "character": "戎",
+              "pinyin": "róng",
+              "audio": "rong2"
+            },
+            {
+              "character": "诸",
+              "pinyin": "zhū",
+              "audio": "zhu1"
+            },
+            {
+              "character": "竞",
+              "pinyin": "jìng",
+              "audio": "jing4"
+            },
+            {
+              "character": "唯",
+              "pinyin": "wéi",
+              "audio": "wei2"
+            }
+          ],
+          "write": [
+            {
+              "character": "戎",
+              "pinyin": "róng",
+              "audio": "rong2"
+            },
+            {
+              "character": "尝",
+              "pinyin": "cháng",
+              "audio": "chang2"
+            },
+            {
+              "character": "诸",
+              "pinyin": "zhū",
+              "audio": "zhu1"
+            },
+            {
+              "character": "竞",
+              "pinyin": "jìng",
+              "audio": "jing4"
+            },
+            {
+              "character": "唯",
+              "pinyin": "wéi",
+              "audio": "wei2"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-26",
+          "number": 26,
+          "title": "西门豹治邺",
+          "recognize": [
+            {
+              "character": "豹",
+              "pinyin": "bào",
+              "audio": "bao4"
+            },
+            {
+              "character": "娶",
+              "pinyin": "qǔ",
+              "audio": "qu3"
+            },
+            {
+              "character": "媳",
+              "pinyin": "xí",
+              "audio": "xi2"
+            },
+            {
+              "character": "巫",
+              "pinyin": "wū",
+              "audio": "wu1"
+            },
+            {
+              "character": "绅",
+              "pinyin": "shēn",
+              "audio": "shen1"
+            },
+            {
+              "character": "旱",
+              "pinyin": "hàn",
+              "audio": "han4"
+            },
+            {
+              "character": "徒",
+              "pinyin": "tú",
+              "audio": "tu2"
+            },
+            {
+              "character": "吊",
+              "pinyin": "diào",
+              "audio": "diao4"
+            },
+            {
+              "character": "磕",
+              "pinyin": "kē",
+              "audio": "ke1"
+            },
+            {
+              "character": "凿",
+              "pinyin": "záo",
+              "audio": "zao2"
+            },
+            {
+              "character": "溉",
+              "pinyin": "gài",
+              "audio": "gai4"
+            }
+          ],
+          "write": [
+            {
+              "character": "豹",
+              "pinyin": "bào",
+              "audio": "bao4"
+            },
+            {
+              "character": "派",
+              "pinyin": "pài",
+              "audio": "pai4"
+            },
+            {
+              "character": "娶",
+              "pinyin": "qǔ",
+              "audio": "qu3"
+            },
+            {
+              "character": "媳",
+              "pinyin": "xí",
+              "audio": "xi2"
+            },
+            {
+              "character": "妇",
+              "pinyin": "fù",
+              "audio": "fu4"
+            },
+            {
+              "character": "淹",
+              "pinyin": "yān",
+              "audio": "yan1"
+            },
+            {
+              "character": "逼",
+              "pinyin": "bī",
+              "audio": "bi1"
+            },
+            {
+              "character": "浮",
+              "pinyin": "fú",
+              "audio": "fu2"
+            },
+            {
+              "character": "旱",
+              "pinyin": "hàn",
+              "audio": "han4"
+            },
+            {
+              "character": "徒",
+              "pinyin": "tú",
+              "audio": "tu2"
+            },
+            {
+              "character": "扔",
+              "pinyin": "rēng",
+              "audio": "reng1"
+            },
+            {
+              "character": "饶",
+              "pinyin": "ráo",
+              "audio": "rao2"
+            },
+            {
+              "character": "骗",
+              "pinyin": "piàn",
+              "audio": "pian4"
+            },
+            {
+              "character": "灌",
+              "pinyin": "guàn",
+              "audio": "guan4"
+            },
+            {
+              "character": "溉",
+              "pinyin": "gài",
+              "audio": "gai4"
+            }
+          ]
+        },
+        {
+          "kind": "lesson",
+          "id": "lesson-27",
+          "number": 27,
+          "title": "故事二则",
+          "recognize": [
+            {
+              "character": "拜",
+              "pinyin": "bài",
+              "audio": "bai4"
+            },
+            {
+              "character": "侯",
+              "pinyin": "hóu",
+              "audio": "hou2"
+            },
+            {
+              "character": "肤",
+              "pinyin": "fū",
+              "audio": "fu1"
+            },
+            {
+              "character": "扎",
+              "pinyin": "zhā",
+              "audio": "zha1",
+              "counted": false
+            },
+            {
+              "character": "剂",
+              "pinyin": "jì",
+              "audio": "ji4"
+            },
+            {
+              "character": "髓",
+              "pinyin": "suǐ",
+              "audio": "sui3"
+            },
+            {
+              "character": "纪",
+              "pinyin": "jǐ",
+              "audio": "ji3",
+              "counted": false
+            },
+            {
+              "character": "标",
+              "pinyin": "biāo",
+              "audio": "biao1"
+            }
+          ],
+          "write": []
+        },
+        {
+          "kind": "garden",
+          "id": "garden-8",
+          "title": "语文园地八",
+          "recognize": [
+            {
+              "character": "纲",
+              "pinyin": "gāng",
+              "audio": "gang1"
+            },
+            {
+              "character": "授",
+              "pinyin": "shòu",
+              "audio": "shou4"
+            },
+            {
+              "character": "揍",
+              "pinyin": "zòu",
+              "audio": "zou4"
+            },
+            {
+              "character": "键",
+              "pinyin": "jiàn",
+              "audio": "jian4"
+            },
+            {
+              "character": "谱",
+              "pinyin": "pǔ",
+              "audio": "pu3"
+            },
+            {
+              "character": "锈",
+              "pinyin": "xiù",
+              "audio": "xiu4"
+            },
+            {
+              "character": "沫",
+              "pinyin": "mò",
+              "audio": "mo4"
+            },
+            {
+              "character": "砖",
+              "pinyin": "zhuān",
+              "audio": "zhuan1"
+            },
+            {
+              "character": "矿",
+              "pinyin": "kuàng",
+              "audio": "kuang4"
+            },
+            {
+              "character": "综",
+              "pinyin": "zōng",
+              "audio": "zong1"
+            },
+            {
+              "character": "氧",
+              "pinyin": "yǎng",
+              "audio": "yang3"
+            },
+            {
+              "character": "俱",
+              "pinyin": "jù",
+              "audio": "ju4"
+            }
+          ],
+          "write": []
+        }
+      ]
+    }
+  ]
+}
