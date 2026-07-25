@@ -63,7 +63,7 @@ function hasValidMedianPoints(median) {
       && Number.isFinite(point[1]));
 }
 
-export function validateLibrary(curriculum, characters, audioIds) {
+export function validateLibrary(curriculum, characterDocument, audioIds) {
   const errors = [];
   if (!isRecord(curriculum)) {
     errors.push('curriculum: must be an object');
@@ -73,14 +73,39 @@ export function validateLibrary(curriculum, characters, audioIds) {
     errors.push('curriculum.units: must be an array');
     return errors;
   }
-  if (!isRecord(characters)) {
+  if (!isRecord(characterDocument)) {
     errors.push('characters: must be an object');
+    return errors;
+  }
+
+  if (characterDocument.schemaVersion !== 1) {
+    errors.push('characters.schemaVersion: must equal 1');
+  }
+
+  const notice = characterDocument.modificationNotice;
+  if (!isRecord(notice)) {
+    errors.push('characters.modificationNotice: must be an object');
+  } else {
+    for (const field of ['date', 'source', 'license']) {
+      if (!hasNonBlankString(notice[field])) {
+        errors.push(`characters.modificationNotice.${field}: must be a non-blank string`);
+      }
+    }
+    if (!Array.isArray(notice.changes)
+      || notice.changes.length === 0
+      || !notice.changes.every(hasNonBlankString)) {
+      errors.push('characters.modificationNotice.changes: must be a non-empty array of non-blank strings');
+    }
+  }
+
+  if (!isRecord(characterDocument.characters)) {
+    errors.push('characters.characters: must be an object');
     return errors;
   }
 
   const lessonIds = new Set();
   const unitIds = new Set();
-  const geometryByCharacter = characters;
+  const geometryByCharacter = characterDocument.characters;
   const availableAudioIds = audioIds instanceof Set ? audioIds : new Set(audioIds ?? []);
 
   for (const [unitIndex, unit] of curriculum.units.entries()) {

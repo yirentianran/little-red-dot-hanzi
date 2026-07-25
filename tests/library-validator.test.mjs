@@ -53,15 +53,40 @@ test('rejects malformed character geometry roots instead of treating them as emp
   }
 });
 
+test('rejects malformed character geometry document fields', () => {
+  const invalidDocument = clone(validCharacters);
+  invalidDocument.schemaVersion = 2;
+  invalidDocument.modificationNotice = null;
+  invalidDocument.characters = [];
+
+  const errors = validateLibrary(validCurriculum, invalidDocument, validAudioIds);
+  assert.match(errors.join('\n'), /characters\.schemaVersion.*1/i);
+  assert.match(errors.join('\n'), /characters\.modificationNotice.*object/i);
+  assert.match(errors.join('\n'), /characters\.characters.*object/i);
+});
+
+test('rejects incomplete character geometry modification notices', () => {
+  const invalidDocument = clone(validCharacters);
+  invalidDocument.modificationNotice = { date: '', source: 42, license: null, changes: [] };
+
+  const errors = validateLibrary(validCurriculum, invalidDocument, validAudioIds);
+  assert.match(errors.join('\n'), /modificationNotice\.date.*non-blank string/i);
+  assert.match(errors.join('\n'), /modificationNotice\.source.*non-blank string/i);
+  assert.match(errors.join('\n'), /modificationNotice\.license.*non-blank string/i);
+  assert.match(errors.join('\n'), /modificationNotice\.changes.*non-empty array/i);
+});
+
 test('reports lesson and character for missing geometry', () => {
-  const errors = validateLibrary(validCurriculum, {}, validAudioIds);
+  const characters = clone(validCharacters);
+  characters.characters = {};
+  const errors = validateLibrary(validCurriculum, characters, validAudioIds);
 
   assert.match(errors.join('\n'), /lesson-1.*郭.*geometry/i);
 });
 
 test('reports a mismatched stroke count', () => {
   const characters = clone(validCharacters);
-  characters.郭.strokes.pop();
+  characters.characters.郭.strokes.pop();
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount/i);
@@ -69,7 +94,7 @@ test('reports a mismatched stroke count', () => {
 
 test('requires array geometry and a positive integer strokeCount', () => {
   const characters = clone(validCharacters);
-  characters.郭 = { strokeCount: 0, strokes: 'bad', medians: 'bad' };
+  characters.characters.郭 = { strokeCount: 0, strokes: 'bad', medians: 'bad' };
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*strokes.*array/i);
@@ -79,7 +104,7 @@ test('requires array geometry and a positive integer strokeCount', () => {
 
 test('requires strokeCount to be an integer matching both geometry arrays', () => {
   const characters = clone(validCharacters);
-  characters.郭.strokeCount = 1.5;
+  characters.characters.郭.strokeCount = 1.5;
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*strokeCount.*positive integer/i);
@@ -120,7 +145,7 @@ test('reports pinyin that is not NFC-normalized', () => {
 
 test('reports malformed stroke paths', () => {
   const characters = clone(validCharacters);
-  characters.郭.strokes[1] = 'not a path';
+  characters.characters.郭.strokes[1] = 'not a path';
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 2.*path/i);
@@ -128,7 +153,7 @@ test('reports malformed stroke paths', () => {
 
 test('reports SVG arc paths with non-binary flags', () => {
   const characters = clone(validCharacters);
-  characters.郭.strokes[0] = 'M0 0 A1 1 0 2 2 5 5';
+  characters.characters.郭.strokes[0] = 'M0 0 A1 1 0 2 2 5 5';
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i);
@@ -140,7 +165,7 @@ test('reports decimal and exponent SVG arc flag spellings', () => {
     'M0 0 a1 1 0 1 1e0 5 5'
   ]) {
     const characters = clone(validCharacters);
-    characters.郭.strokes[0] = path;
+    characters.characters.郭.strokes[0] = path;
 
     const errors = validateLibrary(validCurriculum, characters, validAudioIds);
     assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i, path);
@@ -149,7 +174,7 @@ test('reports decimal and exponent SVG arc flag spellings', () => {
 
 test('accepts SVG arc paths with binary flags', () => {
   const characters = clone(validCharacters);
-  characters.郭.strokes[0] = 'M0 0 A1 1 0 1 0 5 5';
+  characters.characters.郭.strokes[0] = 'M0 0 A1 1 0 1 0 5 5';
 
   assert.deepEqual(validateLibrary(validCurriculum, characters, validAudioIds), []);
 });
@@ -160,7 +185,7 @@ test('reports SVG arcs with negative radii', () => {
     'M0 0 a1 -1 0 0 0 5 5'
   ]) {
     const characters = clone(validCharacters);
-    characters.郭.strokes[0] = path;
+    characters.characters.郭.strokes[0] = path;
 
     const errors = validateLibrary(validCurriculum, characters, validAudioIds);
     assert.match(errors.join('\n'), /lesson-1.*郭.*stroke 1.*path/i, path);
@@ -169,7 +194,7 @@ test('reports SVG arcs with negative radii', () => {
 
 test('reports medians without two numeric coordinate points', () => {
   const characters = clone(validCharacters);
-  characters.郭.medians[1] = [[50, 0], ['x', 100]];
+  characters.characters.郭.medians[1] = [[50, 0], ['x', 100]];
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*median 2/i);
@@ -177,7 +202,7 @@ test('reports medians without two numeric coordinate points', () => {
 
 test('reports median points that contain extra coordinates', () => {
   const characters = clone(validCharacters);
-  characters.郭.medians[0] = [[0, 0, 1], [100, 0]];
+  characters.characters.郭.medians[0] = [[0, 0, 1], [100, 0]];
 
   const errors = validateLibrary(validCurriculum, characters, validAudioIds);
   assert.match(errors.join('\n'), /lesson-1.*郭.*median 1/i);

@@ -92,3 +92,17 @@ test('validates a parsed null curriculum instead of treating it as a missing inp
   assert.deepEqual(stdout, []);
   assert.match(stderr.join('\n'), /curriculum.*object/i);
 });
+
+test('reports a malformed character document through the validation CLI contract', async t => {
+  const rootDir = await createLibrary(t, {
+    characters: 'null',
+    curriculum: await fixture('valid-curriculum.json')
+  });
+  const { stderr, stdout, writers } = createWriters();
+
+  const exitCode = await runValidation({ rootDir, ...writers });
+
+  assert.equal(exitCode, 1);
+  assert.deepEqual(stdout, []);
+  assert.match(stderr.join('\n'), /characters.*object/i);
+});

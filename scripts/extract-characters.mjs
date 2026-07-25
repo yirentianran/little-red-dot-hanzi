@@ -7,9 +7,53 @@ const defaultRootDir = fileURLToPath(new URL('../', import.meta.url));
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 
 function curriculumCharacters(curriculum) {
-  return [...new Set(curriculum.units.flatMap(unit => unit.lessons)
-    .flatMap(section => [...section.recognize, ...section.write])
-    .map(entry => entry.character))].sort();
+  const source = 'data/curriculum.json';
+  if (!isRecord(curriculum)) throw new Error(`${source}: must be an object`);
+  if (!Array.isArray(curriculum.units)) throw new Error(`${source}.units: must be an array`);
+
+  const characters = new Set();
+  for (const [unitIndex, unit] of curriculum.units.entries()) {
+    const unitLocation = `${source}.units[${unitIndex}]`;
+    if (!isRecord(unit)) throw new Error(`${unitLocation}: must be an object`);
+    if (!Array.isArray(unit.lessons)) throw new Error(`${unitLocation}.lessons: must be an array`);
+
+    for (const [sectionIndex, section] of unit.lessons.entries()) {
+      const sectionLocation = `${unitLocation}.lessons[${sectionIndex}]`;
+      if (!isRecord(section)) throw new Error(`${sectionLocation}: must be an object`);
+
+      for (const group of ['recognize', 'write']) {
+        const entries = section[group];
+        const groupLocation = `${sectionLocation}.${group}`;
+        if (!Array.isArray(entries)) throw new Error(`${groupLocation}: must be an array`);
+
+        for (const [entryIndex, entry] of entries.entries()) {
+          const location = `${groupLocation}[${entryIndex}].character`;
+          const character = isRecord(entry) ? entry.character : undefined;
+          if (typeof character !== 'string' || Array.from(character).length !== 1) {
+            throw new Error(`${location}: must be one code point`);
+          }
+          characters.add(character);
+        }
+      }
+    }
+  }
+
+  return [...characters].sort();
+}
+
+function modificationNotice(characterCount) {
+  return {
+    date: '2026-07-25',
+    source: 'hanzi-writer-data@2.0.1',
+    license: 'ARPHICPL.TXT',
+    changes: [
+      `Extracted the ${characterCount}-character subset used by the PEP Grade 4 Volume 1 curriculum.`,
+      'Removed radStrokes and all other upstream fields, retaining only strokes and medians.',
+      'Added strokeCount to each character record.',
+      'Sorted character keys deterministically.',
+      'Combined the selected records into this single JSON document.'
+    ]
+  };
 }
 
 function malformedReason(source) {
@@ -36,9 +80,10 @@ function malformedReason(source) {
 }
 
 export function extractCharacters(curriculum, upstream) {
+  const wantedCharacters = curriculumCharacters(curriculum);
   if (!isRecord(upstream)) throw new Error('upstream geometry must be an object');
 
-  return Object.fromEntries(curriculumCharacters(curriculum).map(character => {
+  const characters = Object.fromEntries(wantedCharacters.map(character => {
     if (!Object.hasOwn(upstream, character)) {
       throw new Error(`upstream geometry missing: ${character}`);
     }
@@ -53,6 +98,12 @@ export function extractCharacters(curriculum, upstream) {
       medians: source.medians
     }];
   }));
+
+  return {
+    schemaVersion: 1,
+    modificationNotice: modificationNotice(wantedCharacters.length),
+    characters
+  };
 }
 
 function parseSourceDirectory(argv, rootDir) {
@@ -68,26 +119,47 @@ export async function runExtraction({
   rootDir = defaultRootDir,
   stdout = message => console.log(message)
 } = {}) {
-  const curriculum = JSON.parse(await readFile(path.join(rootDir, 'data/curriculum.json'), 'utf8'));
+  const curriculumPath = path.join(rootDir, 'data/curriculum.json');
+  let curriculumSource;
+  try {
+    curriculumSource = await readFile(curriculumPath, 'utf8');
+  } catch (error) {
+    throw new Error(`unable to read data/curriculum.json: ${error.message}`);
+  }
+
+  let curriculum;
+  try {
+    curriculum = JSON.parse(curriculumSource);
+  } catch (error) {
+    throw new Error(`invalid JSON in data/curriculum.json: ${error.message}`);
+  }
+
+  const wantedCharacters = curriculumCharacters(curriculum);
   const sourceDir = parseSourceDirectory(argv, rootDir);
   const upstream = {};
 
-  await Promise.all(curriculumCharacters(curriculum).map(async character => {
+  await Promise.all(wantedCharacters.map(async character => {
     const sourcePath = path.join(sourceDir, `${character}.json`);
+    let source;
     try {
-      upstream[character] = JSON.parse(await readFile(sourcePath, 'utf8'));
+      source = await readFile(sourcePath, 'utf8');
     } catch (error) {
       if (error.code === 'ENOENT') throw new Error(`upstream geometry missing: ${character} (${sourcePath})`);
       throw new Error(`unable to read upstream geometry for ${character}: ${error.message}`);
     }
+    try {
+      upstream[character] = JSON.parse(source);
+    } catch (error) {
+      throw new Error(`invalid JSON in upstream geometry for ${character} (${sourcePath}): ${error.message}`);
+    }
   }));
 
-  const extracted = extractCharacters(curriculum, upstream);
+  const document = extractCharacters(curriculum, upstream);
   const outputPath = path.join(rootDir, 'data/characters.json');
   await mkdir(path.dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, `${JSON.stringify(extracted, null, 2)}\n`, 'utf8');
-  stdout(`Extracted ${Object.keys(extracted).length} characters to data/characters.json`);
-  return extracted;
+  await writeFile(outputPath, `${JSON.stringify(document, null, 2)}\n`, 'utf8');
+  stdout(`Extracted ${Object.keys(document.characters).length} characters to data/characters.json`);
+  return document;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

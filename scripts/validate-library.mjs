@@ -43,14 +43,14 @@ export async function runValidation({
   stderr = message => console.error(message)
 } = {}) {
   const errors = [];
-  const [curriculum, characters, audioIds] = await Promise.all([
+  const [curriculum, characterDocument, audioIds] = await Promise.all([
     readJson(rootDir, 'data/curriculum.json', errors),
     readJson(rootDir, 'data/characters.json', errors),
     readAudioIds(rootDir, errors)
   ]);
 
-  if (curriculum !== undefined && characters !== undefined) {
-    errors.push(...validateLibrary(curriculum, characters, audioIds));
+  if (curriculum !== undefined && characterDocument !== undefined) {
+    errors.push(...validateLibrary(curriculum, characterDocument, audioIds));
   }
 
   if (errors.length > 0) {

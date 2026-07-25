@@ -16,7 +16,7 @@
 - `index.html`: semantic application shell and classic-script load order.
 - `styles.css`: responsive visual system and all three views.
 - `data/curriculum.json`: audited textbook hierarchy and lesson readings.
-- `data/characters.json`: extracted stroke outlines and medians for unique textbook characters.
+- `data/characters.json`: versioned geometry document containing an in-file modification notice and a `characters` mapping of extracted stroke outlines and medians.
 - `data/library-data.js`: generated `window.HANZI_LIBRARY` runtime payload.
 - `data/source-data-license.md`: source, version, and license record for stroke geometry.
 - `assets/audio/`: one local pronunciation file per referenced reading id.
@@ -57,12 +57,15 @@ test('accepts matching curriculum, character geometry, and audio ids', () => {
 });
 
 test('reports lesson and character for missing geometry', () => {
-  const errors = validateLibrary(validCurriculum, {}, new Set(['guo1']));
+  const broken = structuredClone(validCharacters);
+  broken.characters = {};
+  const errors = validateLibrary(validCurriculum, broken, new Set(['guo1']));
   assert.match(errors.join('\n'), /lesson-1.*郭.*geometry/i);
 });
 
 test('rejects unequal stroke and median counts', () => {
-  const broken = { 郭: { strokeCount: 2, strokes: ['M0 0L1 1'], medians: [[[0, 0], [1, 1]]] } };
+  const broken = structuredClone(validCharacters);
+  broken.characters.郭 = { strokeCount: 2, strokes: ['M0 0L1 1'], medians: [[[0, 0], [1, 1]]] };
   assert.match(validateLibrary(validCurriculum, broken, new Set(['guo1'])).join('\n'), /strokeCount/i);
 });
 ```
@@ -76,8 +79,9 @@ Expected: FAIL because `scripts/lib/library-validator.mjs` does not exist.
 - [ ] **Step 3: Implement the validator and CLI**
 
 ```js
-export function validateLibrary(curriculum, characters, audioIds) {
+export function validateLibrary(curriculum, characterDocument, audioIds) {
   const errors = [];
+  const characters = characterDocument.characters;
   const lessonIds = new Set();
   for (const unit of curriculum.units ?? []) {
     for (const lesson of unit.lessons ?? []) {
@@ -231,8 +235,11 @@ git commit -m "data: add grade four volume one curriculum"
 **Files:**
 - Create: `scripts/extract-characters.mjs`
 - Create: `data/characters.json`
+- Create: `data/ARPHICPL.TXT`
 - Create: `data/source-data-license.md`
 - Create: `tests/extract-characters.test.mjs`
+- Modify: `scripts/lib/library-validator.mjs`
+- Modify: `tests/fixtures/valid-characters.json`
 - Modify: `package.json`
 - Create: `package-lock.json`
 
@@ -240,13 +247,14 @@ git commit -m "data: add grade four volume one curriculum"
 
 ```js
 test('extracts exactly the unique curriculum characters and preserves stroke order', () => {
-  const subset = extractCharacters(curriculum, {
+  const document = extractCharacters(curriculum, {
     郭: { strokes: ['path-a', 'path-b'], medians: [[[0, 0], [1, 0]], [[1, 0], [1, 1]]] },
     外: { strokes: ['unused'], medians: [[[0, 0], [1, 1]]] }
   });
-  assert.deepEqual(Object.keys(subset), ['郭']);
-  assert.equal(subset.郭.strokeCount, 2);
-  assert.deepEqual(subset.郭.medians[1][1], [1, 1]);
+  assert.deepEqual(Object.keys(document.characters), ['郭']);
+  assert.equal(document.characters.郭.strokeCount, 2);
+  assert.deepEqual(document.characters.郭.medians[1][1], [1, 1]);
+  assert.equal(document.modificationNotice.source, 'hanzi-writer-data@2.0.1');
 });
 ```
 
@@ -263,7 +271,7 @@ export function extractCharacters(curriculum, upstream) {
   const wanted = new Set(curriculum.units.flatMap(unit => unit.lessons)
     .flatMap(lesson => [...lesson.recognize, ...lesson.write])
     .map(entry => entry.character));
-  return Object.fromEntries([...wanted].sort((a, b) => a.localeCompare(b, 'zh-CN')).map(character => {
+  const characters = Object.fromEntries([...wanted].sort().map(character => {
     const source = upstream[character];
     if (!source) throw new Error(`upstream geometry missing: ${character}`);
     return [character, {
@@ -272,21 +280,37 @@ export function extractCharacters(curriculum, upstream) {
       medians: source.medians
     }];
   }));
+  return {
+    schemaVersion: 1,
+    modificationNotice: {
+      date: '2026-07-25',
+      source: 'hanzi-writer-data@2.0.1',
+      license: 'ARPHICPL.TXT',
+      changes: [
+        'Extracted the 428-character subset used by the PEP Grade 4 Volume 1 curriculum.',
+        'Removed radStrokes and all other upstream fields, retaining only strokes and medians.',
+        'Added strokeCount to each character record.',
+        'Sorted character keys deterministically.',
+        'Combined the selected records into this single JSON document.'
+      ]
+    },
+    characters
+  };
 }
 ```
 
-Install the pinned source package with `npm install --save-dev hanzi-writer-data@2.0.1`. Extract only the required characters from `node_modules/hanzi-writer-data`, and document package version 2.0.1, the `chanind/hanzi-writer-data` repository, Make Me a Hanzi provenance, and the bundled `ARPHICPL.TXT` terms in `data/source-data-license.md`.
+Install the pinned source package with `npm install --save-dev --save-exact hanzi-writer-data@2.0.1`. Extract only the required characters from `node_modules/hanzi-writer-data`, copy the bundled `ARPHICPL.TXT` byte-for-byte to `data/ARPHICPL.TXT`, and document package version 2.0.1, the `chanind/hanzi-writer-data` repository, Make Me a Hanzi provenance, and the applicable terms in `data/source-data-license.md`. A regression test must re-read all 428 locked upstream records and compare the complete regenerated document byte-for-byte with `data/characters.json`.
 
 - [ ] **Step 4: Generate real geometry and validate it**
 
 Run: `node scripts/extract-characters.mjs --source node_modules/hanzi-writer-data`
 
-Expected: `data/characters.json` contains every unique curriculum character and `npm run validate` reports audio-only errors.
+Expected: `data/characters.json.characters` contains every unique curriculum character, its in-file notice fully describes the transformation, and `npm run validate` reports audio-only errors.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add package.json package-lock.json scripts/extract-characters.mjs data/characters.json data/source-data-license.md tests/extract-characters.test.mjs
+git add package.json package-lock.json scripts/extract-characters.mjs scripts/lib/library-validator.mjs data/characters.json data/ARPHICPL.TXT data/source-data-license.md tests/extract-characters.test.mjs tests/fixtures/valid-characters.json
 git commit -m "data: add textbook character geometry"
 ```
 
@@ -367,7 +391,7 @@ git commit -m "data: add offline Mandarin pronunciation"
 
 ```js
 test('writes a classic script with no network URLs', async () => {
-  const output = buildRuntimeSource(curriculum, characters, manifest);
+  const output = buildRuntimeSource(curriculum, characterDocument, manifest);
   assert.match(output, /^window\.HANZI_LIBRARY = /);
   assert.doesNotMatch(output, /https?:\/\//);
   const parsed = JSON.parse(output.slice(output.indexOf('{'), -2));
@@ -384,8 +408,8 @@ Expected: FAIL because `buildRuntimeSource` does not exist.
 - [ ] **Step 3: Implement deterministic bundle generation**
 
 ```js
-export function buildRuntimeSource(curriculum, characters, audioManifest) {
-  const payload = { curriculum, characters, audio: audioManifest };
+export function buildRuntimeSource(curriculum, characterDocument, audioManifest) {
+  const payload = { curriculum, characters: characterDocument.characters, audio: audioManifest };
   return `window.HANZI_LIBRARY = ${JSON.stringify(payload)};\n`;
 }
 ```

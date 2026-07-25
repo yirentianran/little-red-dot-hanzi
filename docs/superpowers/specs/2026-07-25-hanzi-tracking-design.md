@@ -160,7 +160,34 @@
 }
 ```
 
-汉字资源是一个以单个汉字为键的 JSON 对象。每条记录包含整数 `strokeCount`、含完整 SVG path 字符串的 `strokes` 数组，以及由二维坐标点列组成的 `medians` 数组。三者的笔画数量必须相等；数组顺序就是规范笔顺。
+汉字资源使用带来源修改声明的 JSON 文档包络。`modificationNotice` 必须位于文件顶部附近，记录修改日期、锁定的上游版本、许可文件，以及子集提取、字段删除、增加 `strokeCount`、排序和合并等全部转换。运行时字形映射位于 `characters` 字段：
+
+```json
+{
+  "schemaVersion": 1,
+  "modificationNotice": {
+    "date": "2026-07-25",
+    "source": "hanzi-writer-data@2.0.1",
+    "license": "ARPHICPL.TXT",
+    "changes": [
+      "Extracted the 428-character subset used by the PEP Grade 4 Volume 1 curriculum.",
+      "Removed radStrokes and all other upstream fields, retaining only strokes and medians.",
+      "Added strokeCount to each character record.",
+      "Sorted character keys deterministically.",
+      "Combined the selected records into this single JSON document."
+    ]
+  },
+  "characters": {
+    "郭": {
+      "strokeCount": 10,
+      "strokes": ["M ... Z"],
+      "medians": [[[350, 840], [404, 806]]]
+    }
+  }
+}
+```
+
+`characters` 以单个汉字为键。每条记录包含整数 `strokeCount`、含完整 SVG path 字符串的 `strokes` 数组，以及由二维坐标点列组成的 `medians` 数组。三者的笔画数量必须相等；数组顺序就是规范笔顺。
 
 教材条目保存课内读音，汉字资源只保存与读音无关的字形数据。蓝色多音字条目使用 `"counted": false`，其他条目省略该字段。同一个汉字在不同课文出现时复用字形；若课内读音不同，则教材条目分别引用不同音频。
 
@@ -168,7 +195,7 @@
 
 仓库保留经过校对的原始 JSON。构建脚本执行以下步骤：
 
-1. 读取教材目录和汉字资源。
+1. 读取教材目录和汉字资源文档，并校验汉字资源的版本、修改声明及 `characters` 映射。
 2. 校验标识符、单元和课序、重复项、汉字长度及带声调拼音格式。
 3. 确认每个教材汉字都存在资源记录。
 4. 确认 `strokeCount`、`strokes.length` 和 `medians.length` 完全一致，且每条轨迹至少有两个有效点。
