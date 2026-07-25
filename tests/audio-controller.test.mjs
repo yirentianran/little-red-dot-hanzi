@@ -41,6 +41,7 @@ function makeMedia(options = {}) {
   const removedListeners = [];
   let preload;
   let currentTime;
+  let playing = false;
 
   const media = {
     pauseCalls: 0,
@@ -53,6 +54,7 @@ function makeMedia(options = {}) {
       log.push(['preload', value]);
       if (options.preloadError) throw options.preloadError;
       preload = value;
+      if (options.onPreload) options.onPreload(media, value);
     },
     get currentTime() {
       return currentTime;
@@ -61,15 +63,23 @@ function makeMedia(options = {}) {
       log.push(['currentTime', value]);
       if (options.currentTimeError) throw options.currentTimeError;
       currentTime = value;
+      if (options.onCurrentTime) options.onCurrentTime(media, value);
     },
     addEventListener(type, listener) {
       log.push(['addEventListener', type]);
+      if (options.addHookBeforeStore && options.onAddEventListener) {
+        options.onAddEventListener(type, listener, media);
+      }
       listeners.set(type, listener);
+      if (!options.addHookBeforeStore && options.onAddEventListener) {
+        options.onAddEventListener(type, listener, media);
+      }
       if (options.addEventErrorType === type) throw options.addEventError;
     },
     removeEventListener(type, listener) {
       log.push(['removeEventListener', type]);
       removedListeners.push([type, listener]);
+      if (options.onRemoveEventListener) options.onRemoveEventListener(type, listener, media);
       if (options.removeEventError) throw options.removeEventError;
       if (listeners.get(type) === listener) listeners.delete(type);
     },
@@ -78,11 +88,14 @@ function makeMedia(options = {}) {
       log.push(['play']);
       if (options.playError) throw options.playError;
       if (options.onPlay) options.onPlay(media);
+      playing = true;
       return options.playResult;
     },
     pause() {
       media.pauseCalls += 1;
       log.push(['pause']);
+      playing = false;
+      if (options.onPause) options.onPause(media);
       if (options.pauseError) throw options.pauseError;
     },
     dispatch(type, event = {}) {
@@ -91,6 +104,12 @@ function makeMedia(options = {}) {
     },
     capture(type) {
       return listeners.get(type);
+    },
+    restart() {
+      playing = true;
+    },
+    get playing() {
+      return playing;
     }
   };
   return media;
@@ -389,6 +408,427 @@ test('cleanup exceptions cannot block stop, replacement, or destroy', async (t) 
   }
 });
 
+test('cleanup reentrancy gives the nested play command final ownership', async (t) => {
+  for (const boundary of ['removeEventListener', 'pause']) {
+    await t.test(boundary, async () => {
+      const files = [];
+      const instances = [];
+      let controller;
+      let nestedPlay;
+      let reentered = false;
+      controller = createAudioController(makeManifest(), (file) => {
+        files.push(file);
+        const options = instances.length === 0
+          ? {
+              playResult: Promise.resolve(),
+              onRemoveEventListener() {
+                if (boundary !== 'removeEventListener' || reentered) return;
+                reentered = true;
+                nestedPlay = controller.play('chao2');
+              },
+              onPause() {
+                if (boundary !== 'pause' || reentered) return;
+                reentered = true;
+                nestedPlay = controller.play('chao2');
+              }
+            }
+          : { playResult: Promise.resolve() };
+        const media = makeMedia(options);
+        instances.push(media);
+        return media;
+      });
+      assert.equal(await controller.play('chao2'), true);
+
+      const outerPlay = controller.play('guo1');
+
+      assert.equal(await outerPlay, false);
+      assert.equal(await nestedPlay, true);
+      assert.deepEqual(files, ['assets/audio/chao2.mp3', 'assets/audio/chao2.mp3']);
+      assert.equal(instances.length, 2, 'the superseded outer command never creates media');
+      controller.stop();
+      assert.equal(instances[1].pauseCalls, 1, 'stop still owns the nested playback');
+    });
+  }
+});
+
+test('configuration reentrancy aborts the stale transaction at every external boundary', async (t) => {
+  const cases = [
+    {
+      name: 'preload destroy',
+      options(command) {
+        return { playResult: undefined, onPreload: command };
+      },
+      command(controller) {
+        controller.destroy();
+      },
+      destroyed: true
+    },
+    {
+      name: 'currentTime play',
+      options(command) {
+        return { playResult: undefined, onCurrentTime: command };
+      },
+      command(controller, remember) {
+        remember(controller.play('guo1'));
+      }
+    },
+    {
+      name: 'ended listener stop',
+      options(command) {
+        return {
+          playResult: undefined,
+          addHookBeforeStore: true,
+          onAddEventListener(type) {
+            if (type === 'ended') command();
+          }
+        };
+      },
+      command(controller) {
+        controller.stop();
+      }
+    },
+    {
+      name: 'error listener play',
+      options(command) {
+        return {
+          playResult: undefined,
+          addHookBeforeStore: true,
+          onAddEventListener(type) {
+            if (type === 'error') command();
+          }
+        };
+      },
+      command(controller, remember) {
+        remember(controller.play('guo1'));
+      }
+    }
+  ];
+
+  for (const scenario of cases) {
+    await t.test(scenario.name, async () => {
+      const instances = [];
+      let controller;
+      let nestedPlay;
+      let commanded = false;
+      const remember = (promise) => {
+        nestedPlay = promise;
+      };
+      const command = () => {
+        if (commanded) return;
+        commanded = true;
+        scenario.command(controller, remember);
+      };
+      controller = createAudioController(makeManifest(), () => {
+        const options = instances.length === 0
+          ? scenario.options(command)
+          : { playResult: Promise.resolve() };
+        const media = makeMedia(options);
+        instances.push(media);
+        return media;
+      });
+
+      const stalePlay = controller.play('chao2');
+
+      assert.equal(await stalePlay, false);
+      assert.equal(instances[0].playCalls, 0, 'stale configuration never reaches media.play');
+      assert.equal(instances[0].pauseCalls, 1, 'partially configured media is rolled back');
+      assert.equal(instances[0].playing, false);
+      assert.equal(instances[0].capture('ended'), undefined);
+      assert.equal(instances[0].capture('error'), undefined);
+      if (nestedPlay) {
+        assert.equal(await nestedPlay, true);
+        controller.stop();
+        assert.equal(instances[1].pauseCalls, 1);
+      }
+      if (scenario.destroyed) assert.equal(controller.isAvailable('guo1'), false);
+    });
+  }
+});
+
+test('play and then-getter reentrancy cannot restart or displace nested playback', async (t) => {
+  await t.test('media.play', async () => {
+    const instances = [];
+    let controller;
+    let nestedPlay;
+    controller = createAudioController(makeManifest(), () => {
+      const options = instances.length === 0
+        ? {
+            playResult: undefined,
+            onPlay() {
+              nestedPlay = controller.play('guo1');
+            }
+          }
+        : { playResult: Promise.resolve() };
+      const media = makeMedia(options);
+      instances.push(media);
+      return media;
+    });
+
+    const stalePlay = controller.play('chao2');
+
+    assert.equal(await stalePlay, false);
+    assert.equal(await nestedPlay, true);
+    assert.equal(instances[0].playing, false, 'stale media is paused after play returns');
+    assert.equal(instances[0].pauseCalls, 2, 'post-play rollback cannot trust an earlier pause');
+    controller.stop();
+    assert.equal(instances[1].pauseCalls, 1);
+  });
+
+  await t.test('then getter', async () => {
+    const instances = [];
+    let controller;
+    let nestedPlay;
+    let getterCalls = 0;
+    const playResult = {};
+    Object.defineProperty(playResult, 'then', {
+      get() {
+        getterCalls += 1;
+        if (getterCalls === 1) nestedPlay = controller.play('guo1');
+        return (resolve) => resolve();
+      }
+    });
+    controller = createAudioController(makeManifest(), () => {
+      const media = makeMedia(instances.length === 0
+        ? { playResult }
+        : { playResult: Promise.resolve() });
+      instances.push(media);
+      return media;
+    });
+
+    const stalePlay = controller.play('chao2');
+
+    assert.equal(await stalePlay, false);
+    assert.equal(await nestedPlay, true);
+    assert.equal(getterCalls, 1, 'the stale thenable is not assimilated after losing ownership');
+    assert.equal(instances[0].playing, false);
+    controller.stop();
+    assert.equal(instances[1].pauseCalls, 1);
+  });
+});
+
+test('media method getters stop validation as soon as a nested command takes ownership', async (t) => {
+  for (const boundary of ['play', 'pause']) {
+    await t.test(boundary + ' getter', async () => {
+      const instances = [];
+      let controller;
+      let nestedPlay;
+      let reentered = false;
+      let lateAddReads = 0;
+      controller = createAudioController(makeManifest(), () => {
+        if (instances.length > 0) {
+          const nestedMedia = makeMedia({ playResult: Promise.resolve() });
+          instances.push(nestedMedia);
+          return nestedMedia;
+        }
+
+        const media = makeMedia({ playResult: Promise.resolve() });
+        const playMethod = media.play;
+        const pauseMethod = media.pause;
+        const addEventListenerMethod = media.addEventListener;
+        Object.defineProperty(media, 'play', {
+          get() {
+            if (boundary === 'play' && !reentered) {
+              reentered = true;
+              nestedPlay = controller.play('guo1');
+            }
+            return playMethod;
+          }
+        });
+        Object.defineProperty(media, 'pause', {
+          get() {
+            if (boundary === 'pause' && !reentered) {
+              reentered = true;
+              nestedPlay = controller.play('guo1');
+            }
+            return pauseMethod;
+          }
+        });
+        Object.defineProperty(media, 'addEventListener', {
+          get() {
+            lateAddReads += 1;
+            return addEventListenerMethod;
+          }
+        });
+        instances.push(media);
+        return media;
+      });
+
+      const stalePlay = controller.play('chao2');
+
+      assert.equal(await stalePlay, false);
+      assert.equal(await nestedPlay, true);
+      assert.equal(lateAddReads, 0, 'later media getters are not read after ownership changes');
+      assert.equal(instances[0].pauseCalls, 1, 'raw media receives a best-effort rollback pause');
+      controller.stop();
+      assert.equal(instances[1].pauseCalls, 1);
+    });
+  }
+});
+
+test('a rejection name getter cannot disable a nested retry of the same reading', async () => {
+  const instances = [];
+  let controller;
+  let nestedPlay;
+  let reentered = false;
+  const failure = {};
+  Object.defineProperty(failure, 'name', {
+    get() {
+      if (!reentered) {
+        reentered = true;
+        nestedPlay = controller.play('chao2');
+      }
+      return 'DecodeError';
+    }
+  });
+  controller = createAudioController(makeManifest(), () => {
+    const media = makeMedia(instances.length === 0
+      ? { playResult: Promise.reject(failure) }
+      : { playResult: Promise.resolve() });
+    instances.push(media);
+    return media;
+  });
+
+  const stalePlay = controller.play('chao2');
+
+  assert.equal(await stalePlay, false);
+  assert.equal(await nestedPlay, true);
+  assert.equal(controller.isAvailable('chao2'), true);
+  controller.stop();
+  assert.equal(instances[1].pauseCalls, 1);
+});
+
+test('a media error getter is read once and cannot pollute a nested retry', async () => {
+  const { controller, instances } = makeHarness({ playResult: Promise.resolve() });
+  assert.equal(await controller.play('chao2'), true);
+  let nestedPlay;
+  let reads = 0;
+  const event = {};
+  Object.defineProperty(event, 'error', {
+    get() {
+      reads += 1;
+      if (reads === 1) {
+        nestedPlay = controller.play('chao2');
+        instances[0].restart();
+      }
+      return new Error('old media error');
+    }
+  });
+
+  instances[0].dispatch('error', event);
+
+  assert.equal(reads, 1);
+  assert.equal(await nestedPlay, true);
+  assert.equal(controller.isAvailable('chao2'), true);
+  assert.equal(instances[0].playing, false);
+  assert.equal(instances[0].pauseCalls, 2, 'normal cancellation and post-getter rollback both pause');
+  controller.stop();
+  assert.equal(instances[1].pauseCalls, 1);
+});
+
+test('a synchronous thenable cannot commit success before its call boundary returns', async () => {
+  const instances = [];
+  let controller;
+  let nestedPlay;
+  const thenable = {
+    then(resolve) {
+      resolve();
+      nestedPlay = controller.play('guo1');
+    }
+  };
+  controller = createAudioController(makeManifest(), () => {
+    const media = makeMedia(instances.length === 0
+      ? { playResult: thenable }
+      : { playResult: Promise.resolve() });
+    instances.push(media);
+    return media;
+  });
+
+  const stalePlay = controller.play('chao2');
+
+  assert.equal(await stalePlay, false);
+  assert.equal(await nestedPlay, true);
+  assert.equal(instances[0].playing, false);
+  controller.stop();
+  assert.equal(instances[1].pauseCalls, 1);
+});
+
+test('thenable fulfillment values are not assimilated as a second playback request', async () => {
+  let calls = 0;
+  const thenable = {
+    then(resolve) {
+      calls += 1;
+      if (calls === 1) resolve(thenable);
+      else resolve();
+    }
+  };
+  const { controller } = makeHarness({ playResult: thenable });
+
+  assert.equal(await controller.play('chao2'), true);
+  assert.equal(calls, 1);
+});
+
+test('cleanup inside failure and ended handlers cannot clear a nested request', async (t) => {
+  for (const boundary of ['failure', 'ended']) {
+    await t.test(boundary, async () => {
+      const instances = [];
+      let controller;
+      let nestedPlay;
+      let reentered = false;
+      controller = createAudioController(makeManifest(), () => {
+        const options = instances.length === 0
+          ? {
+              playResult: boundary === 'ended' ? Promise.resolve() : undefined,
+              playError: boundary === 'failure' ? new Error('start failed') : undefined,
+              onRemoveEventListener() {
+                if (reentered) return;
+                reentered = true;
+                nestedPlay = controller.play('guo1');
+              }
+            }
+          : { playResult: Promise.resolve() };
+        const media = makeMedia(options);
+        instances.push(media);
+        return media;
+      });
+
+      const firstPlay = controller.play('chao2');
+      if (boundary === 'ended') {
+        assert.equal(await firstPlay, true);
+        instances[0].dispatch('ended');
+      } else {
+        assert.equal(await firstPlay, false, 'the nested command supersedes the old failure');
+      }
+
+      assert.equal(await nestedPlay, true);
+      controller.stop();
+      assert.equal(instances[1].pauseCalls, 1);
+    });
+  }
+});
+
+test('a throwing rejection name getter still settles the public promise', async () => {
+  const failure = {};
+  Object.defineProperty(failure, 'name', {
+    get() {
+      throw new Error('hostile name getter');
+    }
+  });
+  const { controller } = makeHarness({ playResult: Promise.reject(failure) });
+
+  const observed = await Promise.race([
+    controller.play('chao2').then(
+      () => ({ type: 'resolved' }),
+      (error) => ({ type: 'rejected', error })
+    ),
+    new Promise((resolve) => setImmediate(() => resolve({ type: 'timeout' })))
+  ]);
+
+  assert.equal(observed.type, 'rejected');
+  assert.equal(observed.error, failure);
+  assert.equal(controller.isAvailable('chao2'), false);
+  assert.equal(controller.isAvailable('guo1'), true);
+});
+
 test('transient media error events reject without making the reading unavailable', async (t) => {
   for (const name of ['NotAllowedError', 'AbortError']) {
     await t.test(name, async () => {
@@ -493,6 +933,12 @@ test('validates the complete manifest and rejects non-local paths', () => {
     [{ format: 'audio/mpeg', readings: { a: { file: '//example.test/a.mp3' } } }, /relative local path/],
     [{ format: 'audio/mpeg', readings: { a: { file: '../a.mp3' } } }, /relative local path/],
     [{ format: 'audio/mpeg', readings: { a: { file: 'assets/../a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%2e%2e/a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%2E%2E/a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%2e%2E/a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%00audio/a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%0Aaudio/a.mp3' } } }, /relative local path/],
+    [{ format: 'audio/mpeg', readings: { a: { file: 'assets/%7faudio/a.mp3' } } }, /relative local path/],
     [{ format: 'audio/mpeg', readings: { a: { file: 'assets\\audio\\a.mp3' } } }, /relative local path/],
     [{ format: 'audio/mpeg', readings: { a: { file: 'assets/audio/a.mp3?remote=1' } } }, /relative local path/],
     [{ format: 'audio/mpeg', readings: {}, extra: true }, /unknown field/],

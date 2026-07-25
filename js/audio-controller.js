@@ -49,7 +49,16 @@
     if (/[:?#\u0000-\u001f\u007f]/.test(value)) return false;
     var segments = value.split('/');
     return segments.every(function (segment) {
-      return segment !== '' && segment !== '.' && segment !== '..';
+      if (segment === '' || segment === '.' || segment === '..') return false;
+      var decoded;
+      try {
+        decoded = decodeURIComponent(segment);
+      } catch (ignored) {
+        return false;
+      }
+      return decoded !== '.'
+        && decoded !== '..'
+        && !/[\\/:?#\u0000-\u001f\u007f]/.test(decoded);
     });
   }
 
@@ -75,22 +84,24 @@
     return copies;
   }
 
-  function validateMedia(media) {
-    requireRecord(media, 'media');
-    requireFunction(media.play, 'media.play');
-    requireFunction(media.pause, 'media.pause');
-    requireFunction(media.addEventListener, 'media.addEventListener');
-    requireFunction(media.removeEventListener, 'media.removeEventListener');
-    return media;
-  }
-
   function isTransientError(error) {
-    return Boolean(error && TRANSIENT_ERROR_NAMES.indexOf(error.name) !== -1);
+    if (!error) return false;
+    var name;
+    try {
+      name = error.name;
+    } catch (ignored) {
+      return false;
+    }
+    return TRANSIENT_ERROR_NAMES.indexOf(name) !== -1;
   }
 
   function mediaEventError(event, media) {
     var candidate;
-    if (event && typeof event === 'object' && event.error) candidate = event.error;
+    try {
+      if (event && typeof event === 'object') candidate = event.error;
+    } catch (ignored) {
+      candidate = null;
+    }
     if (!candidate) {
       try {
         candidate = media.error;
@@ -98,14 +109,27 @@
         candidate = null;
       }
     }
-    if (candidate instanceof Error) return candidate;
+    try {
+      if (candidate instanceof Error) return candidate;
+    } catch (ignored) {
+      candidate = null;
+    }
 
-    var message = candidate && typeof candidate.message === 'string'
-      ? candidate.message
-      : 'Media playback failed';
+    var message = 'Media playback failed';
+    try {
+      var candidateMessage = candidate && candidate.message;
+      if (typeof candidateMessage === 'string') message = candidateMessage;
+    } catch (ignored) {
+      message = 'Media playback failed';
+    }
     var error = new Error(message);
-    if (candidate && typeof candidate.name === 'string' && candidate.name !== '') {
-      error.name = candidate.name;
+    try {
+      var candidateName = candidate && candidate.name;
+      if (typeof candidateName === 'string' && candidateName !== '') {
+        error.name = candidateName;
+      }
+    } catch (ignored) {
+      // The generic Error still provides a deterministic rejection reason.
     }
     return error;
   }
@@ -134,11 +158,11 @@
     }
 
     function detach(request) {
-      if (!request.media) return;
+      if (!request.media || !request.removeEventListenerMethod) return;
       if (request.endedAttached) {
         request.endedAttached = false;
         try {
-          request.media.removeEventListener('ended', request.onEnded);
+          request.removeEventListenerMethod.call(request.media, 'ended', request.onEnded);
         } catch (ignored) {
           // Cleanup must remain idempotent even for a partial media-like implementation.
         }
@@ -146,38 +170,48 @@
       if (request.errorAttached) {
         request.errorAttached = false;
         try {
-          request.media.removeEventListener('error', request.onError);
+          request.removeEventListenerMethod.call(request.media, 'error', request.onError);
         } catch (ignored) {
           // Cleanup must remain idempotent even for a partial media-like implementation.
         }
       }
     }
 
-    function pause(request) {
-      if (!request.media || request.paused) return;
+    function pause(request, force) {
+      if (!request.media || (request.paused && !force)) return;
+      var pauseMethod = request.pauseMethod;
+      if (!pauseMethod) {
+        try {
+          pauseMethod = request.media.pause;
+        } catch (ignored) {
+          return;
+        }
+        if (typeof pauseMethod !== 'function') return;
+        request.pauseMethod = pauseMethod;
+      }
       request.paused = true;
       try {
-        request.media.pause();
+        pauseMethod.call(request.media);
       } catch (ignored) {
         // A failed pause cannot be allowed to revive or retain an invalidated request.
       }
     }
 
     function clearActive(request, shouldPause) {
-      detach(request);
-      if (shouldPause) pause(request);
       if (activeRequest === request) activeRequest = null;
+      detach(request);
+      if (shouldPause) pause(request, false);
     }
 
     function cancelCurrent() {
       var request = currentRequest;
       var active = activeRequest;
-      currentRequest = null;
-      activeRequest = null;
+      if (currentRequest === request) currentRequest = null;
+      if (activeRequest === active) activeRequest = null;
 
       if (active) {
         detach(active);
-        pause(active);
+        pause(active, false);
       }
       if (request) {
         if (request !== active) detach(request);
@@ -191,9 +225,14 @@
         settle(request, 'resolve', false);
         return;
       }
-      if (!isTransientError(error)) unavailable.add(request.id);
+      var transient = isTransientError(error);
+      if (!isCurrent(request)) {
+        rollback(request, true);
+        return;
+      }
+      if (!transient) unavailable.add(request.id);
       clearActive(request, true);
-      currentRequest = null;
+      if (currentRequest === request) currentRequest = null;
       settle(request, 'reject', error);
     }
 
@@ -203,7 +242,36 @@
         return;
       }
       settle(request, 'resolve', true);
-      if (activeRequest !== request) currentRequest = null;
+      if (activeRequest !== request && currentRequest === request) currentRequest = null;
+    }
+
+    function rollback(request, forcePause) {
+      if (currentRequest === request) currentRequest = null;
+      if (activeRequest === request) activeRequest = null;
+      detach(request);
+      pause(request, forcePause);
+      settle(request, 'resolve', false);
+    }
+
+    function continueAfterBoundary(request, forcePause) {
+      if (isCurrent(request)) return true;
+      rollback(request, forcePause);
+      return false;
+    }
+
+    function failSynchronousBoundary(request, error) {
+      if (isCurrent(request)) markFailure(request, error);
+      else rollback(request, true);
+    }
+
+    function addMediaListener(request, type, listener, attachedField) {
+      request[attachedField] = true;
+      try {
+        request.addEventListenerMethod.call(request.media, type, listener);
+      } finally {
+        // A reentrant cancellation may run before the media method finishes registering.
+        request[attachedField] = true;
+      }
     }
 
     function createRequest(id) {
@@ -217,6 +285,10 @@
         id: id,
         generation: generation,
         media: null,
+        playMethod: null,
+        pauseMethod: null,
+        addEventListenerMethod: null,
+        removeEventListenerMethod: null,
         paused: false,
         endedAttached: false,
         errorAttached: false,
@@ -240,38 +312,58 @@
       }
 
       generation += 1;
+      var transactionGeneration = generation;
       cancelCurrent();
+      if (destroyed || generation !== transactionGeneration) return Promise.resolve(false);
 
       var request = createRequest(readingId);
       currentRequest = request;
 
       try {
-        request.media = validateMedia(createAudio(readings.get(readingId)));
-        if (!isCurrent(request)) {
-          pause(request);
-          return request.outcome;
-        }
+        request.media = createAudio(readings.get(readingId));
+        if (!continueAfterBoundary(request, true)) return request.outcome;
+        requireRecord(request.media, 'media');
+        request.playMethod = requireFunction(request.media.play, 'media.play');
+        if (!continueAfterBoundary(request, true)) return request.outcome;
+        request.pauseMethod = requireFunction(request.media.pause, 'media.pause');
+        if (!continueAfterBoundary(request, true)) return request.outcome;
+        request.addEventListenerMethod = requireFunction(
+          request.media.addEventListener,
+          'media.addEventListener'
+        );
+        if (!continueAfterBoundary(request, true)) return request.outcome;
+        request.removeEventListenerMethod = requireFunction(
+          request.media.removeEventListener,
+          'media.removeEventListener'
+        );
+        if (!continueAfterBoundary(request, true)) return request.outcome;
 
         request.media.preload = 'metadata';
+        if (!continueAfterBoundary(request, true)) return request.outcome;
         request.media.currentTime = 0;
+        if (!continueAfterBoundary(request, true)) return request.outcome;
 
         request.onEnded = function () {
           if (!isCurrent(request) || activeRequest !== request) return;
           clearActive(request, false);
-          if (request.outcomeSettled) currentRequest = null;
+          if (request.outcomeSettled && currentRequest === request) currentRequest = null;
         };
         request.onError = function (event) {
           if (!isCurrent(request) || activeRequest !== request) return;
-          markFailure(request, mediaEventError(event, request.media));
+          var error = mediaEventError(event, request.media);
+          if (!continueAfterBoundary(request, true)) return;
+          markFailure(request, error);
         };
 
-        request.endedAttached = true;
-        request.media.addEventListener('ended', request.onEnded);
-        request.errorAttached = true;
-        request.media.addEventListener('error', request.onError);
+        addMediaListener(request, 'ended', request.onEnded, 'endedAttached');
+        if (!continueAfterBoundary(request, true)) return request.outcome;
+        addMediaListener(request, 'error', request.onError, 'errorAttached');
+        if (!continueAfterBoundary(request, true)) return request.outcome;
         activeRequest = request;
 
-        var playResult = request.media.play();
+        request.paused = false;
+        var playResult = request.playMethod.call(request.media);
+        if (!continueAfterBoundary(request, true)) return request.outcome;
         if (playResult === undefined) {
           markStarted(request);
         } else {
@@ -282,20 +374,37 @@
               ? playResult.then
               : null;
           } catch (error) {
-            markFailure(request, error);
+            failSynchronousBoundary(request, error);
             return request.outcome;
           }
+          if (!continueAfterBoundary(request, true)) return request.outcome;
           if (typeof then !== 'function') {
             markFailure(request, new TypeError('media.play(): must return a promise or undefined'));
           } else {
-            Promise.resolve(playResult).then(
+            var resolvePlay;
+            var rejectPlay;
+            var isolatedPlay = new Promise(function (resolve, rejectPromise) {
+              resolvePlay = resolve;
+              rejectPlay = rejectPromise;
+            });
+            isolatedPlay.then(
               function () { markStarted(request); },
               function (error) { markFailure(request, error); }
             );
+            try {
+              then.call(
+                playResult,
+                function () { resolvePlay(); },
+                function (error) { rejectPlay(error); }
+              );
+            } catch (error) {
+              rejectPlay(error);
+            }
+            continueAfterBoundary(request, true);
           }
         }
       } catch (error) {
-        markFailure(request, error);
+        failSynchronousBoundary(request, error);
       }
 
       return request.outcome;
