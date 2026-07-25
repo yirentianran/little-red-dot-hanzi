@@ -6,7 +6,7 @@
 
 **Architecture:** Keep audited curriculum and character geometry as source JSON, validate them with Node scripts, and generate a classic-script runtime bundle that works under `file://`. The browser app uses small UMD-style modules for data lookup, hash routing, SVG rendering, animation, audio, views, and orchestration so core logic is testable with Node's built-in test runner.
 
-**Tech Stack:** HTML5, CSS, vanilla JavaScript, SVG, Node.js 20+, `node:test`, Playwright for browser verification, local Mandarin speech assets, Hanzi Writer Data-compatible geometry.
+**Tech Stack:** HTML5, CSS, vanilla JavaScript, SVG, Node.js 20+, `node:test`, Playwright for browser verification, pinned CC BY-SA Mandarin syllable recordings, Hanzi Writer Data-compatible geometry.
 
 ---
 
@@ -19,7 +19,7 @@
 - `data/characters.json`: versioned geometry document containing an in-file modification notice and a `characters` mapping of extracted stroke outlines and medians.
 - `data/library-data.js`: generated `window.HANZI_LIBRARY` runtime payload.
 - `data/source-data-license.md`: source, version, and license record for stroke geometry.
-- `assets/audio/`: one local pronunciation file per referenced reading id.
+- `assets/audio/`: one byte-preserved local MP3 per referenced reading id, plus manifest and attribution.
 - `js/data-store.js`: validated curriculum lookup API.
 - `js/router.js`: hash parse/serialize/fallback rules.
 - `js/svg-renderer.js`: SVG layers, clipping paths, guide grid, and red dot.
@@ -31,7 +31,7 @@
 - `scripts/validate-library.mjs`: validation CLI.
 - `scripts/build-library.mjs`: deterministic classic-script bundle generator.
 - `scripts/extract-characters.mjs`: subset extractor for upstream character data.
-- `scripts/generate-audio.mjs`: reproducible local speech asset generator.
+- `scripts/sync-audio.mjs`: reproducible importer for the pinned upstream recording set.
 - `tests/`: Node tests, data assertions, and browser acceptance tests.
 
 ### Task 1: Establish the Validation and Test Harness
@@ -314,14 +314,17 @@ git add package.json package-lock.json scripts/extract-characters.mjs scripts/li
 git commit -m "data: add textbook character geometry"
 ```
 
-### Task 4: Generate and Audit Offline Pronunciation
+### Task 4: Import and Audit Offline Pronunciation
 
 **Files:**
-- Create: `scripts/generate-audio.mjs`
+- Create: `scripts/sync-audio.mjs`
 - Create: `assets/audio/`
 - Create: `assets/audio/manifest.json`
+- Create: `assets/audio/THIRD_PARTY_NOTICES.md`
+- Create: `assets/audio/CC-BY-SA-3.0.html`
 - Create: `tests/audio-manifest.test.mjs`
 - Modify: `docs/data-audit.md`
+- Modify: `scripts/validate-library.mjs`
 
 - [ ] **Step 1: Write a failing manifest coverage test**
 
@@ -332,9 +335,12 @@ test('provides one local asset for every reading id', () => {
     .map(entry => entry.audio));
   assert.deepEqual(new Set(Object.keys(manifest.readings)), required);
   for (const record of Object.values(manifest.readings)) {
-    assert.match(record.file, /^assets\/audio\/[a-z]+[1-5]\.m4a$/);
-    assert.ok(record.sourceText.length > 0);
-    assert.equal(record.reviewed, true);
+    assert.match(record.file, /^assets\/audio\/[a-z]+[1-5]\.mp3$/);
+    assert.match(record.sourceFile, /^64k\/syllabs\/cmn-[a-z]+[1-5]\.mp3$/);
+    assert.ok(Number.isInteger(record.bytes) && record.bytes > 0);
+    assert.match(record.sha256, /^[a-f0-9]{64}$/);
+    assert.equal(record.metadataVerified, true);
+    assert.equal(typeof record.auditoryReviewed, 'boolean');
   }
 });
 ```
@@ -345,38 +351,59 @@ Run: `node --test tests/audio-manifest.test.mjs`
 
 Expected: FAIL because the manifest and files do not exist.
 
-- [ ] **Step 3: Implement reproducible local generation**
+- [ ] **Step 3: Implement reproducible pinned-source import**
 
-The script derives unique reading ids from the curriculum, uses the configured Mandarin voice to create one source audio file per reading, converts it to AAC/M4A, and writes a deterministic manifest:
+The script derives the 335 unique reading ids from the curriculum and copies the corresponding original MP3 files from `hugolpz/audio-cmn` `64k/syllabs`, pinned to commit `ff9ed3d0c631195bd2c06f39450f3264c7124040`. It supports a local `--source` checkout for reproducibility and a pinned raw GitHub URL by default. Files are not transcoded and their ID3 metadata is not rewritten. The only source-name mapping exception is curriculum id `ju4`, which reads upstream `cmn-jv4.mp3` but is stored locally as `ju4.mp3`.
+
+The deterministic manifest records provenance and verification separately from human listening:
 
 ```json
 {
-  "format": "audio/mp4",
-  "voice": "Ting-Ting",
+  "schemaVersion": 1,
+  "format": "audio/mpeg",
+  "source": {
+    "repository": "https://github.com/hugolpz/audio-cmn",
+    "commit": "ff9ed3d0c631195bd2c06f39450f3264c7124040",
+    "subset": "64k/syllabs",
+    "license": "CC-BY-SA-3.0",
+    "attribution": "Wang Chen, Hugo Lopez, Nicolas Vion"
+  },
   "readings": {
     "chao2": {
-      "file": "assets/audio/chao2.m4a",
-      "sourceText": "潮",
-      "reviewed": true
+      "file": "assets/audio/chao2.mp3",
+      "sourceFile": "64k/syllabs/cmn-chao2.mp3",
+      "sourceLabel": "chao2",
+      "bytes": 0,
+      "sha256": "...",
+      "metadataVerified": true,
+      "auditoryReviewed": false
     }
   }
 }
 ```
 
-When a character is polyphonic, generate from the exact lesson reading and mark it reviewed only after listening. Reuse one file when multiple entries intentionally share the same reading id.
+The importer verifies the embedded `SWAC_TEXT`, `SWAC_COLL_LICENSE`, author/copyright tags, MP3 decodability, byte size, and hash before writing the manifest. `metadataVerified` may be true only after those machine checks pass. `auditoryReviewed` remains false until a person actually listens; do not infer it from metadata. Reuse one file when multiple curriculum entries intentionally share the same reading id.
+
+Bundle the CC BY-SA 3.0 legal text and a third-party notice naming Wang Chen, Hugo Lopez, Nicolas Vion, the repository, pinned commit, source subset, and whether files were renamed without byte changes. Update `docs/data-audit.md` with the automatic verification scope and the separate listening checklist.
 
 - [ ] **Step 4: Verify every file and audit polyphonic readings**
 
-Run: `node scripts/generate-audio.mjs --voice Ting-Ting`
+Run from a local pinned checkout when available:
+
+`node scripts/sync-audio.mjs --source /path/to/audio-cmn`
+
+Or fetch only the required files from the script's pinned raw URL:
+
+`node scripts/sync-audio.mjs`
 
 Run: `npm run validate`
 
-Expected: every referenced file exists and decodes; full library validation returns `Library valid`.
+Expected: exactly 335 referenced MP3 files exist, every hash and ID3 label matches the manifest, all files decode, and full library validation returns `Library valid`. The validation CLI must only treat `.mp3` basenames as audio assets; a same-named text or metadata file cannot satisfy a curriculum audio id.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add scripts/generate-audio.mjs assets/audio docs/data-audit.md tests/audio-manifest.test.mjs
+git add scripts/sync-audio.mjs scripts/validate-library.mjs assets/audio docs/data-audit.md tests/audio-manifest.test.mjs
 git commit -m "data: add offline Mandarin pronunciation"
 ```
 
