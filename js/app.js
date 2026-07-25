@@ -111,9 +111,11 @@
     var audioRequestGeneration = 0;
     var resumeRoute = null;
     var resumeRouteKey = null;
+    var committedResumeIntent = null;
+    var desiredResumeIntent = null;
     var storageEnabled = isRecord(storage);
-    var storageReconcileActive = false;
-    var storageReconcileRequested = false;
+    var storageFlushActive = false;
+    var storageFlushRequested = false;
     var destroyed = false;
     var lastAnimationAnnouncementKey = null;
     var installedListeners = [];
@@ -165,8 +167,25 @@
       return Object.freeze({ route: normalized, key: api.serializeHash(normalized) });
     }
 
+    function createResumeIntent(routeValue, keyValue) {
+      return Object.freeze({ route: routeValue || null, key: keyValue || null });
+    }
+
+    function commitResumeIntent(intent) {
+      committedResumeIntent = intent;
+      resumeRoute = intent && intent.route ? intent.route : null;
+      resumeRouteKey = intent && intent.key ? intent.key : null;
+    }
+
+    function desireResumeIntent(intent) {
+      desiredResumeIntent = intent;
+      if (storageFlushActive) storageFlushRequested = true;
+    }
+
     function disableStorage() {
       storageEnabled = false;
+      committedResumeIntent = null;
+      desiredResumeIntent = null;
       resumeRoute = null;
       resumeRouteKey = null;
       if (route && route.view === 'directory' && currentHandle
@@ -195,10 +214,10 @@
     }
 
     function removeCorruptResume() {
-      resumeRoute = null;
-      resumeRouteKey = null;
-      var result = storageOperation('removeItem', [STORAGE_KEY]);
-      return result.ok;
+      var intent = createResumeIntent(null, null);
+      desireResumeIntent(intent);
+      commitResumeIntent(intent);
+      return flushResumeStorage();
     }
 
     function readResumeRoute() {
@@ -213,44 +232,36 @@
         removeCorruptResume();
         return null;
       }
-      return Object.freeze({ route: info.route, key: info.key });
+      return createResumeIntent(info.route, info.key);
     }
 
-    function reconcileStoredResume() {
+    function flushResumeStorage() {
       if (!storageEnabled) return false;
-      if (storageReconcileActive) {
-        storageReconcileRequested = true;
-        return false;
+      storageFlushRequested = true;
+      if (storageFlushActive) {
+        return true;
       }
 
-      storageReconcileActive = true;
-      storageReconcileRequested = true;
+      storageFlushActive = true;
       var attempts = 0;
       try {
         while (storageEnabled
-            && storageReconcileRequested
+            && storageFlushRequested
             && attempts < MAX_STORAGE_RECONCILIATIONS) {
-          storageReconcileRequested = false;
+          storageFlushRequested = false;
           attempts += 1;
-          var expectedRevision = transitionRevision;
-          var expectedRoute = resumeRoute;
-          var expectedKey = resumeRouteKey;
-          if (expectedRoute && expectedKey) {
-            storageOperation('setItem', [STORAGE_KEY, expectedKey]);
+          var intent = desiredResumeIntent;
+          if (intent && intent.route && intent.key) {
+            storageOperation('setItem', [STORAGE_KEY, intent.key]);
           } else {
             storageOperation('removeItem', [STORAGE_KEY]);
           }
-          if (storageEnabled
-              && (expectedRevision !== transitionRevision
-                || expectedRoute !== resumeRoute
-                || expectedKey !== resumeRouteKey)) {
-            storageReconcileRequested = true;
-          }
+          if (storageEnabled && intent !== desiredResumeIntent) storageFlushRequested = true;
         }
-        if (storageEnabled && storageReconcileRequested) disableStorage();
+        if (storageEnabled && storageFlushRequested) disableStorage();
       } finally {
-        storageReconcileActive = false;
-        storageReconcileRequested = false;
+        storageFlushActive = false;
+        storageFlushRequested = false;
       }
       return storageEnabled;
     }
@@ -258,15 +269,19 @@
     function saveResumeRoute(info, revision) {
       if (!ownsTransition(revision)) return false;
       if (info.route.view !== 'character' || !storageEnabled) return true;
-      var result = storageOperation('setItem', [STORAGE_KEY, info.key]);
+      var previousCommittedIntent = committedResumeIntent;
+      var intent = createResumeIntent(info.route, info.key);
+      desireResumeIntent(intent);
+      flushResumeStorage();
       if (!ownsTransition(revision)) {
-        reconcileStoredResume();
+        if (storageEnabled && desiredResumeIntent === intent) {
+          desireResumeIntent(previousCommittedIntent);
+          commitResumeIntent(previousCommittedIntent);
+          flushResumeStorage();
+        }
         return false;
       }
-      if (result.ok) {
-        resumeRoute = info.route;
-        resumeRouteKey = info.key;
-      }
+      if (storageEnabled) commitResumeIntent(intent);
       return ownsTransition(revision);
     }
 
@@ -516,8 +531,9 @@
           currentHandle = directoryHandle;
           var storedResume = readResumeRoute();
           if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
-          resumeRoute = storedResume ? storedResume.route : null;
-          resumeRouteKey = storedResume ? storedResume.key : null;
+          var loadedResumeIntent = storedResume || createResumeIntent(null, null);
+          desireResumeIntent(loadedResumeIntent);
+          commitResumeIntent(loadedResumeIntent);
           directoryHandle.setResumeAvailable(storedResume !== null);
           if (!ownsTransition(revision) || currentHandle !== directoryHandle) return null;
         } else if (route.view === 'lesson') {

@@ -716,6 +716,65 @@ test('a superseded storage write is reconciled to the nested winning character r
   assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
 });
 
+test('a superseded character save restores the resume intent loaded from storage', () => {
+  const storage = createStorage({ [STORAGE_KEY]: characterHash('城') });
+  const harness = createHarness({ hash: '#/', storage, reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  const setItem = storage.setItem;
+  let nested = false;
+  storage.setItem = function (key, value) {
+    if (!nested && value === characterHash()) {
+      nested = true;
+      app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+    }
+    setItem.call(this, key, value);
+  };
+
+  const changed = app.navigate(characterRoute());
+
+  assert.equal(changed, false);
+  assert.deepEqual(app.getRoute(), {
+    view: 'lesson', lessonId: 'lesson-1', group: 'write'
+  });
+  assert.equal(
+    harness.location.hash,
+    '#/lesson?lesson=lesson-1&group=write'
+  );
+  assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
+});
+
+test('reentrant character saves use one bounded non-recursive storage flush', () => {
+  const storage = createStorage();
+  const harness = createHarness({ hash: '#/', storage, reducedMotion: true });
+  const app = loadApp().createApp(harness.createOptions);
+  const setItem = storage.setItem;
+  let writeCount = 0;
+  let writeDepth = 0;
+  let maximumWriteDepth = 0;
+  storage.setItem = function (key, value) {
+    writeCount += 1;
+    writeDepth += 1;
+    maximumWriteDepth = Math.max(maximumWriteDepth, writeDepth);
+    try {
+      if (writeCount < 40) {
+        const nextCharacter = value === characterHash() ? '城' : '郭';
+        app.navigate(characterRoute(nextCharacter));
+      }
+      setItem.call(this, key, value);
+    } finally {
+      writeDepth -= 1;
+    }
+  };
+
+  app.navigate(characterRoute());
+
+  assert.equal(maximumWriteDepth, 1);
+  assert.ok(writeCount <= 16, `expected at most 16 writes, received ${writeCount}`);
+  assert.equal(harness.location.hash, characterHash(app.getRoute().character));
+  app.navigate({ view: 'directory' });
+  assert.equal(currentHandle(harness).resumeAvailable, false);
+});
+
 test('stale animation callbacks cannot update or announce into a later view', () => {
   const harness = createHarness({ hash: characterHash() });
   const app = loadApp().createApp(harness.createOptions);
@@ -895,6 +954,33 @@ test('storage accepts only canonical character routes and contains corrupt or th
   const setApp = loadApp().createApp(setHarness.createOptions);
   setApp.navigate({ view: 'directory' });
   assert.equal(currentHandle(setHarness).resumeAvailable, false);
+});
+
+test('a corrupt removal reentry preserves the nested character winner in storage', () => {
+  const storage = createStorage();
+  const harness = createHarness({
+    hash: characterHash(),
+    storage,
+    reducedMotion: true
+  });
+  const app = loadApp().createApp(harness.createOptions);
+  storage.setItem(STORAGE_KEY, 'corrupt');
+  const removeItem = storage.removeItem;
+  let nested = false;
+  storage.removeItem = function (key) {
+    if (!nested) {
+      nested = true;
+      app.navigate(characterRoute('城'));
+    }
+    removeItem.call(this, key);
+  };
+
+  const changed = app.navigate({ view: 'directory' });
+
+  assert.equal(changed, false);
+  assert.deepEqual(app.getRoute(), characterRoute('城'));
+  assert.equal(harness.location.hash, characterHash('城'));
+  assert.equal(storage.value(STORAGE_KEY), characterHash('城'));
 });
 
 test('audio maps transient and permanent failures and ignores stale promises after navigation', async () => {
