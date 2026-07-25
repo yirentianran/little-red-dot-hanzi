@@ -151,7 +151,7 @@ import assert from 'node:assert/strict';
 import curriculum from '../data/curriculum.json' with { type: 'json' };
 
 const expectedTitles = [
-  '观潮', '走月亮', '现代诗二首', '繁星', '一个豆荚里的五粒豆', '蝙蝠和雷达',
+  '观潮', '走月亮', '现代诗二首', '繁星', '一个豆荚里的五粒豆', '夜间飞行的秘密',
   '呼风唤雨的世纪', '蝴蝶的家', '古诗三首', '爬山虎的脚', '蟋蟀的住宅',
   '盘古开天地', '精卫填海', '普罗米修斯', '女娲补天', '麻雀', '爬天都峰',
   '牛和鹅', '一只窝囊的大老虎', '陀螺', '古诗三首', '为中华之崛起而读书',
@@ -178,9 +178,12 @@ test('includes the four textbook language-garden literacy groups', () => {
   assert.ok(gardens.every(section => section.write.length === 0));
 });
 
-test('matches the appendix totals', () => {
+test('preserves every displayed reading while matching the appendix totals', () => {
   const sections = curriculum.units.flatMap(unit => unit.lessons);
-  assert.equal(sections.reduce((sum, section) => sum + section.recognize.length, 0), 250);
+  const recognize = sections.flatMap(section => section.recognize);
+  assert.equal(recognize.length, 271);
+  assert.equal(recognize.filter(entry => entry.counted !== false).length, 250);
+  assert.equal(recognize.filter(entry => entry.counted === false).length, 21);
   assert.equal(sections.reduce((sum, section) => sum + section.write.length, 0), 250);
 });
 
@@ -206,7 +209,7 @@ Expected: FAIL because `data/curriculum.json` does not exist.
 
 - [ ] **Step 3: Create the complete audited curriculum JSON**
 
-Populate all 8 units, 27 numbered lessons, and the language-garden literacy groups in Units 2, 4, 6, and 8 from the 2019 approved textbook appendices. Mark numbered records with `kind: "lesson"` and language-garden records with `kind: "garden"`; garden records have no lesson number and use an empty `write` array. The finished curriculum must contain exactly 250 recognize entries and 250 write entries. Use normalized tone-marked pinyin and numbered reading ids such as `{ "character": "潮", "pinyin": "cháo", "audio": "chao2" }`. Preserve legitimate reuse across lessons or groups; do not infer a pronunciation from the character alone.
+Populate all 8 units, 27 numbered lessons, and the language-garden literacy groups in Units 2, 4, 6, and 8 from the user-cover-aligned 2023 printing of the 2019-approved textbook (not the 2024 revision). Mark numbered records with `kind: "lesson"` and language-garden records with `kind: "garden"`; garden records have no lesson number and use an empty `write` array. Preserve all 271 displayed `recognize` readings. Mark the appendix's 21 blue polyphonic readings with `"counted": false`, so the counted-new-character total remains exactly 250; the `write` total is exactly 250. Use normalized tone-marked pinyin and numbered reading ids such as `{ "character": "潮", "pinyin": "cháo", "audio": "chao2" }`. Preserve legitimate reuse across lessons or groups; do not infer a pronunciation from the character alone.
 
 Record the cover URL, the textbook appendix/page used for each transcription pass, reviewer date, and any polyphonic decisions in `docs/data-audit.md`. The audit must contain a per-lesson checkbox table and totals derived from the JSON, not manually typed totals.
 
