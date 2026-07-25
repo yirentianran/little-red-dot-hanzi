@@ -166,7 +166,22 @@ test('identifies the approved textbook edition', () => {
 
 test('contains all 8 units and 27 numbered lessons in order', () => {
   assert.equal(curriculum.units.length, 8);
-  assert.deepEqual(curriculum.units.flatMap(unit => unit.lessons.map(lesson => lesson.title)), expectedTitles);
+  const numbered = curriculum.units.flatMap(unit => unit.lessons)
+    .filter(section => section.kind === 'lesson');
+  assert.deepEqual(numbered.map(lesson => lesson.title), expectedTitles);
+});
+
+test('includes the four textbook language-garden literacy groups', () => {
+  const gardens = curriculum.units.flatMap(unit => unit.lessons)
+    .filter(section => section.kind === 'garden');
+  assert.deepEqual(gardens.map(section => section.id), ['garden-2', 'garden-4', 'garden-6', 'garden-8']);
+  assert.ok(gardens.every(section => section.write.length === 0));
+});
+
+test('matches the appendix totals', () => {
+  const sections = curriculum.units.flatMap(unit => unit.lessons);
+  assert.equal(sections.reduce((sum, section) => sum + section.recognize.length, 0), 250);
+  assert.equal(sections.reduce((sum, section) => sum + section.write.length, 0), 250);
 });
 
 test('each lesson entry has an explicit textbook classification and tone-marked pinyin', () => {
@@ -191,7 +206,7 @@ Expected: FAIL because `data/curriculum.json` does not exist.
 
 - [ ] **Step 3: Create the complete audited curriculum JSON**
 
-Populate all 8 units and 27 numbered lessons from the 2019 approved textbook's lesson-level recognize/write lists. Use normalized tone-marked pinyin and numbered reading ids such as `{ "character": "潮", "pinyin": "cháo", "audio": "chao2" }`. Preserve legitimate reuse across lessons or groups; do not infer a pronunciation from the character alone.
+Populate all 8 units, 27 numbered lessons, and the language-garden literacy groups in Units 2, 4, 6, and 8 from the 2019 approved textbook appendices. Mark numbered records with `kind: "lesson"` and language-garden records with `kind: "garden"`; garden records have no lesson number and use an empty `write` array. The finished curriculum must contain exactly 250 recognize entries and 250 write entries. Use normalized tone-marked pinyin and numbered reading ids such as `{ "character": "潮", "pinyin": "cháo", "audio": "chao2" }`. Preserve legitimate reuse across lessons or groups; do not infer a pronunciation from the character alone.
 
 Record the cover URL, the textbook appendix/page used for each transcription pass, reviewer date, and any polyphonic decisions in `docs/data-audit.md`. The audit must contain a per-lesson checkbox table and totals derived from the JSON, not manually typed totals.
 
