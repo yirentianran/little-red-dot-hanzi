@@ -4,6 +4,8 @@
   "scripts": {
     "test": "node --test tests/*.test.mjs",
     "validate": "node scripts/validate-library.mjs",
+    "sync:audio": "node scripts/sync-audio.mjs",
+    "verify:audio": "node scripts/sync-audio.mjs --verify",
     "build:data": "node scripts/build-library.mjs",
     "check": "npm test && npm run validate && npm run build:data"
   },

@@ -29,7 +29,9 @@ async function readAudioIds(rootDir, errors) {
   const relativePath = 'assets/audio';
   try {
     const entries = await readdir(path.join(rootDir, relativePath), { withFileTypes: true });
-    return new Set(entries.filter(entry => entry.isFile()).map(entry => path.parse(entry.name).name));
+    return new Set(entries
+      .filter(entry => entry.isFile() && /^[a-z]+[1-5]\.mp3$/.test(entry.name))
+      .map(entry => entry.name.slice(0, -'.mp3'.length)));
   } catch (error) {
     if (error.code === 'ENOENT') errors.push(`Missing source directory: ${relativePath}`);
     else errors.push(`Unable to read source directory ${relativePath}: ${error.message}`);

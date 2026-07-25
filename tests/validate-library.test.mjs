@@ -8,7 +8,7 @@ import { runValidation } from '../scripts/validate-library.mjs';
 
 const fixture = name => readFile(new URL(`./fixtures/${name}`, import.meta.url), 'utf8');
 
-async function createLibrary(t, { curriculum, characters, audio = true } = {}) {
+async function createLibrary(t, { curriculum, characters, audio = true, audioFiles = ['guo1.mp3'] } = {}) {
   const rootDir = await mkdtemp(path.join(tmpdir(), 'hanzi-library-validation-'));
   t.after(() => rm(rootDir, { force: true, recursive: true }));
 
@@ -19,7 +19,9 @@ async function createLibrary(t, { curriculum, characters, audio = true } = {}) {
   if (characters !== undefined) await writeFile(path.join(rootDir, 'data/characters.json'), characters);
   if (audio) {
     await mkdir(path.join(rootDir, 'assets/audio'), { recursive: true });
-    await writeFile(path.join(rootDir, 'assets/audio/guo1.m4a'), '');
+    for (const file of audioFiles) {
+      await writeFile(path.join(rootDir, `assets/audio/${file}`), '');
+    }
   }
 
   return rootDir;
@@ -105,4 +107,36 @@ test('reports a malformed character document through the validation CLI contract
   assert.equal(exitCode, 1);
   assert.deepEqual(stdout, []);
   assert.match(stderr.join('\n'), /characters.*object/i);
+});
+
+test('only regular lowercase .mp3 files satisfy curriculum audio ids', async t => {
+  for (const file of ['guo1.txt', 'guo1.json', 'guo1.m4a', 'guo1.MP3']) {
+    const rootDir = await createLibrary(t, {
+      characters: await fixture('valid-characters.json'),
+      curriculum: await fixture('valid-curriculum.json'),
+      audioFiles: [file]
+    });
+    const { stderr, stdout, writers } = createWriters();
+
+    const exitCode = await runValidation({ rootDir, ...writers });
+
+    assert.equal(exitCode, 1, file);
+    assert.deepEqual(stdout, [], file);
+    assert.match(stderr.join('\n'), /missing audio guo1/i, file);
+  }
+});
+
+test('metadata and license files are never treated as audio ids', async t => {
+  const rootDir = await createLibrary(t, {
+    characters: await fixture('valid-characters.json'),
+    curriculum: await fixture('valid-curriculum.json'),
+    audioFiles: ['manifest.json', 'THIRD_PARTY_NOTICES.md', 'CC-BY-SA-3.0.html']
+  });
+  const { stderr, stdout, writers } = createWriters();
+
+  const exitCode = await runValidation({ rootDir, ...writers });
+
+  assert.equal(exitCode, 1);
+  assert.deepEqual(stdout, []);
+  assert.match(stderr.join('\n'), /missing audio guo1/i);
 });
