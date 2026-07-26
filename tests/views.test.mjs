@@ -1268,6 +1268,10 @@ test('index is offline-first, accessible, and loads classic scripts in dependenc
     'js/svg-renderer.js',
     'js/animation-controller.js',
     'js/audio-controller.js',
+    'vendor/hanzi-writer.min.js',
+    'js/practice-progress-store.js',
+    'js/practice-session.js',
+    'js/practice-engine.js',
     'js/views.js',
     'js/app.js'
   ]);

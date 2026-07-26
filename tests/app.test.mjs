@@ -5,12 +5,18 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 import routerModule from '../js/router.js';
+import practiceProgressModule from '../js/practice-progress-store.js';
+import practiceSessionModule from '../js/practice-session.js';
 
 const require = createRequire(import.meta.url);
 const STORAGE_KEY = 'hanzi-tracking:last-route:v1';
 
 function loadApp() {
   return require('../js/app.js');
+}
+
+function loadViews() {
+  return require('../js/views.js');
 }
 
 class FakeEventTarget {
@@ -137,7 +143,15 @@ function deferred() {
 function createHarness(options = {}) {
   const log = [];
   const root = new FakeElement('main');
-  const announcer = { textContent: '' };
+  const announcements = [];
+  let announcedText = '';
+  const announcer = {
+    get textContent() { return announcedText; },
+    set textContent(value) {
+      announcedText = String(value);
+      announcements.push(announcedText);
+    }
+  };
   const windowObject = new FakeEventTarget();
   const documentObject = new FakeEventTarget();
   documentObject.hidden = options.hidden === true;
@@ -198,13 +212,20 @@ function createHarness(options = {}) {
 
   const state = {
     log,
+    announcements,
     store,
     views: [],
-    renderCounts: { directory: 0, lesson: 0, character: 0 },
+    renderCounts: { directory: 0, lesson: 0, character: 0, practice: 0 },
     renderHandles: [],
     renderers: [],
     animations: [],
     audioPlays: [],
+    lessonModelCalls: [],
+    characterModelCalls: [],
+    practiceModelCalls: [],
+    practiceSessions: [],
+    practiceEngines: [],
+    practiceProgress: null,
     unavailable: new Set(),
     audioPlay: (id) => Promise.resolve(!state.unavailable.has(id)),
     app: null
@@ -250,8 +271,14 @@ function createHarness(options = {}) {
       return store;
     },
     createDirectoryModel: () => Object.freeze({ units: [] }),
-    createLessonModel: (_store, selector) => Object.freeze({ ...selector, lesson, unit }),
-    createCharacterModel(resolved) {
+    createLessonModel: (_store, selector, practice) => {
+      state.lessonModelCalls.push({ selector, practice });
+      if (options.realViewModels) return loadViews().createLessonModel(_store, selector, practice);
+      return Object.freeze({ ...selector, lesson, unit, practice });
+    },
+    createCharacterModel(resolved, practice) {
+      state.characterModelCalls.push({ resolved, practice });
+      if (options.realViewModels) return loadViews().createCharacterModel(resolved, practice);
       return Object.freeze({
         unit: resolved.unit,
         lesson: resolved.lesson,
@@ -267,8 +294,31 @@ function createHarness(options = {}) {
         next: resolved.next,
         previousDisabled: resolved.previous === null,
         nextDisabled: resolved.next === null,
-        isReview: false
+        isReview: false,
+        practice
       });
+    },
+    createPracticeProgressStore(candidateStorage) {
+      const progress = practiceProgressModule.createPracticeProgressStore(candidateStorage);
+      state.practiceProgress = progress;
+      return progress;
+    },
+    createPracticeSession(sessionOptions) {
+      const session = practiceSessionModule.createPracticeSession(sessionOptions);
+      state.practiceSessions.push({ options: sessionOptions, session });
+      return session;
+    },
+    createPracticeModel(resolved, sessionState, persistent) {
+      if (options.realViewModels) {
+        const model = loadViews().createPracticeModel(resolved, sessionState, persistent);
+        state.practiceModelCalls.push(model);
+        return model;
+      }
+      const model = Object.freeze({
+        resolved, state: sessionState, persistent, strokeCount: resolved.geometry.strokeCount
+      });
+      state.practiceModelCalls.push(model);
+      return model;
     },
     renderDirectory() {
       let resumeAvailable = null;
@@ -313,6 +363,57 @@ function createHarness(options = {}) {
         }
       };
       return installView('character', handle);
+    },
+    renderPractice(_root, model) {
+      const status = model.state ? model.state.status : model.status;
+      const handle = {
+        heading: heading('practice'),
+        board: status === 'active' ? new FakeElement('practice-board') : null,
+        model,
+        feedback: [],
+        strokePositions: [],
+        setFeedback(message, kind) {
+          this.feedback.push([message, kind]);
+          log.push('practice.feedback=' + kind + ':' + message);
+        },
+        setStrokePosition(current, total) {
+          this.strokePositions.push([current, total]);
+          log.push('practice.stroke=' + current + '/' + total);
+        }
+      };
+      return installView('practice', handle);
+    },
+    createPracticeEngine(engineOptions) {
+      const engine = {
+        options: engineOptions,
+        starts: [],
+        restartCalls: 0,
+        hintCalls: 0,
+        destroyed: false,
+        start(value) {
+          this.starts.push(value);
+          log.push('practice-engine.start=' + value.phase + ':' + value.strokeIndex);
+        },
+        restart() {
+          this.restartCalls += 1;
+          log.push('practice-engine.restart');
+          if (state.onPracticeEngineRestart) state.onPracticeEngineRestart(this);
+        },
+        showHint() {
+          this.hintCalls += 1;
+          log.push('practice-engine.hint');
+          if (state.onPracticeEngineHint) state.onPracticeEngineHint(this);
+        },
+        emit(event) {
+          engineOptions.onEvent(event);
+        },
+        destroy() {
+          this.destroyed = true;
+          log.push('practice-engine.destroy');
+        }
+      };
+      state.practiceEngines.push(engine);
+      return engine;
     },
     createSvgRenderer() {
       log.push('renderer.create');
@@ -409,9 +510,11 @@ function createHarness(options = {}) {
     documentObject,
     location,
     storage,
+    HanziWriter: options.HanziWriter || Object.freeze({ create() {} }),
     createAudio,
     reducedMotion: options.reducedMotion === true
   };
+  windowObject.HanziWriter = createOptions.HanziWriter;
   if (Object.hasOwn(options, 'initialRoute')) createOptions.initialRoute = options.initialRoute;
 
   function click(action, attributes = {}, clickOptions = {}) {
@@ -458,11 +561,274 @@ function characterHash(character = '郭', group = 'write') {
   return routerModule.serializeHash(characterRoute(character, group));
 }
 
+function practiceRoute(character = '郭', group = 'write', scope = 'group') {
+  return { view: 'practice', lessonId: 'lesson-1', group, scope, character };
+}
+
+function practiceHash(character = '郭', group = 'write', scope = 'group') {
+  return routerModule.serializeHash(practiceRoute(character, group, scope));
+}
+
 test('exports the complete frozen application integration API', () => {
   const app = loadApp();
 
   assert.deepEqual(Object.keys(app).sort(), ['bootstrapApp', 'createApp']);
   assert.ok(Object.isFrozen(app));
+});
+
+test('starts group practice from both lesson groups and replaces hashes between characters', () => {
+  for (const [group, first, second] of [
+    ['write', '郭', '城'],
+    ['recognize', '识', '字']
+  ]) {
+    const harness = createHarness({ hash: '#/' });
+    const app = loadApp().createApp(harness.createOptions);
+    harness.click('open-lesson', {
+      'data-lesson-id': 'lesson-1', 'data-group': group
+    });
+    harness.click('start-group-practice', {
+      'data-lesson-id': 'lesson-1', 'data-group': group
+    });
+
+    assert.deepEqual(app.getRoute(), practiceRoute(first, group, 'group'));
+    assert.equal(harness.state.views.at(-1), 'practice');
+    assert.equal(harness.state.practiceSessions.at(-1).options.scope, 'group');
+    assert.equal(harness.location.hash, practiceHash(first, group, 'group'));
+    assert.ok(harness.state.log.includes('location.hash=' + practiceHash(first, group, 'group')));
+
+    let engine = harness.state.practiceEngines.at(-1);
+    engine.emit({ type: 'character-complete', totalMistakes: 0 });
+    engine = harness.state.practiceEngines.at(-1);
+    engine.emit({ type: 'character-complete', totalMistakes: 0 });
+
+    assert.equal(app.getRoute().character, second);
+    assert.equal(harness.location.hash, practiceHash(second, group, 'group'));
+    assert.ok(harness.state.log.includes('location.replace=' + practiceHash(second, group, 'group')));
+  }
+});
+
+test('quiz events drive guided, independent, retry and exactly-once progress updates', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  loadApp().createApp(harness.createOptions);
+  const firstEngine = harness.state.practiceEngines.at(-1);
+
+  firstEngine.emit({ type: 'stroke-correct', strokeNum: 0, strokesRemaining: 2 });
+  firstEngine.emit({ type: 'stroke-mistake', strokeNum: 1, totalMistakes: 1, isBackwards: true });
+  assert.deepEqual(currentHandle(harness).strokePositions.at(-1), [2, 3]);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['方向反了，再试一次', 'error']);
+  assert.equal(harness.state.practiceSessions.at(-1).session.getState().mistakes, 1);
+
+  firstEngine.emit({ type: 'character-complete', totalMistakes: 1 });
+  assert.equal(firstEngine.destroyed, true);
+  assert.equal(harness.state.practiceSessions.at(-1).session.getState().phase, 'independent');
+  const independentEngine = harness.state.practiceEngines.at(-1);
+  independentEngine.emit({ type: 'stroke-mistake', strokeNum: 0, totalMistakes: 1, isBackwards: false });
+  independentEngine.emit({ type: 'character-complete', totalMistakes: 1 });
+
+  assert.equal(harness.state.practiceSessions.at(-1).session.getState().status, 'needs-retry');
+  assert.equal(harness.state.views.at(-1), 'practice');
+  assert.equal(harness.state.practiceProgress.getCharacter('郭').attemptCount, 1);
+  assert.equal(harness.state.practiceProgress.getCharacter('郭').lastOutcome, 'needs-practice');
+  assert.equal(independentEngine.destroyed, true);
+
+  harness.click('practice-retry');
+  const retryEngine = harness.state.practiceEngines.at(-1);
+  assert.deepEqual(retryEngine.starts, [{ phase: 'independent', strokeIndex: 0 }]);
+  retryEngine.emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(harness.state.practiceProgress.getCharacter('郭').attemptCount, 2);
+  assert.equal(harness.state.practiceProgress.getCharacter('郭').lastOutcome, 'mastered');
+});
+
+test('practice hint, restart and return actions target only the current practice resources', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const engine = harness.state.practiceEngines.at(-1);
+  engine.emit({ type: 'stroke-mistake', strokeNum: 0, totalMistakes: 1, isBackwards: false });
+
+  harness.click('practice-hint');
+  assert.equal(engine.hintCalls, 1);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['请看当前笔的提示', 'hint']);
+  harness.click('practice-restart');
+  assert.equal(engine.restartCalls, 1);
+  assert.equal(harness.state.practiceSessions.at(-1).session.getState().mistakes, 0);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['已经重新开始', 'neutral']);
+
+  harness.click('practice-return-lesson');
+  assert.deepEqual(app.getRoute(), { view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+  assert.equal(engine.destroyed, true);
+  assert.equal(app.dispatch('practice-hint'), false);
+});
+
+test('reentrant practice commands never write feedback into a replacement view', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const firstHandle = currentHandle(harness);
+  const firstEngine = harness.state.practiceEngines.at(-1);
+  harness.state.onPracticeEngineHint = (engine) => {
+    harness.state.onPracticeEngineHint = null;
+    engine.emit({ type: 'character-complete', totalMistakes: 0 });
+  };
+
+  assert.equal(app.dispatch('practice-hint'), false);
+  assert.equal(firstEngine.destroyed, true);
+  assert.notEqual(currentHandle(harness), firstHandle);
+  assert.equal(currentHandle(harness).feedback.length, 0);
+});
+
+test('practice preserves the last learning route and returns to remembered or direct-url origins', () => {
+  const harness = createHarness({ hash: characterHash('字', 'recognize') });
+  const app = loadApp().createApp(harness.createOptions);
+  const savedLearningRoute = harness.storage.value(STORAGE_KEY);
+  harness.click('start-character-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'recognize', 'data-character': '字'
+  });
+  assert.deepEqual(app.getRoute(), practiceRoute('字', 'recognize', 'single'));
+  assert.equal(harness.storage.value(STORAGE_KEY), savedLearningRoute);
+  harness.click('practice-back');
+  assert.deepEqual(app.getRoute(), characterRoute('字', 'recognize'));
+
+  const directSingle = createHarness({ hash: practiceHash('城', 'write', 'single') });
+  const singleApp = loadApp().createApp(directSingle.createOptions);
+  directSingle.click('practice-back');
+  assert.deepEqual(singleApp.getRoute(), characterRoute('城', 'write'));
+
+  const directGroup = createHarness({ hash: practiceHash('城', 'write', 'group') });
+  const groupApp = loadApp().createApp(directGroup.createOptions);
+  directGroup.click('practice-back');
+  assert.deepEqual(groupApp.getRoute(), { view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+});
+
+test('injects current practice snapshots into lesson and character models', () => {
+  const harness = createHarness({
+    hash: '#/lesson?lesson=lesson-1&group=write', realViewModels: true
+  });
+  const app = loadApp().createApp(harness.createOptions);
+  harness.state.practiceProgress.recordCharacterOutcome('郭', 'mastered');
+  harness.state.practiceProgress.markGroupCharacterCompleted('lesson-1', 'write', '城');
+  app.navigate({ view: 'directory' });
+  app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+
+  const lessonModel = currentHandle(harness).model;
+  assert.equal(lessonModel.entries[0].mastered, true);
+  assert.equal(lessonModel.entries[1].completedHere, true);
+
+  app.navigate(characterRoute('城', 'write'));
+  const characterModel = currentHandle(harness).model;
+  assert.equal(characterModel.mastered, false);
+  assert.equal(characterModel.completedHere, true);
+});
+
+test('real practice models accept every app-generated active, retry and complete snapshot', () => {
+  const harness = createHarness({ hash: practiceHash(), realViewModels: true });
+  loadApp().createApp(harness.createOptions);
+  assert.equal(currentHandle(harness).model.status, 'active');
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 1 });
+  assert.equal(currentHandle(harness).model.status, 'needs-retry');
+  harness.click('practice-defer');
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(currentHandle(harness).model.status, 'complete');
+});
+
+test('defers failed group characters and reviews only the resulting needs list without resume', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  loadApp().createApp(harness.createOptions);
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 2 });
+  harness.click('practice-defer');
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(harness.state.practiceSessions.at(-1).session.getState().status, 'complete');
+  assert.deepEqual(harness.state.practiceSessions.at(-1).session.getState().needsPracticeCharacters, ['郭']);
+
+  harness.click('practice-review-needs');
+  const review = harness.state.practiceSessions.at(-1);
+  assert.equal(review.options.resume, false);
+  assert.deepEqual(review.options.entries.map((entry) => entry.character), ['郭']);
+  assert.equal(review.options.startCharacter, '郭');
+});
+
+test('practice cleanup rejects stale engine events and storage degradation is announced once', () => {
+  const storage = createStorage();
+  const originalSetItem = storage.setItem;
+  storage.setItem = function (key, value) {
+    if (key === practiceProgressModule.PRACTICE_STORAGE_KEY) throw new Error('quota');
+    return originalSetItem.call(this, key, value);
+  };
+  const harness = createHarness({ hash: practiceHash(), storage });
+  const app = loadApp().createApp(harness.createOptions);
+  const sessionRecord = harness.state.practiceSessions.at(-1);
+  const staleEngine = harness.state.practiceEngines.at(-1);
+  staleEngine.emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(harness.state.practiceProgress.isPersistent(), false);
+  assert.equal(harness.state.announcements.filter((message) => message === '本次进度不会保存').length, 1);
+
+  app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+  assert.equal(staleEngine.destroyed, true);
+  assert.throws(() => sessionRecord.session.getState(), /destroyed/);
+  const renderCount = harness.state.renderCounts.practice;
+  staleEngine.emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(harness.state.renderCounts.practice, renderCount);
+
+  app.navigate(practiceRoute());
+  harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+  assert.equal(harness.state.announcements.filter((message) => message === '本次进度不会保存').length, 1);
+  app.destroy();
+  assert.equal(harness.state.practiceEngines.at(-1).destroyed, true);
+});
+
+test('a progress write that navigates reentrantly cannot leak the superseded practice session', () => {
+  const storage = createStorage();
+  const harness = createHarness({ hash: practiceHash(), storage });
+  const app = loadApp().createApp(harness.createOptions);
+  const session = harness.state.practiceSessions.at(-1).session;
+  const engine = harness.state.practiceEngines.at(-1);
+  const originalSetItem = storage.setItem;
+  let redirected = false;
+  storage.setItem = function (key, value) {
+    const result = originalSetItem.call(this, key, value);
+    if (!redirected && key === practiceProgressModule.PRACTICE_STORAGE_KEY) {
+      redirected = true;
+      app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+    }
+    return result;
+  };
+
+  engine.emit({ type: 'character-complete', totalMistakes: 0 });
+
+  assert.equal(app.getRoute().view, 'lesson');
+  assert.equal(engine.destroyed, true);
+  assert.throws(() => session.getState(), /destroyed/);
+  assert.equal(harness.state.renderCounts.practice, 1);
+});
+
+test('retry and defer clean sessions superseded by reentrant progress writes', async (context) => {
+  for (const action of ['practice-retry', 'practice-defer']) {
+    await context.test(action, () => {
+      const storage = createStorage();
+      const harness = createHarness({ hash: practiceHash(), storage });
+      const app = loadApp().createApp(harness.createOptions);
+      harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 0 });
+      harness.state.practiceEngines.at(-1).emit({ type: 'character-complete', totalMistakes: 1 });
+      const session = harness.state.practiceSessions.at(-1).session;
+      const originalSetItem = storage.setItem;
+      let redirected = false;
+      storage.setItem = function (key, value) {
+        const result = originalSetItem.call(this, key, value);
+        if (!redirected && key === practiceProgressModule.PRACTICE_STORAGE_KEY) {
+          redirected = true;
+          app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+        }
+        return result;
+      };
+
+      harness.click(action);
+
+      assert.equal(app.getRoute().view, 'lesson');
+      assert.throws(() => session.getState(), /destroyed/);
+    });
+  }
 });
 
 test('explicit initial route wins, renders synchronously, canonicalizes hash, and never steals focus', () => {
@@ -1176,7 +1542,14 @@ test('classic script merges without DOM access and index boots in offline depend
     html.matchAll(/<script defer src="([^"]+)"><\/script>/g),
     (match) => match[1]
   );
-  assert.deepEqual(scripts.slice(-2), ['js/views.js', 'js/app.js']);
+  assert.deepEqual(scripts.slice(-6), [
+    'vendor/hanzi-writer.min.js',
+    'js/practice-progress-store.js',
+    'js/practice-session.js',
+    'js/practice-engine.js',
+    'js/views.js',
+    'js/app.js'
+  ]);
   assert.match(html, /href="#app"/);
   assert.match(html, /DOMContentLoaded/);
   assert.match(html, /HanziApp\.bootstrapApp/);
