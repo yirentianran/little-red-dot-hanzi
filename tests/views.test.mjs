@@ -225,6 +225,8 @@ test('builds first, last, and review character models with real pinyin and strok
   assert.equal(first.character, '潮');
   assert.equal(first.pinyin, 'cháo');
   assert.equal(first.audioId, 'chao2');
+  assert.deepEqual(first.words, ['潮水', '浪潮', '涨潮']);
+  assert.ok(Object.isFrozen(first.words));
   assert.equal(first.strokeCount, 15);
   assert.equal(first.index, 0);
   assert.equal(first.total, 15);
@@ -387,6 +389,9 @@ test('renders character work surface and updates only coarse animation state', a
     '慢速', '适中', '快速'
   ]);
   assert.equal(byAttribute(container, 'data-slot', 'speed-group')[0].getAttribute('role'), 'group');
+  const vocabulary = byAttribute(container, 'data-slot', 'vocabulary-words');
+  assert.equal(vocabulary.length, 1);
+  assert.equal(vocabulary[0].textContent, '组词：潮水  浪潮  涨潮');
   assert.equal(byAction(container, 'previous-character').length, 1);
   assert.equal(byAction(container, 'next-character').length, 1);
   assert.equal(handle.board.getAttribute('data-slot'), 'character-board');
@@ -433,6 +438,32 @@ test('renders character work surface and updates only coarse animation state', a
   assert.equal(byAction(container, 'next-stroke')[0].getAttribute('disabled'), '');
   assert.equal(byAction(container, 'set-speed')[0].getAttribute('aria-pressed'), 'true');
   assert.ok(Object.isFrozen(handle));
+});
+
+test('omits the vocabulary row when a legacy character model has no words', () => {
+  const { renderCharacter } = loadViews();
+  const { container } = createDom();
+  const model = Object.freeze({
+    unit: Object.freeze({ id: 'unit-1', title: '第一单元' }),
+    lesson: Object.freeze({ id: 'lesson-1', title: '观潮', kind: 'lesson', number: 1 }),
+    group: 'write',
+    character: '潮',
+    pinyin: 'cháo',
+    audioId: 'chao2',
+    strokeCount: 15,
+    index: 0,
+    total: 15,
+    isReview: false,
+    previous: null,
+    next: null,
+    previousDisabled: true,
+    nextDisabled: true
+  });
+
+  renderCharacter(container, model);
+
+  assert.equal(byAttribute(container, 'data-slot', 'vocabulary-words').length, 0);
+  assert.equal(container.textContent.includes('组词'), false);
 });
 
 test('updates audio feedback and keeps pronunciation and character navigation after board failure', async () => {
@@ -531,6 +562,8 @@ test('styles define the responsive bright-classroom system without unsafe visual
   assert.match(css, /touch-action:\s*manipulation/i);
   assert.match(css, /prefers-reduced-motion:\s*reduce/i);
   assert.match(css, /overflow-wrap:\s*anywhere/i);
+  assert.match(css, /\.character-words\s*\{/i);
+  assert.match(css, /max-width:\s*18rem/i);
   assert.match(css, /\.visually-hidden\s*\{/i);
   assert.match(css, /\.skip-link:focus-visible/i);
   assert.match(css, /min-width:\s*0/i);

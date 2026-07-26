@@ -265,6 +265,16 @@
     };
   }
 
+  function copyWords(value, character, path) {
+    if (!Array.isArray(value)) return null;
+    var copy = value.map(function (word, index) {
+      requireNonBlankString(word, path + '[' + index + ']');
+      if (word.indexOf(character) === -1) reject(path + '[' + index + ']', 'must include ' + character);
+      return word;
+    });
+    return Object.freeze(copy);
+  }
+
   function createCharacterModel(resolved) {
     requireRecord(resolved, 'resolved');
     var unit = copyUnit(requireOwn(resolved, 'unit', 'resolved'), 'resolved.unit');
@@ -281,6 +291,7 @@
     if (Array.from(character).length !== 1) {
       reject('resolved.entry.character', 'must be one code point');
     }
+    var words = copyWords(entry.words, character, 'resolved.entry.words');
     var previous = copyNeighbor(requireOwn(resolved, 'previous', 'resolved'), 'resolved.previous');
     var next = copyNeighbor(requireOwn(resolved, 'next', 'resolved'), 'resolved.next');
     return freezeTree({
@@ -294,6 +305,7 @@
       audioId: requireNonBlankString(
         requireOwn(entry, 'audio', 'resolved.entry'), 'resolved.entry.audio'
       ),
+      words: words,
       strokeCount: requireInteger(
         requireOwn(geometry, 'strokeCount', 'resolved.geometry'), 'resolved.geometry.strokeCount', 1
       ),
@@ -615,6 +627,12 @@
     var boardColumn = node(documentObject, 'div', { 'class': 'board-column' }, undefined, [board]);
 
     var pinyin = node(documentObject, 'p', { 'class': 'character-pinyin' }, model.pinyin);
+    var vocabulary = Array.isArray(model.words) && model.words.length > 0
+      ? node(documentObject, 'p', {
+        'class': 'character-words',
+        'data-slot': 'vocabulary-words'
+      }, '组词：' + model.words.join('  '))
+      : null;
     var hanzi = node(documentObject, 'p', { 'class': 'character-display' }, model.character);
     var strokeCount = node(documentObject, 'p', { 'class': 'stroke-count' },
       '共 ' + model.strokeCount + ' 笔');
@@ -669,11 +687,9 @@
       'role': 'group',
       'aria-label': '笔顺播放速度'
     }, undefined, speedButtons);
-    var tools = node(documentObject, 'section', {
-      'class': 'character-tools',
-      'aria-label': model.character + '的读音和笔顺控制'
-    }, undefined, [
-      pinyin,
+    var toolChildren = [pinyin];
+    if (vocabulary) toolChildren.push(vocabulary);
+    toolChildren.push(
       hanzi,
       strokeCount,
       audioButton,
@@ -681,7 +697,11 @@
       animationStatus,
       controls,
       speedGroup
-    ]);
+    );
+    var tools = node(documentObject, 'section', {
+      'class': 'character-tools',
+      'aria-label': model.character + '的读音和笔顺控制'
+    }, undefined, toolChildren);
     var workSurface = node(documentObject, 'div', { 'class': 'character-work-surface' }, undefined, [
       boardColumn,
       tools
