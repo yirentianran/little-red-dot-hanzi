@@ -3,8 +3,10 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import vm from 'node:vm';
 
+import practiceProgressStoreModule from '../js/practice-progress-store.js';
 import practiceSessionModule from '../js/practice-session.js';
 
+const { PRACTICE_STORAGE_KEY, createPracticeProgressStore } = practiceProgressStoreModule;
 const { createPracticeSession } = practiceSessionModule;
 
 function groupProgress(overrides = {}) {
@@ -20,6 +22,18 @@ function groupProgress(overrides = {}) {
 
 function clone(value) {
   return structuredClone(value);
+}
+
+function createStorage(initial = {}) {
+  const values = new Map(Object.entries(initial));
+  return {
+    getItem(key) {
+      return values.has(key) ? values.get(key) : null;
+    },
+    setItem(key, value) {
+      values.set(key, value);
+    }
+  };
 }
 
 function createFakeProgress({ characters = {}, group = null } = {}) {
@@ -250,6 +264,16 @@ test('group resume restores compatible state and ignores incompatible saved queu
   const ignoredForeignNeeds = createPracticeSession(options(foreignNeeds));
   assert.equal(ignoredForeignNeeds.getState().character, '潮');
   assert.deepEqual(ignoredForeignNeeds.getState().needsPracticeCharacters, []);
+
+  const reversedCompleted = createFakeProgress({
+    group: groupProgress({
+      completedCharacters: ['据', '潮'], remainingCharacters: [], needsPracticeCharacters: [],
+      currentCharacter: null, currentPhase: null
+    })
+  });
+  const ignoredReversedCompleted = createPracticeSession(options(reversedCompleted));
+  assert.equal(ignoredReversedCompleted.getState().character, '潮');
+  assert.deepEqual(ignoredReversedCompleted.getState().completedCharacters, []);
 });
 
 test('single scope filters to the start character and never reads a group resume', () => {
@@ -362,6 +386,153 @@ test('single-scope destroy never saves group progress and makes later calls iner
   assert.throws(() => session.recordStrokeMistake(), /destroyed/i);
   assert.deepEqual(progress.calls.filter(([name]) => name === 'saveGroup'), []);
   assert.deepEqual(progress.calls, callsAfterDestroy);
+});
+
+test('guards reentrant collaborator callbacks without duplicating mutations', () => {
+  const outcomeProgress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const recordOutcome = outcomeProgress.recordCharacterOutcome;
+  let outcomeSession;
+  outcomeProgress.recordCharacterOutcome = function (character, outcome) {
+    recordOutcome.call(this, character, outcome);
+    assert.deepEqual(outcomeSession.getState(), {
+      status: 'active', phase: 'independent', character: '潮', index: 0, total: 2,
+      mistakes: 0, completedCharacters: [], remainingCharacters: ['潮', '据'], needsPracticeCharacters: []
+    });
+    assert.throws(() => outcomeSession.recordStrokeMistake(), /mutation/i);
+  };
+  outcomeSession = createPracticeSession(options(outcomeProgress));
+  assert.deepEqual(Object.keys(outcomeSession).sort(), [
+    'completeCharacter', 'defer', 'destroy', 'getState', 'recordStrokeMistake', 'restart', 'retry'
+  ]);
+  outcomeSession.completeCharacter({ totalMistakes: 0 });
+  assert.equal(outcomeProgress.calls.filter(([name]) => name === 'recordCharacterOutcome').length, 1);
+  assert.equal(outcomeProgress.calls.filter(([name]) => name === 'saveGroup').length, 1);
+
+  const saveProgress = createFakeProgress();
+  const saveGroup = saveProgress.saveGroup;
+  let saveSession;
+  saveProgress.saveGroup = function () {
+    saveGroup.apply(this, arguments);
+    assert.throws(() => saveSession.restart(), /mutation/i);
+  };
+  saveSession = createPracticeSession(options(saveProgress));
+  saveSession.completeCharacter({ totalMistakes: 0 });
+  assert.equal(saveProgress.calls.filter(([name]) => name === 'saveGroup').length, 1);
+
+  const markProgress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const markComplete = markProgress.markGroupCharacterCompleted;
+  let markSession;
+  markProgress.markGroupCharacterCompleted = function () {
+    markComplete.apply(this, arguments);
+    assert.throws(() => markSession.completeCharacter({ totalMistakes: 0 }), /mutation/i);
+  };
+  markSession = createPracticeSession(options(markProgress, { scope: 'single' }));
+  markSession.completeCharacter({ totalMistakes: 0 });
+  const outcomePosition = markProgress.calls.findIndex(([name]) => name === 'recordCharacterOutcome');
+  const markPosition = markProgress.calls.findIndex(([name]) => name === 'markGroupCharacterCompleted');
+  assert.equal(markProgress.calls.filter(([name]) => name === 'recordCharacterOutcome').length, 1);
+  assert.equal(markProgress.calls.filter(([name]) => name === 'markGroupCharacterCompleted').length, 1);
+  assert.ok(outcomePosition < markPosition);
+
+  const destroyProgress = createFakeProgress();
+  const destroySave = destroyProgress.saveGroup;
+  let destroySession;
+  destroyProgress.saveGroup = function () {
+    destroySave.apply(this, arguments);
+    assert.throws(() => destroySession.destroy(), /mutation/i);
+  };
+  destroySession = createPracticeSession(options(destroyProgress));
+  destroySession.destroy();
+  assert.doesNotThrow(() => destroySession.destroy());
+  assert.equal(destroyProgress.calls.filter(([name]) => name === 'saveGroup').length, 1);
+
+  const retryProgress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const retrySession = createPracticeSession(options(retryProgress));
+  retrySession.completeCharacter({ totalMistakes: 1 });
+  const retrySave = retryProgress.saveGroup;
+  retryProgress.saveGroup = function () {
+    retrySave.apply(this, arguments);
+    assert.throws(() => retrySession.retry(), /mutation/i);
+  };
+  retrySession.retry();
+  assert.equal(retryProgress.calls.filter(([name]) => name === 'saveGroup').length, 2);
+
+  const deferProgress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const deferSession = createPracticeSession(options(deferProgress));
+  deferSession.completeCharacter({ totalMistakes: 1 });
+  const deferSave = deferProgress.saveGroup;
+  deferProgress.saveGroup = function () {
+    deferSave.apply(this, arguments);
+    assert.throws(() => deferSession.defer(), /mutation/i);
+  };
+  deferSession.defer();
+  assert.equal(deferProgress.calls.filter(([name]) => name === 'saveGroup').length, 2);
+});
+
+test('clears the mutation guard after throwing collaborators so later commands remain usable', () => {
+  const progress = createFakeProgress();
+  const saveGroup = progress.saveGroup;
+  let shouldThrow = true;
+  progress.saveGroup = function () {
+    if (shouldThrow) {
+      shouldThrow = false;
+      throw new Error('save failed');
+    }
+    return saveGroup.apply(this, arguments);
+  };
+  const session = createPracticeSession(options(progress));
+
+  assert.throws(() => session.completeCharacter({ totalMistakes: 0 }), /save failed/);
+  assert.equal(session.getState().phase, 'guided');
+  assert.doesNotThrow(() => session.completeCharacter({ totalMistakes: 0 }));
+  assert.equal(session.getState().phase, 'independent');
+
+  const recordProgress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const recordOutcome = recordProgress.recordCharacterOutcome;
+  shouldThrow = true;
+  recordProgress.recordCharacterOutcome = function () {
+    if (shouldThrow) {
+      shouldThrow = false;
+      throw new Error('record failed');
+    }
+    return recordOutcome.apply(this, arguments);
+  };
+  const independent = createPracticeSession(options(recordProgress, { scope: 'single' }));
+  assert.throws(() => independent.completeCharacter({ totalMistakes: 0 }), /record failed/);
+  assert.doesNotThrow(() => independent.completeCharacter({ totalMistakes: 0 }));
+  assert.equal(independent.getState().status, 'complete');
+});
+
+test('preflights official progress-store attempt overflow before single completion side effects', () => {
+  const storage = createStorage({
+    [PRACTICE_STORAGE_KEY]: JSON.stringify({
+      schemaVersion: 1,
+      characters: {
+        潮: { attemptCount: Number.MAX_SAFE_INTEGER, lastOutcome: 'mastered', mastered: true }
+      },
+      groups: {}
+    })
+  });
+  const progress = createPracticeProgressStore(storage);
+  const session = createPracticeSession(options(progress, { scope: 'single' }));
+  const before = session.getState();
+
+  assert.throws(() => session.completeCharacter({ totalMistakes: 0 }), /safe integer/i);
+  assert.deepEqual(session.getState(), before);
+  assert.equal(progress.getGroup('lesson-1', 'write'), null);
+  assert.deepEqual(progress.getCharacter('潮'), {
+    attemptCount: Number.MAX_SAFE_INTEGER, lastOutcome: 'mastered', mastered: true
+  });
 });
 
 test('invalid options, totals, and transitions are rejected atomically', () => {

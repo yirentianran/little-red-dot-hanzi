@@ -179,7 +179,8 @@
         ownDataValue(value, 'needsPracticeCharacters', 'stored group'),
         'stored group.needsPracticeCharacters', orderedCharacters
       );
-      if (!isOrderedSubset(remaining, orderedCharacters)
+      if (!isOrderedSubset(completed, orderedCharacters)
+          || !isOrderedSubset(remaining, orderedCharacters)
           || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
@@ -259,6 +260,7 @@
     };
     var singleMarked = false;
     var destroyed = false;
+    var mutating = false;
 
     if (scope === 'group' && resume) {
       var restored = cloneCompatibleGroup(progress.getGroup(lessonId, group), orderedCharacters);
@@ -277,6 +279,16 @@
 
     function assertAlive() {
       if (destroyed) throw new Error('Practice session has been destroyed');
+    }
+
+    function runMutation(action) {
+      if (mutating) throw new Error('Practice session mutation is already in progress');
+      mutating = true;
+      try {
+        return action();
+      } finally {
+        mutating = false;
+      }
     }
 
     function currentIndex(nextState) {
@@ -323,96 +335,114 @@
 
     function recordStrokeMistake() {
       assertAlive();
-      if (state.status !== 'active') return;
-      state = Object.assign({}, state, { mistakes: state.mistakes + 1 });
+      return runMutation(function () {
+        if (state.status !== 'active') return;
+        state = Object.assign({}, state, { mistakes: state.mistakes + 1 });
+      });
     }
 
     function completeCharacter(input) {
       assertAlive();
-      requireOwnAllowedFields(input, ['totalMistakes'], ['totalMistakes'], 'completion');
-      var totalMistakes = ownDataValue(input, 'totalMistakes', 'completion');
-      if (!Number.isSafeInteger(totalMistakes) || totalMistakes < 0) {
-        reject('completion.totalMistakes', 'must be a non-negative safe integer');
-      }
-      if (state.status !== 'active') throw new Error('Practice session is not active');
-      if (state.phase === 'guided') {
-        commit(Object.assign({}, state, { phase: 'independent', mistakes: 0 }), true);
-        return;
-      }
+      return runMutation(function () {
+        requireOwnAllowedFields(input, ['totalMistakes'], ['totalMistakes'], 'completion');
+        var totalMistakes = ownDataValue(input, 'totalMistakes', 'completion');
+        if (!Number.isSafeInteger(totalMistakes) || totalMistakes < 0) {
+          reject('completion.totalMistakes', 'must be a non-negative safe integer');
+        }
+        if (state.status !== 'active') throw new Error('Practice session is not active');
+        if (state.phase === 'guided') {
+          commit(Object.assign({}, state, { phase: 'independent', mistakes: 0 }), true);
+          return;
+        }
 
-      var character = state.character;
-      var completed = addUnique(state.completedCharacters, character);
-      if (scope === 'single' && !singleMarked) {
-        progress.markGroupCharacterCompleted(lessonId, group, character);
-        singleMarked = true;
-      }
-      if (totalMistakes > 0) {
-        progress.recordCharacterOutcome(character, 'needs-practice');
+        var character = state.character;
+        var currentRecord = progress.getCharacter(character);
+        if (currentRecord && typeof currentRecord === 'object'
+            && typeof currentRecord.attemptCount === 'number'
+            && currentRecord.attemptCount >= Number.MAX_SAFE_INTEGER) {
+          throw new RangeError('character.attemptCount must not exceed the safe integer limit');
+        }
+        var completed = addUnique(state.completedCharacters, character);
+        var outcome = totalMistakes > 0 ? 'needs-practice' : 'mastered';
+        progress.recordCharacterOutcome(character, outcome);
+        if (scope === 'single' && !singleMarked) {
+          progress.markGroupCharacterCompleted(lessonId, group, character);
+          singleMarked = true;
+        }
+        if (totalMistakes > 0) {
+          commit({
+            status: 'needs-retry', phase: 'independent', character: character, mistakes: totalMistakes,
+            completedCharacters: completed, remainingCharacters: state.remainingCharacters.slice(),
+            needsPracticeCharacters: state.needsPracticeCharacters.slice()
+          }, true);
+          return;
+        }
+
+        var remaining = state.remainingCharacters.filter(function (item) { return item !== character; });
+        if (remaining.length === 0) {
+          commit({
+            status: 'complete', phase: null, character: null, mistakes: 0,
+            completedCharacters: completed, remainingCharacters: [],
+            needsPracticeCharacters: state.needsPracticeCharacters.slice()
+          }, true);
+          return;
+        }
+        var nextCharacter = remaining[0];
         commit({
-          status: 'needs-retry', phase: 'independent', character: character, mistakes: totalMistakes,
-          completedCharacters: completed, remainingCharacters: state.remainingCharacters.slice(),
+          status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
+          completedCharacters: completed, remainingCharacters: remaining,
           needsPracticeCharacters: state.needsPracticeCharacters.slice()
         }, true);
-        return;
-      }
-
-      progress.recordCharacterOutcome(character, 'mastered');
-      var remaining = state.remainingCharacters.filter(function (item) { return item !== character; });
-      if (remaining.length === 0) {
-        commit({
-          status: 'complete', phase: null, character: null, mistakes: 0,
-          completedCharacters: completed, remainingCharacters: [],
-          needsPracticeCharacters: state.needsPracticeCharacters.slice()
-        }, true);
-        return;
-      }
-      var nextCharacter = remaining[0];
-      commit({
-        status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
-        completedCharacters: completed, remainingCharacters: remaining,
-        needsPracticeCharacters: state.needsPracticeCharacters.slice()
-      }, true);
+      });
     }
 
     function retry() {
       assertAlive();
-      if (state.status !== 'needs-retry') throw new Error('Practice session is not in needs-retry state');
-      commit(Object.assign({}, state, { status: 'active', phase: 'independent', mistakes: 0 }), true);
+      return runMutation(function () {
+        if (state.status !== 'needs-retry') throw new Error('Practice session is not in needs-retry state');
+        commit(Object.assign({}, state, { status: 'active', phase: 'independent', mistakes: 0 }), true);
+      });
     }
 
     function defer() {
       assertAlive();
-      if (scope !== 'group') throw new Error('Only group practice sessions can defer a character');
-      if (state.status !== 'needs-retry') throw new Error('Practice session is not in needs-retry state');
-      var deferredCharacter = state.character;
-      var remaining = state.remainingCharacters.filter(function (item) { return item !== deferredCharacter; });
-      var needsPractice = addUnique(state.needsPracticeCharacters, deferredCharacter);
-      if (remaining.length === 0) {
+      return runMutation(function () {
+        if (scope !== 'group') throw new Error('Only group practice sessions can defer a character');
+        if (state.status !== 'needs-retry') throw new Error('Practice session is not in needs-retry state');
+        var deferredCharacter = state.character;
+        var remaining = state.remainingCharacters.filter(function (item) { return item !== deferredCharacter; });
+        var needsPractice = addUnique(state.needsPracticeCharacters, deferredCharacter);
+        if (remaining.length === 0) {
+          commit({
+            status: 'complete', phase: null, character: null, mistakes: 0,
+            completedCharacters: state.completedCharacters.slice(), remainingCharacters: [],
+            needsPracticeCharacters: needsPractice
+          }, true);
+          return;
+        }
+        var nextCharacter = remaining[0];
         commit({
-          status: 'complete', phase: null, character: null, mistakes: 0,
-          completedCharacters: state.completedCharacters.slice(), remainingCharacters: [],
+          status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
+          completedCharacters: state.completedCharacters.slice(), remainingCharacters: remaining,
           needsPracticeCharacters: needsPractice
         }, true);
-        return;
-      }
-      var nextCharacter = remaining[0];
-      commit({
-        status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
-        completedCharacters: state.completedCharacters.slice(), remainingCharacters: remaining,
-        needsPracticeCharacters: needsPractice
-      }, true);
+      });
     }
 
     function restart() {
       assertAlive();
-      if (state.status !== 'active') throw new Error('Practice session is not active');
-      state = Object.assign({}, state, { mistakes: 0 });
+      return runMutation(function () {
+        if (state.status !== 'active') throw new Error('Practice session is not active');
+        state = Object.assign({}, state, { mistakes: 0 });
+      });
     }
 
     function destroy() {
       if (destroyed) return;
-      if (scope === 'group' && state.status === 'active') saveGroup(state);
-      destroyed = true;
+      return runMutation(function () {
+        if (scope === 'group' && state.status === 'active') saveGroup(state);
+        destroyed = true;
+      });
     }
 
     return Object.freeze({
