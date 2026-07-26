@@ -129,10 +129,22 @@ test('normalizes practice routes with strict hierarchy and selected group entrie
     view: 'practice', lessonId: 'missing', group: 'write', scope: 'single', character: '潮'
   }, store), { view: 'directory' });
   assert.deepEqual(normalizeRoute({
+    view: 'practice', lessonId: 'missing', group: 'write', scope: 'group', character: '潮'
+  }, store), { view: 'directory' });
+  assert.deepEqual(normalizeRoute({
+    view: 'practice', lessonId: 'lesson-1', scope: 'group', character: '潮'
+  }, store), lessonRoute);
+  assert.deepEqual(normalizeRoute({
     view: 'practice', lessonId: 'lesson-1', group: '', scope: 'single', character: '潮'
   }, store), lessonRoute);
   assert.deepEqual(normalizeRoute({
+    view: 'practice', lessonId: 'lesson-1', group: '', scope: 'group', character: '潮'
+  }, store), lessonRoute);
+  assert.deepEqual(normalizeRoute({
     view: 'practice', lessonId: 'lesson-1', group: 'bad', scope: 'single', character: '潮'
+  }, store), lessonRoute);
+  assert.deepEqual(normalizeRoute({
+    view: 'practice', lessonId: 'lesson-1', group: 'bad', scope: 'group', character: '潮'
   }, store), lessonRoute);
   assert.deepEqual(normalizeRoute({
     view: 'practice', lessonId: 'lesson-1', group: 'write', scope: 'single', character: '盐'
