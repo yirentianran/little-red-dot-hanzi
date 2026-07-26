@@ -158,6 +158,12 @@
     return true;
   }
 
+  function coversSource(completed, remaining, source) {
+    return source.every(function (character) {
+      return completed.indexOf(character) !== -1 || remaining.indexOf(character) !== -1;
+    });
+  }
+
   function cloneCompatibleGroup(value, orderedCharacters) {
     try {
       requirePlainObject(value, 'stored group');
@@ -182,6 +188,12 @@
       if (!isOrderedSubset(completed, orderedCharacters)
           || !isOrderedSubset(remaining, orderedCharacters)
           || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
+      if (!coversSource(completed, remaining, orderedCharacters)) return null;
+      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
+        var neededCharacter = needsPractice[needIndex];
+        if (completed.indexOf(neededCharacter) === -1
+            || remaining.indexOf(neededCharacter) !== -1) return null;
+      }
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
       if (remaining.length === 0) {
@@ -191,9 +203,20 @@
           || (currentPhase !== 'guided' && currentPhase !== 'independent')) {
         return null;
       }
+      var normalizedRemaining = remaining.filter(function (character) {
+        if (completed.indexOf(character) === -1) return true;
+        return character === currentCharacter && currentPhase === 'independent';
+      });
+      if (!coversSource(completed, normalizedRemaining, orderedCharacters)) return null;
+      if (normalizedRemaining.length === 0) {
+        currentCharacter = null;
+        currentPhase = null;
+      } else if (normalizedRemaining[0] !== currentCharacter) {
+        return null;
+      }
       return {
         completedCharacters: completed,
-        remainingCharacters: remaining,
+        remainingCharacters: normalizedRemaining,
         needsPracticeCharacters: needsPractice,
         currentCharacter: currentCharacter,
         currentPhase: currentPhase
