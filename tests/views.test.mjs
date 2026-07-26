@@ -523,7 +523,7 @@ test('index is offline-first, accessible, and loads classic scripts in dependenc
   assert.match(html, /<html lang="zh-CN">/);
   assert.match(html, /name="viewport" content="width=device-width, initial-scale=1"/);
   assert.match(html, /<body>\s*<a class="skip-link" href="#app">跳到学习内容<\/a>/);
-  assert.match(html, /class="brand-name">汉字追踪小课堂<\//);
+  assert.match(html, /class="brand-name">小红点识字<\//);
   assert.match(html, /人教版四年级上册·2019年审定/);
   assert.match(html, /<main id="app" tabindex="-1"><\/main>/);
   assert.match(html, /id="announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"/);
