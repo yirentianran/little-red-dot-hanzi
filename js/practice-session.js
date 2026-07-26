@@ -186,12 +186,18 @@
         ownDataValue(value, 'remainingCharacters', 'stored group'),
         'stored group.remainingCharacters', orderedCharacters
       );
-      var needsPractice = orderBySource(cloneCharacterList(
+      var needsPractice = cloneCharacterList(
         ownDataValue(value, 'needsPracticeCharacters', 'stored group'),
         'stored group.needsPracticeCharacters', orderedCharacters
-      ), orderedCharacters);
-      if (!isOrderedSubset(remaining, orderedCharacters)) return null;
+      );
+      if (!isOrderedSubset(remaining, orderedCharacters)
+          || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
       if (!coversSource(completed, remaining, orderedCharacters)) return null;
+      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
+        var neededCharacter = needsPractice[needIndex];
+        if (completed.indexOf(neededCharacter) === -1
+            || remaining.indexOf(neededCharacter) !== -1) return null;
+      }
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
       if (remaining.length === 0) {
@@ -206,11 +212,6 @@
         return character === currentCharacter && currentPhase === 'independent';
       });
       if (!coversSource(completed, normalizedRemaining, orderedCharacters)) return null;
-      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
-        var neededCharacter = needsPractice[needIndex];
-        if (completed.indexOf(neededCharacter) === -1
-            || normalizedRemaining.indexOf(neededCharacter) !== -1) return null;
-      }
       if (normalizedRemaining.length === 0) {
         currentCharacter = null;
         currentPhase = null;

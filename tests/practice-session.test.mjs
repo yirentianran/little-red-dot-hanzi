@@ -306,6 +306,10 @@ test('restores only semantically complete queues and preserves current independe
       completedCharacters: ['潮'], remainingCharacters: ['据'], needsPracticeCharacters: ['据'],
       currentCharacter: '据', currentPhase: 'guided'
     }),
+    groupProgress({
+      completedCharacters: ['潮'], remainingCharacters: ['潮', '据'], needsPracticeCharacters: ['潮'],
+      currentCharacter: '潮', currentPhase: 'guided'
+    }),
   ];
   invalidGroups.forEach((group) => {
     const session = createPracticeSession(options(createFakeProgress({ group })));
@@ -653,7 +657,7 @@ test('advances a saved group when its guided current character completes in sing
   });
 });
 
-test('restores append-order cross-scope completions and needs lists in source order', () => {
+test('restores append-order cross-scope completions but rejects reversed needs lists', () => {
   const progress = createPracticeProgressStore(createStorage());
   progress.saveGroup('lesson-1', 'write', groupProgress({
     remainingCharacters: ['潮', '据'], currentCharacter: '潮', currentPhase: 'guided'
@@ -677,11 +681,11 @@ test('restores append-order cross-scope completions and needs lists in source or
     completedCharacters: ['据', '潮'], remainingCharacters: [], needsPracticeCharacters: ['据', '潮'],
     currentCharacter: null, currentPhase: null
   }));
-  const orderedNeeds = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
-  assert.deepEqual(orderedNeeds.getState(), {
-    status: 'complete', phase: null, character: null, index: 2, total: 2,
-    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [],
-    needsPracticeCharacters: ['潮', '据']
+  const reversedNeeds = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  assert.deepEqual(reversedNeeds.getState(), {
+    status: 'active', phase: 'independent', character: '潮', index: 0, total: 2,
+    mistakes: 0, completedCharacters: [], remainingCharacters: ['潮', '据'],
+    needsPracticeCharacters: []
   });
 
   progress.saveGroup('lesson-3', 'write', groupProgress({
