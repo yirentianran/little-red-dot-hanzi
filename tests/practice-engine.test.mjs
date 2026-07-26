@@ -50,7 +50,22 @@ class FakeElement {
 }
 
 function createDocument() {
-  return { createElementNS(_namespace, name) { return new FakeElement(name, this); } };
+  return {
+    listeners: new Map(),
+    defaultView: {
+      getComputedStyle(target) { return { position: target.computedPosition ?? 'static' }; }
+    },
+    createElementNS(_namespace, name) { return new FakeElement(name, this); },
+    addEventListener(type, callback, options) {
+      const entries = this.listeners.get(type) || [];
+      entries.push({ callback, options });
+      this.listeners.set(type, entries);
+    },
+    removeEventListener(type, callback, options) {
+      const entries = this.listeners.get(type) || [];
+      this.listeners.set(type, entries.filter((entry) => entry.callback !== callback || entry.options !== options));
+    }
+  };
 }
 
 function createTimers() {
@@ -75,18 +90,48 @@ function createTimers() {
 function createHarness(overrides = {}) {
   const document = createDocument();
   const target = new FakeElement('div', document);
+  target.computedPosition = overrides.computedPosition ?? 'static';
   const events = [];
-  const calls = { create: [], quiz: [], cancelQuiz: 0, outline: [], highlight: [], dimensions: [], transforms: [] };
-  const writer = {
-    quiz(options) { calls.quiz.push(options); },
-    cancelQuiz() { calls.cancelQuiz += 1; },
+  const calls = {
+    create: [], quiz: [], cancelQuiz: 0, outline: [], highlight: [], dimensions: [], transforms: [],
+    installedQuiz: null
+  };
+  const baseWriter = {
+    quiz(options) {
+      if (overrides.deferredOperations) {
+        return Promise.resolve().then(() => {
+          calls.quiz.push(options);
+          calls.installedQuiz = options;
+        });
+      }
+      calls.quiz.push(options);
+      calls.installedQuiz = options;
+    },
+    cancelQuiz() { calls.cancelQuiz += 1; calls.installedQuiz = null; },
     highlightStroke(strokeNum) { calls.highlight.push(strokeNum); },
     updateDimensions(options) { calls.dimensions.push(options); },
-    showOutline(options) { calls.outline.push(['show', options]); },
-    hideOutline(options) { calls.outline.push(['hide', options]); }
+    showOutline(options) {
+      calls.outline.push(['show', options]);
+      return overrides.deferredOperations ? Promise.resolve() : undefined;
+    },
+    hideOutline(options) {
+      calls.outline.push(['hide', options]);
+      return overrides.deferredOperations ? Promise.resolve() : undefined;
+    }
   };
+  const writer = { ...baseWriter, ...overrides.writer };
+  const writerMouseUp = () => {};
+  const writerTouchEnd = () => {};
   const HanziWriter = {
-    create(...args) { calls.create.push(args); if (overrides.createError) throw overrides.createError; return writer; },
+    create(...args) {
+      calls.create.push(args);
+      const [host] = args;
+      host.appendChild(new FakeElement('svg', document));
+      document.addEventListener('mouseup', writerMouseUp);
+      document.addEventListener('touchend', writerTouchEnd);
+      if (overrides.createError) throw overrides.createError;
+      return writer;
+    },
     getScalingTransform(width, height, padding) {
       calls.transforms.push([width, height, padding]);
       return { x: 1, y: 2, scale: 0.25, transform: `translate(${width} ${height}) scale(.25 -.25)` };
@@ -108,8 +153,16 @@ function createHarness(overrides = {}) {
     clearTimeout: timers.clearTimeout,
     ...overrides.options
   };
+  const originalDocumentAdd = document.addEventListener;
   const engine = createPracticeEngine(options);
-  return { calls, document, engine, events, geometry, HanziWriter, options, target, timers, writer };
+  return {
+    calls, document, engine, events, geometry, HanziWriter, options, target, timers, writer,
+    originalDocumentAdd, writerMouseUp, writerTouchEnd
+  };
+}
+
+async function flushMicrotasks(turns = 12) {
+  for (let index = 0; index < turns; index += 1) await Promise.resolve();
 }
 
 function dot(target) { return target.queryByClass('practice-start-dot')[0]; }
@@ -145,7 +198,9 @@ test('creates one writer with exact local data and a separate pointer-transparen
   const { calls, geometry, target } = createHarness();
   assert.equal(calls.create.length, 1);
   const [writerTarget, character, options] = calls.create[0];
-  assert.equal(writerTarget, target);
+  assert.notEqual(writerTarget, target);
+  assert.equal(writerTarget.parentNode, target);
+  assert.equal(writerTarget.getAttribute('class'), 'practice-writer-host');
   assert.equal(character, '潮');
   assert.deepEqual({ ...options, charDataLoader: undefined }, {
     width: 320, height: 280, padding: 24,
@@ -167,6 +222,7 @@ test('creates one writer with exact local data and a separate pointer-transparen
   assert.notEqual(loaded.medians, geometry.medians);
   assert.equal(Object.isFrozen(loaded), true);
   assert.notEqual(options.charDataLoader('潮'), loaded);
+  assert.equal(target.children.length, 2);
   const overlay = target.children.at(-1);
   assert.equal(overlay.name, 'svg');
   assert.equal(overlay.style.pointerEvents, 'none');
@@ -190,6 +246,75 @@ test('guided and independent starts use exact outline and quiz options', () => {
   engine.start({ phase: 'independent', strokeIndex: 0 });
   assert.deepEqual(calls.outline.at(-1), ['hide', { duration: 0 }]);
   assert.equal(calls.cancelQuiz, 1);
+});
+
+test('promise-deferred activation cannot survive cancellation or destruction', async (t) => {
+  await t.test('start then immediate cancel', async () => {
+    const { calls, engine } = createHarness({ deferredOperations: true });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    engine.cancel();
+    await flushMicrotasks();
+    assert.equal(calls.installedQuiz, null);
+    assert.equal(calls.quiz.length, 0);
+  });
+
+  await t.test('start then immediate destroy', async () => {
+    const { calls, engine } = createHarness({ deferredOperations: true });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    engine.destroy();
+    await flushMicrotasks();
+    assert.equal(calls.installedQuiz, null);
+    assert.equal(calls.quiz.length, 0);
+  });
+
+  await t.test('rapid replacement then cancel', async () => {
+    const { calls, engine } = createHarness({ deferredOperations: true });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    engine.start({ phase: 'independent', strokeIndex: 1 });
+    engine.cancel();
+    await flushMicrotasks();
+    assert.equal(calls.installedQuiz, null);
+    assert.equal(calls.quiz.length, 0);
+  });
+});
+
+test('serialized promise activation leaves only the latest quiz installed', async () => {
+  const { calls, engine } = createHarness({ deferredOperations: true });
+  engine.start({ phase: 'guided', strokeIndex: 0 });
+  engine.start({ phase: 'independent', strokeIndex: 1 });
+  await flushMicrotasks();
+  assert.equal(calls.quiz.length, 1);
+  assert.equal(calls.installedQuiz, calls.quiz[0]);
+  assert.equal(calls.installedQuiz.quizStartStrokeNum, 1);
+  assert.deepEqual(calls.outline.at(-1), ['hide', { duration: 0 }]);
+});
+
+test('rejected public activation promises are contained and do not start quiz', async () => {
+  const harness = createHarness({
+    writer: {
+      showOutline() { return Promise.reject(new Error('outline rejected')); }
+    }
+  });
+  harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+  await flushMicrotasks();
+  assert.equal(harness.calls.quiz.length, 0);
+  harness.engine.cancel();
+});
+
+test('owns writer host and known 3.7.3 document listeners until destroy; browser runtime rechecks in Task 9', () => {
+  const { calls, document, engine, originalDocumentAdd, target } = createHarness();
+  assert.equal(document.addEventListener, originalDocumentAdd);
+  assert.equal(document.listeners.get('mouseup').length, 1);
+  assert.equal(document.listeners.get('touchend').length, 1);
+  assert.equal(target.children.length, 2);
+
+  engine.destroy();
+
+  assert.equal(calls.cancelQuiz, 1);
+  assert.equal(target.children.length, 0);
+  assert.equal(document.listeners.get('mouseup').length, 0);
+  assert.equal(document.listeners.get('touchend').length, 0);
+  assert.equal(document.addEventListener, originalDocumentAdd);
 });
 
 test('callbacks emit detached frozen events and update dot and mistake path', () => {
@@ -218,6 +343,68 @@ test('callbacks emit detached frozen events and update dot and mistake path', ()
   calls.quiz[0].onComplete({ character: '潮', totalMistakes: 3 });
   assert.equal(dot(target).getAttribute('visibility'), 'hidden');
   assert.deepEqual(events[2], { type: 'character-complete', totalMistakes: 3 });
+});
+
+test('observer exceptions are contained after coherent correct, mistake, and complete state', async (t) => {
+  await t.test('correct', () => {
+    const { calls, engine, target } = createHarness({ options: { onEvent() { throw new Error('observer'); } } });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    assert.doesNotThrow(() => calls.quiz[0].onCorrectStroke(validStrokeData()));
+    assert.equal(dot(target).getAttribute('cx'), '50');
+  });
+  await t.test('mistake', () => {
+    const { calls, engine, target } = createHarness({ options: { onEvent() { throw new Error('observer'); } } });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    assert.doesNotThrow(() => calls.quiz[0].onMistake(validStrokeData({ isBackwards: true })));
+    assert.equal(errorPath(target).getAttribute('d'), 'M1 2 L3 4');
+  });
+  await t.test('complete', () => {
+    const { calls, engine, target } = createHarness({ options: { onEvent() { throw new Error('observer'); } } });
+    engine.start({ phase: 'guided', strokeIndex: 0 });
+    assert.doesNotThrow(() => calls.quiz[0].onComplete({ totalMistakes: 2 }));
+    assert.equal(dot(target).getAttribute('visibility'), 'hidden');
+  });
+});
+
+test('observer reentrancy preserves revision-owned DOM and lifecycle state', async (t) => {
+  await t.test('correct observer restarts', () => {
+    let reentrantEngine;
+    const harness = createHarness({ options: { onEvent() { reentrantEngine.restart(); } } });
+    reentrantEngine = harness.engine;
+    harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+    harness.calls.quiz[0].onCorrectStroke(validStrokeData());
+    assert.equal(harness.calls.quiz.at(-1).quizStartStrokeNum, 0);
+    assert.equal(dot(harness.target).getAttribute('cx'), '10');
+  });
+  await t.test('mistake observer cancels', () => {
+    let reentrantEngine;
+    const harness = createHarness({ options: { onEvent() { reentrantEngine.cancel(); } } });
+    reentrantEngine = harness.engine;
+    harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+    harness.calls.quiz[0].onMistake(validStrokeData({ isBackwards: true }));
+    assert.equal(errorPath(harness.target), undefined);
+    assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
+  });
+  await t.test('complete observer destroys', () => {
+    let reentrantEngine;
+    const harness = createHarness({ options: { onEvent() { reentrantEngine.destroy(); } } });
+    reentrantEngine = harness.engine;
+    harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+    harness.calls.quiz[0].onComplete({ totalMistakes: 0 });
+    assert.equal(harness.target.children.length, 0);
+    assert.equal(harness.document.listeners.get('mouseup').length, 0);
+    assert.equal(harness.calls.cancelQuiz, 1);
+  });
+});
+
+test('showHint is a no-op during the final-correct callback window', () => {
+  let reentrantEngine;
+  const harness = createHarness({ options: { onEvent() { reentrantEngine.showHint(); } } });
+  reentrantEngine = harness.engine;
+  harness.engine.start({ phase: 'guided', strokeIndex: 1 });
+  harness.calls.quiz[0].onCorrectStroke(validStrokeData({ strokeNum: 1, strokesRemaining: 0 }));
+  assert.deepEqual(harness.calls.highlight, []);
+  assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
 });
 
 test('replacement, hint, restart, and cancel preserve callback ownership and state', () => {
@@ -323,9 +510,18 @@ test('writer construction failure rolls back overlay, listeners, and style', () 
   const document = createDocument();
   const target = new FakeElement('div', document);
   target.style.position = 'static';
+  const originalDocumentAdd = document.addEventListener;
   assert.throws(() => createPracticeEngine({
     target,
-    HanziWriter: { create() { throw new Error('writer failed'); }, getScalingTransform() { return { transform: '' }; } },
+    HanziWriter: {
+      create(host) {
+        host.appendChild(new FakeElement('svg', document));
+        document.addEventListener('mouseup', () => {});
+        document.addEventListener('touchend', () => {});
+        throw new Error('writer failed');
+      },
+      getScalingTransform() { return { transform: '' }; }
+    },
     character: '潮',
     geometry: { strokeCount: 1, strokes: ['M0 0'], medians: [[[0, 0]]] },
     onEvent() {}
@@ -333,6 +529,8 @@ test('writer construction failure rolls back overlay, listeners, and style', () 
   assert.equal(target.children.length, 0);
   assert.equal(target.style.position, 'static');
   assert.equal([...target.listeners.values()].flat().length, 0);
+  assert.equal([...document.listeners.values()].flat().length, 0);
+  assert.equal(document.addEventListener, originalDocumentAdd);
 
   const partialTarget = new FakeElement('div', document);
   const addListener = partialTarget.addEventListener;
@@ -350,6 +548,43 @@ test('writer construction failure rolls back overlay, listeners, and style', () 
   assert.equal([...partialTarget.listeners.values()].flat().length, 0);
   assert.equal(partialTarget.children.length, 0);
   assert.equal(partialTarget.style.position, '');
+});
+
+test('fails with full rollback when document listener capture cannot be installed safely', () => {
+  const document = createDocument();
+  const addEventListener = document.addEventListener;
+  Object.defineProperty(document, 'addEventListener', {
+    configurable: false,
+    writable: false,
+    value: addEventListener
+  });
+  const target = new FakeElement('div', document);
+  assert.throws(() => createPracticeEngine({
+    target,
+    HanziWriter: {
+      create() { assert.fail('writer must not be constructed without listener capture'); },
+      getScalingTransform() { return { transform: '' }; }
+    },
+    character: '潮',
+    geometry: { strokeCount: 1, strokes: ['M0 0'], medians: [[[0, 0]]] },
+    onEvent() {}
+  }), /document listener capture/i);
+  assert.equal(target.children.length, 0);
+  assert.equal(target.style.position, '');
+  assert.equal(document.addEventListener, addEventListener);
+});
+
+test('position ownership follows computed style and preserves later external inline changes', () => {
+  const positioned = createHarness({ computedPosition: 'absolute' });
+  assert.equal(positioned.target.style.position, '');
+  positioned.engine.destroy();
+  assert.equal(positioned.target.style.position, '');
+
+  const staticTarget = createHarness({ computedPosition: 'static' });
+  assert.equal(staticTarget.target.style.position, 'relative');
+  staticTarget.target.style.position = 'fixed';
+  staticTarget.engine.destroy();
+  assert.equal(staticTarget.target.style.position, 'fixed');
 });
 
 test('rejects invalid options and starts atomically without invoking accessors', () => {

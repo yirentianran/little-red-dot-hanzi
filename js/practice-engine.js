@@ -10,6 +10,7 @@
   'use strict';
 
   var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+  var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
   var PADDING = 24;
   var LENIENCY = 1;
   var ERROR_DURATION = 240;
@@ -319,10 +320,14 @@
     var dimensions = readDimensions(target);
 
     var documentObject = target.ownerDocument;
+    var writerHost = documentObject.createElementNS(HTML_NAMESPACE, 'div');
     var overlay = documentObject.createElementNS(SVG_NAMESPACE, 'svg');
     var errorLayer = documentObject.createElementNS(SVG_NAMESPACE, 'g');
     var dotLayer = documentObject.createElementNS(SVG_NAMESPACE, 'g');
     var startDot = documentObject.createElementNS(SVG_NAMESPACE, 'circle');
+    setAttribute(writerHost, 'class', 'practice-writer-host');
+    writerHost.style.position = 'absolute';
+    writerHost.style.inset = '0';
     setAttribute(overlay, 'class', 'practice-overlay');
     setAttribute(overlay, 'aria-hidden', 'true');
     overlay.style.position = 'absolute';
@@ -339,8 +344,20 @@
     overlay.appendChild(dotLayer);
 
     var originalPosition = target.style.position;
-    var changedPosition = !originalPosition || originalPosition === 'static';
+    var computedPosition = null;
+    var defaultView = documentObject.defaultView;
+    if (defaultView && typeof defaultView.getComputedStyle === 'function') {
+      var computedStyle = defaultView.getComputedStyle(target);
+      if (computedStyle && typeof computedStyle.position === 'string') {
+        computedPosition = computedStyle.position;
+      }
+    }
+    var changedPosition = computedPosition === null
+      ? (!originalPosition || originalPosition === 'static')
+      : computedPosition === 'static';
     var installedListenerTypes = [];
+    var writerDocumentListeners = [];
+    var writerHostInstalled = false;
     var overlayInstalled = false;
     var writer;
     var destroyed = false;
@@ -352,6 +369,8 @@
     var errorTimer = null;
     var errorPath = null;
     var errorRevision = 0;
+    var activationTasks = [];
+    var activationRunning = false;
 
     function updateOverlaySize(nextDimensions) {
       setAttribute(overlay, 'width', nextDimensions.width);
@@ -419,10 +438,100 @@
       if (!active) throw new Error('Practice engine must be active to ' + command);
     }
 
+    function emit(event) {
+      try {
+        onEvent(event);
+      } catch (_error) {
+        // Observer failures must not escape into Hanzi Writer callbacks.
+      }
+    }
+
+    function ownsActivation(ownerRevision) {
+      return !destroyed && active && revision === ownerRevision;
+    }
+
+    function safeCancelQuiz() {
+      try {
+        writer.cancelQuiz();
+      } catch (_error) {
+        // Cleanup continues even if the third-party writer rejects cancellation.
+      }
+    }
+
+    function finishActivation() {
+      activationRunning = false;
+      drainActivations();
+    }
+
+    function settleOperation(result, onFulfilled, onRejected) {
+      var then;
+      try {
+        then = result && result.then;
+      } catch (_error) {
+        onRejected();
+        return;
+      }
+      if (typeof then !== 'function') {
+        onFulfilled();
+        return;
+      }
+      Promise.resolve(result).then(onFulfilled, onRejected);
+    }
+
+    function drainActivations() {
+      if (activationRunning) return;
+      while (activationTasks.length !== 0) {
+        var task = activationTasks.shift();
+        if (!ownsActivation(task.revision)) continue;
+        activationRunning = true;
+        var outlineResult;
+        try {
+          outlineResult = task.phase === 'guided'
+            ? writer.showOutline({ duration: 0 })
+            : writer.hideOutline({ duration: 0 });
+        } catch (_error) {
+          safeCancelQuiz();
+          finishActivation();
+          return;
+        }
+        settleOperation(outlineResult, function () {
+          if (!ownsActivation(task.revision)) {
+            safeCancelQuiz();
+            finishActivation();
+            return;
+          }
+          var quizResult;
+          try {
+            quizResult = writer.quiz(task.quizOptions);
+          } catch (_error) {
+            safeCancelQuiz();
+            finishActivation();
+            return;
+          }
+          settleOperation(quizResult, function () {
+            if (!ownsActivation(task.revision)) safeCancelQuiz();
+            finishActivation();
+          }, function () {
+            safeCancelQuiz();
+            finishActivation();
+          });
+        }, function () {
+          safeCancelQuiz();
+          finishActivation();
+        });
+        return;
+      }
+    }
+
+    function queueActivation(ownerRevision, ownerPhase, quizOptions) {
+      activationTasks.push({ revision: ownerRevision, phase: ownerPhase, quizOptions: quizOptions });
+      drainActivations();
+    }
+
     function invalidateActiveQuiz() {
       revision += 1;
       activePointerId = null;
-      if (active) writer.cancelQuiz();
+      if (active) safeCancelQuiz();
       active = false;
       clearError();
       updateDot();
@@ -439,10 +548,8 @@
       currentStroke = nextStroke;
       active = true;
       var ownerRevision = revision;
-      if (phase === 'guided') writer.showOutline({ duration: 0 });
-      else writer.hideOutline({ duration: 0 });
       updateDot();
-      writer.quiz({
+      var quizOptions = {
         quizStartStrokeNum: currentStroke,
         showHintAfterMisses: 2,
         acceptBackwardsStrokes: false,
@@ -454,14 +561,14 @@
           if (!event) return;
           currentStroke = event.strokeNum + 1;
           updateDot();
-          onEvent(event);
+          emit(event);
         },
         onMistake: function (data) {
           if (destroyed || !active || revision !== ownerRevision) return;
           var event = normalizeStrokeEvent('stroke-mistake', data, currentStroke);
           if (!event) return;
           renderError(event.drawnPath.pathString, ownerRevision);
-          onEvent(event);
+          emit(event);
         },
         onComplete: function (data) {
           if (destroyed || !active || revision !== ownerRevision) return;
@@ -471,9 +578,10 @@
           activePointerId = null;
           clearError();
           updateDot();
-          onEvent(event);
+          emit(event);
         }
-      });
+      };
+      queueActivation(ownerRevision, phase, quizOptions);
     }
 
     function start(startOptions) {
@@ -499,6 +607,7 @@
     function showHint() {
       assertAlive();
       requireActive('show a hint');
+      if (currentStroke >= geometry.strokeCount) return;
       writer.highlightStroke(currentStroke);
     }
 
@@ -573,18 +682,98 @@
       }
     }
 
+    function removeWriterDocumentListeners() {
+      while (writerDocumentListeners.length !== 0) {
+        var listener = writerDocumentListeners.pop();
+        try {
+          documentObject.removeEventListener(listener.type, listener.callback, listener.options);
+        } catch (_error) {
+          // Continue removing the remaining known writer listeners.
+        }
+      }
+    }
+
+    function restorePosition() {
+      if (changedPosition && target.style.position === 'relative') {
+        target.style.position = originalPosition;
+      }
+    }
+
+    function createWriterWithCapturedDocumentListeners(createWriter) {
+      var ownDescriptor;
+      var originalAdd;
+      try {
+        ownDescriptor = Object.getOwnPropertyDescriptor(documentObject, 'addEventListener');
+        originalAdd = documentObject.addEventListener;
+      } catch (_error) {
+        throw new Error('Hanzi Writer document listener capture could not be installed');
+      }
+      if (typeof originalAdd !== 'function'
+          || typeof documentObject.removeEventListener !== 'function'
+          || (ownDescriptor && ownDescriptor.configurable !== true)) {
+        throw new Error('Hanzi Writer document listener capture could not be installed');
+      }
+      var capturedAdd = function (type, callback, listenerOptions) {
+        writerDocumentListeners.push({
+          type: type,
+          callback: callback,
+          options: listenerOptions
+        });
+        return originalAdd.call(documentObject, type, callback, listenerOptions);
+      };
+      try {
+        Object.defineProperty(documentObject, 'addEventListener', {
+          configurable: true,
+          enumerable: ownDescriptor ? ownDescriptor.enumerable : false,
+          writable: true,
+          value: capturedAdd
+        });
+      } catch (_error) {
+        throw new Error('Hanzi Writer document listener capture could not be installed');
+      }
+      if (documentObject.addEventListener !== capturedAdd) {
+        throw new Error('Hanzi Writer document listener capture could not be installed');
+      }
+
+      var result;
+      var creationError = null;
+      try {
+        result = createWriter();
+      } catch (error) {
+        creationError = error;
+      }
+      try {
+        if (ownDescriptor) Object.defineProperty(documentObject, 'addEventListener', ownDescriptor);
+        else delete documentObject.addEventListener;
+      } catch (_error) {
+        removeWriterDocumentListeners();
+        throw new Error('Hanzi Writer document listener capture could not be restored');
+      }
+      if (documentObject.addEventListener !== originalAdd) {
+        removeWriterDocumentListeners();
+        throw new Error('Hanzi Writer document listener capture could not be restored');
+      }
+      if (creationError) throw creationError;
+      return result;
+    }
+
     function rollbackConstruction() {
       removeListeners();
+      removeWriterDocumentListeners();
       if (overlayInstalled) removeNode(overlay);
       overlayInstalled = false;
-      if (changedPosition) target.style.position = originalPosition;
+      if (writerHostInstalled) removeNode(writerHost);
+      writerHostInstalled = false;
+      restorePosition();
     }
 
     try {
       if (changedPosition) target.style.position = 'relative';
       updateOverlaySize(dimensions);
       installListeners();
-      writer = hanziApi.create.call(hanziApi.object, target, character, {
+      target.appendChild(writerHost);
+      writerHostInstalled = true;
+      var writerOptions = {
         width: dimensions.width,
         height: dimensions.height,
         padding: PADDING,
@@ -604,6 +793,9 @@
             }))
           });
         }
+      };
+      writer = createWriterWithCapturedDocumentListeners(function () {
+        return hanziApi.create.call(hanziApi.object, writerHost, character, writerOptions);
       });
       ['quiz', 'cancelQuiz', 'highlightStroke', 'updateDimensions', 'showOutline', 'hideOutline']
         .forEach(function (method) { requirePublicFunction(writer, method, 'writer'); });
@@ -617,15 +809,19 @@
     function destroy() {
       if (destroyed) return;
       revision += 1;
-      if (active) writer.cancelQuiz();
+      destroyed = true;
       active = false;
       activePointerId = null;
+      activationTasks = [];
+      safeCancelQuiz();
       clearError();
       removeListeners();
+      removeWriterDocumentListeners();
       removeNode(overlay);
       overlayInstalled = false;
-      if (changedPosition) target.style.position = originalPosition;
-      destroyed = true;
+      removeNode(writerHost);
+      writerHostInstalled = false;
+      restorePosition();
     }
 
     return Object.freeze({
