@@ -230,9 +230,20 @@
     return deepFreeze(state);
   }
 
+  function hasStorageInterface(candidate) {
+    if (candidate === null || candidate === undefined
+      || (typeof candidate !== 'object' && typeof candidate !== 'function')) {
+      return false;
+    }
+    try {
+      return typeof candidate.getItem === 'function' && typeof candidate.setItem === 'function';
+    } catch (_error) {
+      return false;
+    }
+  }
+
   function createPracticeProgressStore(storage) {
-    var storageEnabled = storage !== null && storage !== undefined
-      && (typeof storage === 'object' || typeof storage === 'function');
+    var storageEnabled = hasStorageInterface(storage);
     var state = emptyState();
 
     function disableStorage() {

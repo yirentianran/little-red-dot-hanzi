@@ -215,6 +215,22 @@ test('a storage read failure falls back to a functional in-memory store', () => 
   assert.deepEqual(store.getGroup('lesson-1', 'recognize'), groupProgress({ completedCharacters: ['潮'] }));
 });
 
+test('missing or non-callable storage writers start in functional memory mode', () => {
+  [
+    { getItem: () => null },
+    { getItem: () => null, setItem: false }
+  ].forEach((storage) => {
+    const store = createPracticeProgressStore(storage);
+
+    assert.equal(store.isPersistent(), false);
+
+    const record = store.recordCharacterOutcome('潮', 'mastered');
+
+    assert.equal(store.isPersistent(), false);
+    assert.deepEqual(record, { attemptCount: 1, lastOutcome: 'mastered', mastered: true });
+  });
+});
+
 test('classic browser scripts merge the API without DOM or fetch and preserve HanziApp', async () => {
   const source = await readFile(new URL('../js/practice-progress-store.js', import.meta.url), 'utf8');
   const sentinel = Object.freeze({ preserved: true });
