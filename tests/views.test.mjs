@@ -134,6 +134,10 @@ function practiceSnapshot(overrides = {}) {
   };
 }
 
+const LESSON_ONE_WRITE_CHARACTERS = Object.freeze([
+  '潮', '据', '堤', '阔', '盼', '滚', '顿', '逐', '渐', '堵', '犹', '崩', '震', '霎', '余'
+]);
+
 function sessionState(overrides = {}) {
   return {
     status: 'active',
@@ -143,7 +147,7 @@ function sessionState(overrides = {}) {
     total: 15,
     mistakes: 0,
     completedCharacters: [],
-    remainingCharacters: ['潮'],
+    remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     needsPracticeCharacters: [],
     masteredCount: 0,
     ...overrides
@@ -394,6 +398,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     mistakes: 2,
     completedCharacters: ['潮'],
     remainingCharacters: ['潮', '据'],
+    total: 2,
     masteredCount: 0
   }), true);
   const needsPracticeCharacters = ['据'];
@@ -403,7 +408,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     character: null,
     index: 15,
     mistakes: 0,
-    completedCharacters: ['潮', '据'],
+    completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     remainingCharacters: [],
     needsPracticeCharacters,
     masteredCount: 1
@@ -444,7 +449,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     index: 15,
     total: 15,
     mistakes: 0,
-    completedCount: 2,
+    completedCount: 15,
     masteredCount: 1,
     needsPracticeCharacters: ['据'],
     persistent: false
@@ -479,6 +484,70 @@ test('practice models use session positions for filtered group review rounds', a
   assert.equal(resolved.total, 15);
   assert.equal(model.index, 0);
   assert.equal(model.total, 1);
+});
+
+test('practice state consistency follows session queue and completion invariants', async () => {
+  const { createPracticeModel } = loadViews();
+  const store = await createRuntimeStore();
+  const resolve = (character, scope = 'group') => ({
+    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character }),
+    scope
+  });
+
+  const overlapping = createPracticeModel(resolve('潮'), sessionState({
+    completedCharacters: ['据']
+  }), true);
+  assert.equal(overlapping.index, 0);
+  assert.equal(overlapping.completedCount, 1);
+
+  assert.throws(() => createPracticeModel(resolve('据'), sessionState({
+    character: '据',
+    completedCharacters: ['潮'],
+    remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(1),
+    index: 0
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('据'), sessionState({
+    character: '据',
+    completedCharacters: [],
+    remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
+    index: 0
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    completedCharacters: [],
+    remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(0, -1)
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    needsPracticeCharacters: ['据']
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    status: 'needs-retry',
+    phase: 'independent',
+    mistakes: 1,
+    completedCharacters: ['据']
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    status: 'complete',
+    phase: null,
+    character: null,
+    index: 15,
+    completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(0, -1),
+    remainingCharacters: []
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    status: 'complete',
+    phase: null,
+    character: null,
+    index: 1,
+    total: 1,
+    completedCharacters: ['据'],
+    remainingCharacters: []
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮', 'single'), sessionState({
+    total: 1,
+    completedCharacters: ['潮'],
+    remainingCharacters: ['潮'],
+    needsPracticeCharacters: ['潮']
+  }), true), TypeError);
 });
 
 test('practice model and progress inputs reject hostile or inconsistent structures without getters', async () => {
@@ -876,7 +945,8 @@ test('renders retry controls by scope and rejects inactive handle mutations with
     phase: 'independent',
     mistakes: 3,
     completedCharacters: ['潮'],
-    remainingCharacters: ['潮', '据']
+    remainingCharacters: ['潮', '据'],
+    total: 2
   }), true);
   const singleModel = createPracticeModel({ ...baseResolved, scope: 'single' }, sessionState({
     status: 'needs-retry',
@@ -918,7 +988,7 @@ test('renders complete summaries, conditional review actions, return action, and
     character: null,
     index: 15,
     mistakes: 0,
-    completedCharacters: ['潮', '据'],
+    completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     remainingCharacters: [],
     needsPracticeCharacters: ['据'],
     masteredCount: 1
@@ -929,7 +999,7 @@ test('renders complete summaries, conditional review actions, return action, and
     character: null,
     index: 15,
     mistakes: 0,
-    completedCharacters: ['潮'],
+    completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     remainingCharacters: [],
     masteredCount: 1
   }), true);
@@ -940,7 +1010,7 @@ test('renders complete summaries, conditional review actions, return action, and
 
   assert.equal(handle.board, null);
   assert.equal(byAttribute(needsDom.container, 'data-slot', 'practice-board').length, 0);
-  assert.match(needsDom.container.textContent, /本轮完成 2 个/);
+  assert.match(needsDom.container.textContent, /本轮完成 15 个/);
   assert.match(needsDom.container.textContent, /当前掌握 1 个/);
   assert.match(needsDom.container.textContent, /需要再练 1 个/);
   assert.match(needsDom.container.textContent, /本次进度不会保存/);

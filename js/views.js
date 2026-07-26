@@ -635,6 +635,9 @@
     if (resolved.scope === 'single' && state.total !== 1) {
       reject('state.total', 'must equal 1 for single-character practice');
     }
+    if (resolved.scope === 'single' && state.needsPracticeCharacters.length !== 0) {
+      reject('state.needsPracticeCharacters', 'must be empty for single-character practice');
+    }
     var sourceCharacters = resolved.scope === 'single'
       ? [resolved.character]
       : resolved.characters;
@@ -647,10 +650,24 @@
         reject('state.' + item[0], 'must be an ordered subset of the practice characters');
       }
     });
+    var completed = new Set(state.completedCharacters);
+    if (state.needsPracticeCharacters.some(function (character) {
+      return !completed.has(character);
+    })) {
+      reject('state.needsPracticeCharacters', 'must be a subset of state.completedCharacters');
+    }
+    var covered = new Set(state.completedCharacters.concat(state.remainingCharacters));
+    if (covered.size !== state.total) {
+      reject('state', 'completed and remaining characters must cover state.total');
+    }
     if (state.status === 'complete') {
       if (state.phase !== null || state.character !== null || state.index !== state.total
-          || state.mistakes !== 0 || state.remainingCharacters.length !== 0) {
+          || state.mistakes !== 0 || state.remainingCharacters.length !== 0
+          || state.completedCharacters.length !== state.total) {
         reject('state', 'complete state must use null current fields and final counts');
+      }
+      if (!completed.has(resolved.character)) {
+        reject('resolved.entry.character', 'must occur in completed practice characters');
       }
       return;
     }
@@ -659,15 +676,17 @@
     if (state.character !== resolved.character) {
       reject('state.character', 'must match resolved.entry.character');
     }
-    if (state.index >= state.total) reject('state.index', 'must be less than state.total');
-    if (state.remainingCharacters.indexOf(state.character) === -1) {
-      reject('state.remainingCharacters', 'must include state.character');
-    }
-    if (state.remainingCharacters[0] !== state.character) {
+    if (state.remainingCharacters.length === 0
+        || state.remainingCharacters[0] !== state.character) {
       reject('state.remainingCharacters', 'must start with state.character');
     }
+    if (state.index !== state.total - state.remainingCharacters.length) {
+      reject('state.index', 'must match completed practice queue progress');
+    }
+    if (state.index >= state.total) reject('state.index', 'must be less than state.total');
     if (state.status === 'needs-retry'
-        && (state.phase !== 'independent' || state.mistakes === 0)) {
+        && (state.phase !== 'independent' || state.mistakes === 0
+          || !completed.has(state.character))) {
       reject('state', 'needs-retry requires independent phase and at least one mistake');
     }
   }
