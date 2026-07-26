@@ -12,12 +12,14 @@
   var PARAMETER_FIELDS = Object.freeze({
     lesson: 'lessonId',
     group: 'group',
+    scope: 'scope',
     character: 'character'
   });
   var PATH_VIEWS = Object.freeze({
     '/': 'directory',
     '/lesson': 'lesson',
-    '/character': 'character'
+    '/character': 'character',
+    '/practice': 'practice'
   });
 
   function isRecord(value) {
@@ -29,7 +31,21 @@
   }
 
   function hasOnlyKeys(value, allowed) {
-    return Object.keys(value).every(function (key) { return allowed.indexOf(key) !== -1; });
+    return Reflect.ownKeys(value).every(function (key) {
+      return typeof key === 'string' && allowed.indexOf(key) !== -1;
+    });
+  }
+
+  function getOwnDataValue(record, field) {
+    if (!Object.hasOwn(record, field)) return { present: false };
+    var descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(record, field);
+    } catch (_error) {
+      return { present: false };
+    }
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) return { present: false };
+    return { present: true, value: descriptor.value };
   }
 
   function directoryRoute() {
@@ -74,32 +90,47 @@
   }
 
   function serializeHash(route) {
-    if (!isRecord(route) || !Object.hasOwn(route, 'view')) return '#/';
-    var view = route.view;
+    if (!isRecord(route)) return '#/';
+    var viewField = getOwnDataValue(route, 'view');
+    if (!viewField.present) return '#/';
+    var view = viewField.value;
     if (view === 'directory') return '#/';
-    if (view !== 'lesson' && view !== 'character') return '#/';
+    if (view !== 'lesson' && view !== 'character' && view !== 'practice') return '#/';
     var allowed = view === 'lesson'
       ? ['view', 'lessonId', 'group']
-      : ['view', 'lessonId', 'group', 'character'];
+      : view === 'character'
+        ? ['view', 'lessonId', 'group', 'character']
+        : ['view', 'lessonId', 'group', 'scope', 'character'];
+    var lessonField = getOwnDataValue(route, 'lessonId');
+    var groupField = getOwnDataValue(route, 'group');
     if (!hasOnlyKeys(route, allowed)
-      || !Object.hasOwn(route, 'lessonId')
-      || !Object.hasOwn(route, 'group')
-      || !isNonBlankString(route.lessonId)
-      || (route.group !== 'write' && route.group !== 'recognize')) {
+      || !lessonField.present
+      || !groupField.present
+      || !isNonBlankString(lessonField.value)
+      || (groupField.value !== 'write' && groupField.value !== 'recognize')) {
       return '#/';
     }
-    if (view === 'character'
-      && (!Object.hasOwn(route, 'character')
-        || typeof route.character !== 'string'
-        || Array.from(route.character).length !== 1)) {
+    var characterField = getOwnDataValue(route, 'character');
+    if ((view === 'character' || view === 'practice')
+      && (!characterField.present
+        || typeof characterField.value !== 'string'
+        || Array.from(characterField.value).length !== 1)) {
+      return '#/';
+    }
+    var scopeField = getOwnDataValue(route, 'scope');
+    if (view === 'practice'
+      && (!scopeField.present || (scopeField.value !== 'single' && scopeField.value !== 'group'))) {
       return '#/';
     }
 
     try {
       var parameters = new URLSearchParams();
-      parameters.append('lesson', route.lessonId);
-      parameters.append('group', route.group);
-      if (view === 'character') parameters.append('character', route.character);
+      parameters.append('lesson', lessonField.value);
+      parameters.append('group', groupField.value);
+      if (view === 'practice') parameters.append('scope', scopeField.value);
+      if (view === 'character' || view === 'practice') {
+        parameters.append('character', characterField.value);
+      }
       return '#/' + view + '?' + parameters.toString();
     } catch (_error) {
       return '#/';
@@ -107,25 +138,32 @@
   }
 
   function normalizeRoute(route, store) {
-    if (!isRecord(route)
-      || (Object.hasOwn(route, '_invalid') && route._invalid === true)
-      || !Object.hasOwn(route, 'view')) {
+    if (!isRecord(route)) {
       return directoryRoute();
     }
-    var view = route.view;
+    var invalidField = getOwnDataValue(route, '_invalid');
+    var viewField = getOwnDataValue(route, 'view');
+    if ((invalidField.present && invalidField.value === true) || !viewField.present) {
+      return directoryRoute();
+    }
+    var view = viewField.value;
     if (view === 'directory') return directoryRoute();
-    if (view !== 'lesson' && view !== 'character') return directoryRoute();
-    var allowed = ['view', 'lessonId', 'group', 'character'];
+    if (view !== 'lesson' && view !== 'character' && view !== 'practice') return directoryRoute();
+    var allowed = view === 'practice'
+      ? ['view', 'lessonId', 'group', 'scope', 'character']
+      : ['view', 'lessonId', 'group', 'character'];
     if (!hasOnlyKeys(route, allowed)) return directoryRoute();
-    if (!Object.hasOwn(route, 'lessonId')
-      || !isNonBlankString(route.lessonId)
-      || !store.hasLesson(route.lessonId)) {
+    var lessonField = getOwnDataValue(route, 'lessonId');
+    if (!lessonField.present
+      || !isNonBlankString(lessonField.value)
+      || !store.hasLesson(lessonField.value)) {
       return directoryRoute();
     }
 
-    var lessonId = route.lessonId;
+    var lessonId = lessonField.value;
     var defaultGroup = store.getDefaultGroup(lessonId);
-    var group = Object.hasOwn(route, 'group') ? route.group : undefined;
+    var groupField = getOwnDataValue(route, 'group');
+    var group = groupField.present ? groupField.value : undefined;
     var groupIsNamed = group === 'write' || group === 'recognize';
     var selectedEntries = groupIsNamed ? store.getEntries(lessonId, group) : null;
     var groupIsUsable = selectedEntries !== null && selectedEntries.length > 0;
@@ -135,13 +173,35 @@
     if (view === 'lesson') {
       return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
     }
-    if (!Object.hasOwn(route, 'character')
-      || typeof route.character !== 'string'
-      || Array.from(route.character).length !== 1
+    var characterField = getOwnDataValue(route, 'character');
+    if (view === 'practice') {
+      var scopeField = getOwnDataValue(route, 'scope');
+      if (!scopeField.present || (scopeField.value !== 'single' && scopeField.value !== 'group')) {
+        return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
+      }
+      var practiceCharacter = characterField.present ? characterField.value : undefined;
+      var practiceResolved = typeof practiceCharacter === 'string'
+        && Array.from(practiceCharacter).length === 1
+        ? store.resolve({ lessonId: lessonId, group: group, character: practiceCharacter })
+        : null;
+      if (practiceResolved === null && scopeField.value === 'single') {
+        return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
+      }
+      return Object.freeze({
+        view: 'practice',
+        lessonId: lessonId,
+        group: group,
+        scope: scopeField.value,
+        character: practiceResolved === null ? selectedEntries[0].character : practiceCharacter
+      });
+    }
+    if (!characterField.present
+      || typeof characterField.value !== 'string'
+      || Array.from(characterField.value).length !== 1
       || store.resolve({
         lessonId: lessonId,
         group: group,
-        character: route.character
+        character: characterField.value
       }) === null) {
       return Object.freeze({ view: 'lesson', lessonId: lessonId, group: group });
     }
@@ -149,7 +209,7 @@
       view: 'character',
       lessonId: lessonId,
       group: group,
-      character: route.character
+      character: characterField.value
     });
   }
 
