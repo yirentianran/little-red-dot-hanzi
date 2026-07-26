@@ -39,6 +39,8 @@ npm run test:browser
 
 ## 数据与许可
 
+项目代码以 MIT License 开源，见 [LICENSE](LICENSE)。
+
 字库对应 2019 年审定的人教版语文四年级上册，共 8 个单元、31 节学习内容、521 条学习记录和 428 个唯一汉字。
 
 汉字几何提取自 `hanzi-writer-data` 2.0.1，依照 ARPHICPL 分发；来源、修改内容和许可说明见 [data/source-data-license.md](data/source-data-license.md) 与 [data/ARPHICPL.TXT](data/ARPHICPL.TXT)。普通话音频来自 `hugolpz/audio-cmn` 的 `64k/syllabs` 子集，来源与许可见 [assets/audio/THIRD_PARTY_NOTICES.md](assets/audio/THIRD_PARTY_NOTICES.md)。
