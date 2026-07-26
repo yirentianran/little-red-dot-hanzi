@@ -164,6 +164,7 @@ export async function registerBrowserTests({ test }) {
     assert.equal(await currentHash(page), characterHash('lesson-1', 'write', '潮'));
     assert.equal(await page.locator('.character-pinyin').textContent(), 'cháo');
     assert.equal(await page.locator('.character-display').textContent(), '潮');
+    assert.equal(await page.locator('[data-slot="vocabulary-words"]').textContent(), '组词：潮水  浪潮  涨潮');
     assert.equal(await page.locator('.stroke-count').textContent(), '共 15 笔');
     assert.equal(await page.locator('[data-slot="character-board"] svg').count(), 1);
 

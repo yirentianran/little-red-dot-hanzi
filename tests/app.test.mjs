@@ -147,12 +147,12 @@ function createHarness(options = {}) {
 
   const entries = {
     write: Object.freeze([
-      Object.freeze({ character: '郭', pinyin: 'guō', audio: 'guo1' }),
-      Object.freeze({ character: '城', pinyin: 'chéng', audio: 'cheng2' })
+      Object.freeze({ character: '郭', pinyin: 'guō', audio: 'guo1', words: Object.freeze(['城郭', '郭外']) }),
+      Object.freeze({ character: '城', pinyin: 'chéng', audio: 'cheng2', words: Object.freeze(['城市', '城墙']) })
     ]),
     recognize: Object.freeze([
-      Object.freeze({ character: '识', pinyin: 'shí', audio: 'shi2' }),
-      Object.freeze({ character: '字', pinyin: 'zì', audio: 'zi4' })
+      Object.freeze({ character: '识', pinyin: 'shí', audio: 'shi2', words: Object.freeze(['认识', '识字']) }),
+      Object.freeze({ character: '字', pinyin: 'zì', audio: 'zi4', words: Object.freeze(['汉字', '写字']) })
     ])
   };
   const lesson = Object.freeze({
@@ -259,6 +259,7 @@ function createHarness(options = {}) {
         character: resolved.entry.character,
         pinyin: resolved.entry.pinyin,
         audioId: resolved.entry.audio,
+        words: resolved.entry.words,
         strokeCount: resolved.geometry.strokeCount,
         index: resolved.index,
         total: resolved.total,
@@ -1096,6 +1097,7 @@ test('single delegated listener handles nested known actions and ignores disable
     'data-lesson-id': 'lesson-1', 'data-group': 'write', 'data-character': '郭'
   });
   assert.equal(app.getRoute().view, 'character');
+  assert.deepEqual(currentHandle(harness).model.words, ['城郭', '郭外']);
   harness.click('next-character', {
     'data-lesson-id': 'lesson-1', 'data-group': 'write', 'data-character': '城'
   });
