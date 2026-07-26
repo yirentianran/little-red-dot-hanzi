@@ -535,6 +535,46 @@ test('preflights official progress-store attempt overflow before single completi
   });
 });
 
+test('keeps official store group completion and deferred needs lists in source order across scopes', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  progress.saveGroup('lesson-1', 'write', groupProgress({
+    remainingCharacters: ['潮', '据'], currentCharacter: '潮', currentPhase: 'guided'
+  }));
+
+  const singleLater = createPracticeSession(options(progress, { scope: 'single', startCharacter: '据' }));
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  assert.deepEqual(progress.getGroup('lesson-1', 'write').completedCharacters, ['据']);
+
+  const group = createPracticeSession(options(progress));
+  assert.equal(group.getState().character, '潮');
+  group.completeCharacter({ totalMistakes: 0 });
+  group.completeCharacter({ totalMistakes: 0 });
+  assert.deepEqual(progress.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['潮', '据'], remainingCharacters: ['据'], needsPracticeCharacters: [],
+    currentCharacter: '据', currentPhase: 'independent'
+  }));
+
+  const resumed = createPracticeSession(options(progress));
+  assert.deepEqual(resumed.getState(), {
+    status: 'active', phase: 'independent', character: '据', index: 1, total: 2,
+    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: ['据'], needsPracticeCharacters: []
+  });
+
+  progress.saveGroup('lesson-2', 'write', groupProgress({
+    remainingCharacters: ['潮'], needsPracticeCharacters: ['据'], currentCharacter: '潮', currentPhase: 'independent'
+  }));
+  const deferred = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  deferred.completeCharacter({ totalMistakes: 1 });
+  deferred.defer();
+  assert.deepEqual(progress.getGroup('lesson-2', 'write'), groupProgress({
+    completedCharacters: ['潮'], remainingCharacters: [], needsPracticeCharacters: ['潮', '据'],
+    currentCharacter: null, currentPhase: null
+  }));
+  const resumedDeferred = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  assert.deepEqual(resumedDeferred.getState().needsPracticeCharacters, ['潮', '据']);
+});
+
 test('invalid options, totals, and transitions are rejected atomically', () => {
   const progress = createFakeProgress();
   const invalidOptions = [

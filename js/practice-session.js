@@ -212,8 +212,10 @@
     return value;
   }
 
-  function addUnique(list, character) {
-    return list.indexOf(character) === -1 ? list.concat([character]) : list.slice();
+  function addInSourceOrder(list, character, source) {
+    var included = new Set(list);
+    included.add(character);
+    return source.filter(function (item) { return included.has(item); });
   }
 
   function createPracticeSession(options) {
@@ -362,7 +364,7 @@
             && currentRecord.attemptCount >= Number.MAX_SAFE_INTEGER) {
           throw new RangeError('character.attemptCount must not exceed the safe integer limit');
         }
-        var completed = addUnique(state.completedCharacters, character);
+        var completed = addInSourceOrder(state.completedCharacters, character, orderedCharacters);
         var outcome = totalMistakes > 0 ? 'needs-practice' : 'mastered';
         progress.recordCharacterOutcome(character, outcome);
         if (scope === 'single' && !singleMarked) {
@@ -411,7 +413,9 @@
         if (state.status !== 'needs-retry') throw new Error('Practice session is not in needs-retry state');
         var deferredCharacter = state.character;
         var remaining = state.remainingCharacters.filter(function (item) { return item !== deferredCharacter; });
-        var needsPractice = addUnique(state.needsPracticeCharacters, deferredCharacter);
+        var needsPractice = addInSourceOrder(
+          state.needsPracticeCharacters, deferredCharacter, orderedCharacters
+        );
         if (remaining.length === 0) {
           commit({
             status: 'complete', phase: null, character: null, mistakes: 0,
