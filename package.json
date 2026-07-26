@@ -8,10 +8,15 @@
     "validate": "node scripts/validate-library.mjs",
     "sync:audio": "node scripts/sync-audio.mjs",
     "verify:audio": "node scripts/sync-audio.mjs --verify",
+    "vendor:hanzi-writer": "node scripts/sync-hanzi-writer.mjs",
+    "verify:vendor": "node scripts/sync-hanzi-writer.mjs --verify",
     "build:data": "node scripts/build-library.mjs",
-    "check": "npm test && npm run validate && npm run build:data"
+    "check": "npm test && npm run validate && npm run build:data && npm run verify:vendor"
   },
   "devDependencies": {
     "hanzi-writer-data": "2.0.1"
+  },
+  "dependencies": {
+    "hanzi-writer": "3.7.3"
   }
 }
