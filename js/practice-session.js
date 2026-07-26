@@ -179,12 +179,14 @@
         ownDataValue(value, 'needsPracticeCharacters', 'stored group'),
         'stored group.needsPracticeCharacters', orderedCharacters
       );
-      if (!isOrderedSubset(remaining, orderedCharacters)) return null;
+      if (!isOrderedSubset(remaining, orderedCharacters)
+          || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
       if (remaining.length === 0) {
         if (currentCharacter !== null || currentPhase !== null) return null;
       } else if (remaining.indexOf(currentCharacter) === -1
+          || currentCharacter !== remaining[0]
           || (currentPhase !== 'guided' && currentPhase !== 'independent')) {
         return null;
       }

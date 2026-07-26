@@ -230,10 +230,26 @@ test('group resume restores compatible state and ignores incompatible saved queu
   const currentWithinQueue = createFakeProgress({
     group: groupProgress({ remainingCharacters: ['潮', '据'], currentCharacter: '据', currentPhase: 'independent' })
   });
-  const restoredCurrent = createPracticeSession(options(currentWithinQueue));
-  assert.equal(restoredCurrent.getState().character, '据');
-  assert.equal(restoredCurrent.getState().index, 1);
-  assert.deepEqual(restoredCurrent.getState().remainingCharacters, ['潮', '据']);
+  const ignoredCurrent = createPracticeSession(options(currentWithinQueue));
+  assert.equal(ignoredCurrent.getState().character, '潮');
+  assert.deepEqual(ignoredCurrent.getState().remainingCharacters, ['潮', '据']);
+
+  const reversedNeeds = createFakeProgress({
+    group: groupProgress({
+      completedCharacters: ['潮'], remainingCharacters: ['据'], needsPracticeCharacters: ['据', '潮'],
+      currentCharacter: '据', currentPhase: 'guided'
+    })
+  });
+  const ignoredReversedNeeds = createPracticeSession(options(reversedNeeds));
+  assert.equal(ignoredReversedNeeds.getState().character, '潮');
+  assert.deepEqual(ignoredReversedNeeds.getState().needsPracticeCharacters, []);
+
+  const foreignNeeds = createFakeProgress({
+    group: groupProgress({ remainingCharacters: ['据'], needsPracticeCharacters: ['熟'], currentCharacter: '据', currentPhase: 'guided' })
+  });
+  const ignoredForeignNeeds = createPracticeSession(options(foreignNeeds));
+  assert.equal(ignoredForeignNeeds.getState().character, '潮');
+  assert.deepEqual(ignoredForeignNeeds.getState().needsPracticeCharacters, []);
 });
 
 test('single scope filters to the start character and never reads a group resume', () => {
@@ -297,6 +313,25 @@ test('restart clears only active mistakes without changing queue state or persis
   assert.deepEqual(progress.calls, beforeCalls);
 });
 
+test('deferring the last failed group character completes the session with a null saved current state', () => {
+  const progress = createFakeProgress({
+    characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: true } }
+  });
+  const session = createPracticeSession(options(progress, { entries: entries(['潮']) }));
+
+  session.completeCharacter({ totalMistakes: 1 });
+  session.defer();
+
+  assert.deepEqual(session.getState(), {
+    status: 'complete', phase: null, character: null, index: 1, total: 1,
+    mistakes: 0, completedCharacters: ['潮'], remainingCharacters: [], needsPracticeCharacters: ['潮']
+  });
+  assert.deepEqual(progress.group(), groupProgress({
+    completedCharacters: ['潮'], remainingCharacters: [], needsPracticeCharacters: ['潮'],
+    currentCharacter: null, currentPhase: null
+  }));
+});
+
 test('destroy saves an active group once and all late calls except repeated destroy fail without mutation', () => {
   const progress = createFakeProgress();
   const session = createPracticeSession(options(progress));
@@ -313,6 +348,19 @@ test('destroy saves an active group once and all late calls except repeated dest
       ? session[method]({ totalMistakes: 0 })
       : session[method](), /destroyed/i);
   });
+  assert.deepEqual(progress.calls, callsAfterDestroy);
+});
+
+test('single-scope destroy never saves group progress and makes later calls inert', () => {
+  const progress = createFakeProgress();
+  const session = createPracticeSession(options(progress, { scope: 'single' }));
+
+  session.destroy();
+  const callsAfterDestroy = clone(progress.calls);
+  assert.doesNotThrow(() => session.destroy());
+  assert.throws(() => session.completeCharacter({ totalMistakes: 0 }), /destroyed/i);
+  assert.throws(() => session.recordStrokeMistake(), /destroyed/i);
+  assert.deepEqual(progress.calls.filter(([name]) => name === 'saveGroup'), []);
   assert.deepEqual(progress.calls, callsAfterDestroy);
 });
 
