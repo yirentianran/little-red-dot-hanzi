@@ -219,7 +219,7 @@
     try {
       pathString = ownDataValue(value, 'pathString', 'callback.drawnPath');
       points = ownDataValue(value, 'points', 'callback.drawnPath');
-      requirePathString(pathString, 'callback.drawnPath.pathString');
+      if (typeof pathString !== 'string' || pathString.trim() === '') return null;
       requireRegularArray(points, 'callback.drawnPath.points');
     } catch (_error) {
       return null;
@@ -243,15 +243,14 @@
     return Object.freeze({ pathString: pathString, points: Object.freeze(copies) });
   }
 
-  function optionalSafeInteger(source, key, destination) {
+  function requiredSafeInteger(source, key, destination) {
     var descriptor;
     try {
       descriptor = Object.getOwnPropertyDescriptor(source, key);
     } catch (_error) {
       return false;
     }
-    if (!descriptor) return true;
-    if (!Object.hasOwn(descriptor, 'value')
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')
         || !Number.isSafeInteger(descriptor.value) || descriptor.value < 0) return false;
     destination[key] = descriptor.value;
     return true;
@@ -267,21 +266,19 @@
     }
     if (!Number.isSafeInteger(strokeNum) || strokeNum !== expectedStroke) return null;
     var event = { type: type, strokeNum: strokeNum };
-    if (!optionalSafeInteger(data, 'mistakesOnStroke', event)
-        || !optionalSafeInteger(data, 'totalMistakes', event)
-        || !optionalSafeInteger(data, 'strokesRemaining', event)) return null;
+    if (!requiredSafeInteger(data, 'mistakesOnStroke', event)
+        || !requiredSafeInteger(data, 'totalMistakes', event)
+        || !requiredSafeInteger(data, 'strokesRemaining', event)) return null;
     var drawnDescriptor;
     try {
       drawnDescriptor = Object.getOwnPropertyDescriptor(data, 'drawnPath');
     } catch (_error) {
       return null;
     }
-    if (drawnDescriptor) {
-      if (!Object.hasOwn(drawnDescriptor, 'value')) return null;
-      var drawnPath = freezeDrawnPath(drawnDescriptor.value);
-      if (!drawnPath) return null;
-      event.drawnPath = drawnPath;
-    }
+    if (!drawnDescriptor || !Object.hasOwn(drawnDescriptor, 'value')) return null;
+    var drawnPath = freezeDrawnPath(drawnDescriptor.value);
+    if (!drawnPath) return null;
+    event.drawnPath = drawnPath;
     if (type === 'stroke-mistake') {
       var backwards;
       try {
@@ -298,7 +295,7 @@
   function normalizeCompleteEvent(data) {
     if (!isPlainObject(data)) return null;
     var event = { type: 'character-complete' };
-    if (!optionalSafeInteger(data, 'totalMistakes', event)) return null;
+    if (!requiredSafeInteger(data, 'totalMistakes', event)) return null;
     return Object.freeze(event);
   }
 
@@ -537,6 +534,7 @@
     function onPointerDown(event) {
       if (destroyed || !active || !Number.isFinite(event.pointerId)) return;
       if (activePointerId === null) {
+        if (event.isPrimary === false) return;
         activePointerId = event.pointerId;
       } else if (activePointerId !== event.pointerId) {
         restartInterruptedStroke();
@@ -598,14 +596,13 @@
         acceptBackwardsStrokes: false,
         leniency: LENIENCY,
         highlightOnComplete: false,
-        charDataLoader: function (_requestedCharacter, onLoad) {
-          var data = Object.freeze({
+        charDataLoader: function () {
+          return Object.freeze({
             strokes: Object.freeze(geometry.strokes.slice()),
             medians: Object.freeze(geometry.medians.map(function (median) {
               return Object.freeze(median.map(function (point) { return Object.freeze(point.slice()); }));
             }))
           });
-          onLoad(data);
         }
       });
       ['quiz', 'cancelQuiz', 'highlightStroke', 'updateDimensions', 'showOutline', 'hideOutline']

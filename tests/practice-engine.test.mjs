@@ -114,6 +114,32 @@ function createHarness(overrides = {}) {
 
 function dot(target) { return target.queryByClass('practice-start-dot')[0]; }
 function errorPath(target) { return target.queryByClass('practice-error-path')[0]; }
+function validStrokeData(overrides = {}) {
+  return {
+    strokeNum: 0,
+    mistakesOnStroke: 1,
+    totalMistakes: 2,
+    strokesRemaining: 1,
+    drawnPath: { pathString: 'M1 2 L3 4', points: [{ x: 1, y: 2 }] },
+    isBackwards: false,
+    ...overrides
+  };
+}
+
+function withoutField(value, field) {
+  const copy = { ...value };
+  delete copy[field];
+  return copy;
+}
+
+function withHostileField(value, field) {
+  const copy = { ...value };
+  Object.defineProperty(copy, field, {
+    enumerable: true,
+    get() { assert.fail(`${field} accessor invoked`); }
+  });
+  return copy;
+}
 
 test('creates one writer with exact local data and a separate pointer-transparent overlay', () => {
   const { calls, geometry, target } = createHarness();
@@ -128,12 +154,19 @@ test('creates one writer with exact local data and a separate pointer-transparen
     acceptBackwardsStrokes: false, leniency: 1, highlightOnComplete: false,
     charDataLoader: undefined
   });
-  let loaded;
-  options.charDataLoader('潮', (data) => { loaded = data; }, () => assert.fail('local loader failed'));
+  let callbackCalls = 0;
+  const loaded = options.charDataLoader(
+    '潮',
+    () => { callbackCalls += 1; },
+    () => assert.fail('local loader failed')
+  );
+  assert.equal(callbackCalls, 0);
   assert.deepEqual(loaded, { strokes: geometry.strokes, medians: geometry.medians });
+  assert.deepEqual(Object.keys(loaded), ['strokes', 'medians']);
   assert.notEqual(loaded.strokes, geometry.strokes);
   assert.notEqual(loaded.medians, geometry.medians);
   assert.equal(Object.isFrozen(loaded), true);
+  assert.notEqual(options.charDataLoader('潮'), loaded);
   const overlay = target.children.at(-1);
   assert.equal(overlay.name, 'svg');
   assert.equal(overlay.style.pointerEvents, 'none');
@@ -230,7 +263,9 @@ test('resize updates the writer, overlay, and public transform without recreatio
 test('second pointer and abnormal primary termination restart the same stroke without events', () => {
   const { calls, engine, events, target } = createHarness();
   engine.start({ phase: 'independent', strokeIndex: 1 });
+  target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
   target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+  assert.equal(calls.cancelQuiz, 0);
   target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
   assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);
   assert.equal(calls.cancelQuiz, 1);
@@ -337,14 +372,117 @@ test('rejects invalid options and starts atomically without invoking accessors',
   assert.throws(() => createPracticeEngine({ ...harness.options, extra: true }), /not allowed/);
 });
 
-test('invalid callback data is ignored without corrupting current stroke', () => {
+test('invalid correct-stroke callback fields are entirely inert', async (t) => {
+  const base = validStrokeData();
+  const cases = [
+    ['missing strokeNum', withoutField(base, 'strokeNum')],
+    ['mismatched strokeNum', { ...base, strokeNum: 1 }],
+    ['invalid strokeNum', { ...base, strokeNum: -1 }],
+    ['missing mistakesOnStroke', withoutField(base, 'mistakesOnStroke')],
+    ['invalid mistakesOnStroke', { ...base, mistakesOnStroke: 0.5 }],
+    ['missing totalMistakes', withoutField(base, 'totalMistakes')],
+    ['invalid totalMistakes', { ...base, totalMistakes: -1 }],
+    ['missing strokesRemaining', withoutField(base, 'strokesRemaining')],
+    ['invalid strokesRemaining', { ...base, strokesRemaining: Number.MAX_SAFE_INTEGER + 1 }],
+    ['missing drawnPath', withoutField(base, 'drawnPath')],
+    ['invalid drawnPath', { ...base, drawnPath: null }],
+    ['missing pathString', { ...base, drawnPath: withoutField(base.drawnPath, 'pathString') }],
+    ['blank pathString', { ...base, drawnPath: { ...base.drawnPath, pathString: ' ' } }],
+    ['missing points', { ...base, drawnPath: withoutField(base.drawnPath, 'points') }],
+    ['invalid points', { ...base, drawnPath: { ...base.drawnPath, points: null } }],
+    ['missing point x', { ...base, drawnPath: { ...base.drawnPath, points: [{ y: 2 }] } }],
+    ['missing point y', { ...base, drawnPath: { ...base.drawnPath, points: [{ x: 1 }] } }],
+    ['non-finite point', { ...base, drawnPath: { ...base.drawnPath, points: [{ x: Infinity, y: 2 }] } }]
+  ];
+  for (const field of ['strokeNum', 'mistakesOnStroke', 'totalMistakes', 'strokesRemaining', 'drawnPath']) {
+    cases.push([`hostile ${field}`, withHostileField(base, field)]);
+  }
+
+  for (const [name, data] of cases) {
+    await t.test(name, () => {
+      const { calls, engine, events, target } = createHarness();
+      engine.start({ phase: 'guided', strokeIndex: 0 });
+      calls.quiz[0].onCorrectStroke(data);
+      assert.deepEqual(events, []);
+      assert.equal(dot(target).getAttribute('cx'), '10');
+      assert.equal(dot(target).getAttribute('visibility'), 'visible');
+      assert.equal(errorPath(target), undefined);
+      engine.showHint();
+      assert.deepEqual(calls.highlight, [0]);
+    });
+  }
+});
+
+test('invalid mistake callback fields are entirely inert', async (t) => {
+  const base = validStrokeData({ isBackwards: true });
+  const cases = [
+    ['missing strokeNum', withoutField(base, 'strokeNum')],
+    ['mismatched strokeNum', { ...base, strokeNum: 1 }],
+    ['invalid strokeNum', { ...base, strokeNum: -1 }],
+    ['missing mistakesOnStroke', withoutField(base, 'mistakesOnStroke')],
+    ['invalid mistakesOnStroke', { ...base, mistakesOnStroke: -1 }],
+    ['missing totalMistakes', withoutField(base, 'totalMistakes')],
+    ['invalid totalMistakes', { ...base, totalMistakes: 1.25 }],
+    ['missing strokesRemaining', withoutField(base, 'strokesRemaining')],
+    ['invalid strokesRemaining', { ...base, strokesRemaining: '1' }],
+    ['missing drawnPath', withoutField(base, 'drawnPath')],
+    ['invalid drawnPath', { ...base, drawnPath: [] }],
+    ['missing pathString', { ...base, drawnPath: withoutField(base.drawnPath, 'pathString') }],
+    ['blank pathString', { ...base, drawnPath: { ...base.drawnPath, pathString: '' } }],
+    ['missing points', { ...base, drawnPath: withoutField(base.drawnPath, 'points') }],
+    ['invalid point', { ...base, drawnPath: { ...base.drawnPath, points: [{ x: 1, y: NaN }] } }],
+    ['missing isBackwards', withoutField(base, 'isBackwards')],
+    ['invalid isBackwards', { ...base, isBackwards: 1 }]
+  ];
+  for (const field of ['strokeNum', 'mistakesOnStroke', 'totalMistakes', 'strokesRemaining', 'drawnPath', 'isBackwards']) {
+    cases.push([`hostile ${field}`, withHostileField(base, field)]);
+  }
+
+  for (const [name, data] of cases) {
+    await t.test(name, () => {
+      const { calls, engine, events, target, timers } = createHarness();
+      engine.start({ phase: 'guided', strokeIndex: 0 });
+      calls.quiz[0].onMistake(data);
+      assert.deepEqual(events, []);
+      assert.equal(dot(target).getAttribute('cx'), '10');
+      assert.equal(dot(target).getAttribute('visibility'), 'visible');
+      assert.equal(errorPath(target), undefined);
+      assert.equal(timers.pending.size, 0);
+      engine.showHint();
+      assert.deepEqual(calls.highlight, [0]);
+    });
+  }
+});
+
+test('invalid complete callbacks remain active and supported data stays detached', async (t) => {
+  const cases = [
+    ['missing totalMistakes', {}],
+    ['negative totalMistakes', { totalMistakes: -1 }],
+    ['fractional totalMistakes', { totalMistakes: 1.5 }],
+    ['unsafe totalMistakes', { totalMistakes: Number.MAX_SAFE_INTEGER + 1 }],
+    ['hostile totalMistakes', withHostileField({}, 'totalMistakes')]
+  ];
+  for (const [name, data] of cases) {
+    await t.test(name, () => {
+      const { calls, engine, events, target } = createHarness();
+      engine.start({ phase: 'guided', strokeIndex: 0 });
+      calls.quiz[0].onComplete(data);
+      assert.deepEqual(events, []);
+      assert.equal(dot(target).getAttribute('visibility'), 'visible');
+      engine.showHint();
+      assert.deepEqual(calls.highlight, [0]);
+    });
+  }
+
   const { calls, engine, events } = createHarness();
   engine.start({ phase: 'guided', strokeIndex: 0 });
-  calls.quiz[0].onCorrectStroke({ strokeNum: -1 });
-  calls.quiz[0].onMistake({ get strokeNum() { assert.fail('accessor invoked'); } });
-  assert.deepEqual(events, []);
-  engine.showHint();
-  assert.deepEqual(calls.highlight, [0]);
+  const data = { totalMistakes: 2 };
+  Object.defineProperty(data, 'character', {
+    get() { assert.fail('unsupported character getter invoked'); }
+  });
+  calls.quiz[0].onComplete(data);
+  assert.deepEqual(events, [{ type: 'character-complete', totalMistakes: 2 }]);
+  assert.equal(Object.isFrozen(events[0]), true);
 });
 
 test('public API is frozen and exact, and UMD merge has no DOM or fetch load-time dependency', async () => {
