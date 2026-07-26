@@ -5,9 +5,13 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 import dataStoreModule from '../js/data-store.js';
+import practiceProgressModule from '../js/practice-progress-store.js';
+import practiceSessionModule from '../js/practice-session.js';
 
 const require = createRequire(import.meta.url);
 const { createDataStore } = dataStoreModule;
+const { createPracticeProgressStore } = practiceProgressModule;
+const { createPracticeSession } = practiceSessionModule;
 
 function loadViews() {
   return require('../js/views.js');
@@ -495,10 +499,27 @@ test('practice state consistency follows session queue and completion invariants
   });
 
   const overlapping = createPracticeModel(resolve('潮'), sessionState({
-    completedCharacters: ['据']
+    phase: 'independent',
+    completedCharacters: ['潮']
   }), true);
   assert.equal(overlapping.index, 0);
   assert.equal(overlapping.completedCount, 1);
+
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    completedCharacters: ['据']
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    phase: 'independent',
+    completedCharacters: ['潮', '据']
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    completedCharacters: ['潮']
+  }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+    phase: 'independent',
+    completedCharacters: ['潮'],
+    needsPracticeCharacters: ['潮']
+  }), true), TypeError);
 
   assert.throws(() => createPracticeModel(resolve('据'), sessionState({
     character: '据',
@@ -548,6 +569,91 @@ test('practice state consistency follows session queue and completion invariants
     remainingCharacters: ['潮'],
     needsPracticeCharacters: ['潮']
   }), true), TypeError);
+});
+
+test('practice models accept real session snapshots across retry, defer, completion, and filters', async () => {
+  const { createPracticeModel } = loadViews();
+  const store = await createRuntimeStore();
+  const entries = store.getEntries('lesson-1', 'write').slice(0, 2);
+  const progress = createPracticeProgressStore(null);
+  const session = createPracticeSession({
+    lessonId: 'lesson-1',
+    group: 'write',
+    scope: 'group',
+    entries,
+    startCharacter: '潮',
+    progress
+  });
+  const models = [];
+  const capture = () => {
+    const state = session.getState();
+    const stableCharacter = state.character
+      || state.completedCharacters[state.completedCharacters.length - 1];
+    const resolved = {
+      ...store.resolve({
+        lessonId: 'lesson-1', group: 'write', character: stableCharacter
+      }),
+      scope: 'group'
+    };
+    const model = createPracticeModel(resolved, { ...state, masteredCount: 0 }, false);
+    models.push(model);
+    return model;
+  };
+
+  assert.deepEqual(
+    { status: capture().status, phase: models.at(-1).phase, index: models.at(-1).index },
+    { status: 'active', phase: 'guided', index: 0 }
+  );
+  session.completeCharacter({ totalMistakes: 0 });
+  assert.equal(capture().phase, 'independent');
+  session.completeCharacter({ totalMistakes: 2 });
+  assert.deepEqual(
+    { status: capture().status, completed: models.at(-1).completedCount },
+    { status: 'needs-retry', completed: 1 }
+  );
+  session.retry();
+  assert.deepEqual(
+    { status: capture().status, phase: models.at(-1).phase },
+    { status: 'active', phase: 'independent' }
+  );
+  session.completeCharacter({ totalMistakes: 0 });
+  assert.deepEqual(
+    { character: capture().character, index: models.at(-1).index },
+    { character: '据', index: 1 }
+  );
+  session.completeCharacter({ totalMistakes: 0 });
+  capture();
+  session.completeCharacter({ totalMistakes: 1 });
+  assert.equal(capture().status, 'needs-retry');
+  session.defer();
+  assert.deepEqual(
+    {
+      status: capture().status,
+      completed: models.at(-1).completedCount,
+      needs: models.at(-1).needsPracticeCharacters
+    },
+    { status: 'complete', completed: 2, needs: ['据'] }
+  );
+
+  const filteredProgress = createPracticeProgressStore(null);
+  const filtered = createPracticeSession({
+    lessonId: 'lesson-1',
+    group: 'write',
+    scope: 'group',
+    entries: store.getEntries('lesson-1', 'write').slice(1, 3),
+    startCharacter: '据',
+    progress: filteredProgress,
+    resume: false
+  });
+  const filteredState = filtered.getState();
+  const filteredModel = createPracticeModel({
+    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '据' }),
+    scope: 'group'
+  }, { ...filteredState, masteredCount: 0 }, false);
+  assert.deepEqual(
+    { character: filteredModel.character, index: filteredModel.index, total: filteredModel.total },
+    { character: '据', index: 0, total: 2 }
+  );
 });
 
 test('practice model and progress inputs reject hostile or inconsistent structures without getters', async () => {
@@ -904,6 +1010,7 @@ test('renders active practice as an unframed board with stable live handles and 
   assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-lesson-id'), 'lesson-1');
   assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-group'), 'write');
   assert.match(byAction(container, 'practice-back')[0].getAttribute('aria-label'), /返回.*观潮.*会写/);
+  assert.match(byAction(container, 'practice-back')[0].textContent, /观潮/);
   assert.match(container.textContent, /观潮/);
   assert.match(container.textContent, /会写/);
   assert.match(container.textContent, /第 1 \/ 15 个/);
@@ -934,6 +1041,17 @@ test('renders active practice as an unframed board with stable live handles and 
   assert.throws(() => handle.setFeedback('bad', 'warning'), TypeError);
   assert.throws(() => handle.setStrokePosition(0, 15), TypeError);
   assert.equal(handle.board.getAttribute('aria-label'), beforeInvalid);
+
+  const singleModel = createPracticeModel({ ...resolved, scope: 'single' }, sessionState({
+    total: 1,
+    remainingCharacters: ['潮']
+  }), true);
+  const singleDom = createDom();
+  renderPractice(singleDom.container, singleModel);
+  const singleBack = byAction(singleDom.container, 'practice-back')[0];
+  assert.match(singleBack.getAttribute('aria-label'), /返回.*潮.*学习页/);
+  assert.doesNotMatch(singleBack.getAttribute('aria-label'), /字表/);
+  assert.match(singleBack.textContent, /潮/);
 });
 
 test('renders retry controls by scope and rejects inactive handle mutations without DOM changes', async () => {

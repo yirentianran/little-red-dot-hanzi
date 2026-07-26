@@ -651,10 +651,26 @@
       }
     });
     var completed = new Set(state.completedCharacters);
+    var remaining = new Set(state.remainingCharacters);
     if (state.needsPracticeCharacters.some(function (character) {
       return !completed.has(character);
     })) {
       reject('state.needsPracticeCharacters', 'must be a subset of state.completedCharacters');
+    }
+    if (state.needsPracticeCharacters.some(function (character) {
+      return remaining.has(character);
+    })) {
+      reject('state.needsPracticeCharacters', 'must not occur in state.remainingCharacters');
+    }
+    var overlaps = state.completedCharacters.filter(function (character) {
+      return remaining.has(character);
+    });
+    var allowsCurrentOverlap = overlaps.length === 1
+      && overlaps[0] === state.character
+      && (state.status === 'needs-retry'
+        || (state.status === 'active' && state.phase === 'independent'));
+    if (overlaps.length > 0 && !allowsCurrentOverlap) {
+      reject('state', 'only the current retry character may be completed and remaining');
     }
     var covered = new Set(state.completedCharacters.concat(state.remainingCharacters));
     if (covered.size !== state.total) {
@@ -679,6 +695,11 @@
     if (state.remainingCharacters.length === 0
         || state.remainingCharacters[0] !== state.character) {
       reject('state.remainingCharacters', 'must start with state.character');
+    }
+    var completedBeforeCurrent = state.completedCharacters.length
+      - (allowsCurrentOverlap ? 1 : 0);
+    if (state.index !== completedBeforeCurrent) {
+      reject('state.index', 'must match completed practice progress');
     }
     if (state.index !== state.total - state.remainingCharacters.length) {
       reject('state.index', 'must match completed practice queue progress');
@@ -1341,10 +1362,16 @@
     });
     var backAttributes = practiceContextAttributes(viewModel, 'practice-back');
     backAttributes['class'] = 'button button--quiet back-button';
-    backAttributes['aria-label'] = '返回《' + viewModel.lesson.title + '》' + groupLabel + '字表';
+    var backLabel = viewModel.scope === 'single'
+      ? '返回“' + viewModel.character + '”字的学习页'
+      : '返回《' + viewModel.lesson.title + '》' + groupLabel + '字表';
+    var backText = viewModel.scope === 'single'
+      ? '学习“' + viewModel.character + '”'
+      : viewModel.lesson.title;
+    backAttributes['aria-label'] = backLabel;
     var back = node(documentObject, 'button', backAttributes, undefined, [
       icon(documentObject, '←'),
-      node(documentObject, 'span', {}, viewModel.lesson.title)
+      node(documentObject, 'span', {}, backText)
     ]);
     var position = node(documentObject, 'p', {
       'class': 'practice-round-position',
