@@ -164,7 +164,12 @@
     });
   }
 
-  function cloneCompatibleGroup(value, orderedCharacters) {
+  function orderBySource(characters, source) {
+    var included = new Set(characters);
+    return source.filter(function (character) { return included.has(character); });
+  }
+
+  function cloneCompatibleGroup(value, orderedCharacters, phaseFor) {
     try {
       requirePlainObject(value, 'stored group');
       var names = Object.getOwnPropertyNames(value);
@@ -173,27 +178,20 @@
       GROUP_FIELDS.forEach(function (field) {
         if (names.indexOf(field) === -1) throw new TypeError('missing field');
       });
-      var completed = cloneCharacterList(
+      var completed = orderBySource(cloneCharacterList(
         ownDataValue(value, 'completedCharacters', 'stored group'),
         'stored group.completedCharacters', orderedCharacters
-      );
+      ), orderedCharacters);
       var remaining = cloneCharacterList(
         ownDataValue(value, 'remainingCharacters', 'stored group'),
         'stored group.remainingCharacters', orderedCharacters
       );
-      var needsPractice = cloneCharacterList(
+      var needsPractice = orderBySource(cloneCharacterList(
         ownDataValue(value, 'needsPracticeCharacters', 'stored group'),
         'stored group.needsPracticeCharacters', orderedCharacters
-      );
-      if (!isOrderedSubset(completed, orderedCharacters)
-          || !isOrderedSubset(remaining, orderedCharacters)
-          || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
+      ), orderedCharacters);
+      if (!isOrderedSubset(remaining, orderedCharacters)) return null;
       if (!coversSource(completed, remaining, orderedCharacters)) return null;
-      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
-        var neededCharacter = needsPractice[needIndex];
-        if (completed.indexOf(neededCharacter) === -1
-            || remaining.indexOf(neededCharacter) !== -1) return null;
-      }
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
       if (remaining.length === 0) {
@@ -208,11 +206,17 @@
         return character === currentCharacter && currentPhase === 'independent';
       });
       if (!coversSource(completed, normalizedRemaining, orderedCharacters)) return null;
+      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
+        var neededCharacter = needsPractice[needIndex];
+        if (completed.indexOf(neededCharacter) === -1
+            || normalizedRemaining.indexOf(neededCharacter) !== -1) return null;
+      }
       if (normalizedRemaining.length === 0) {
         currentCharacter = null;
         currentPhase = null;
       } else if (normalizedRemaining[0] !== currentCharacter) {
-        return null;
+        currentCharacter = normalizedRemaining[0];
+        currentPhase = phaseFor(currentCharacter);
       }
       return {
         completedCharacters: completed,
@@ -288,7 +292,9 @@
     var mutating = false;
 
     if (scope === 'group' && resume) {
-      var restored = cloneCompatibleGroup(progress.getGroup(lessonId, group), orderedCharacters);
+      var restored = cloneCompatibleGroup(
+        progress.getGroup(lessonId, group), orderedCharacters, phaseFor
+      );
       if (restored !== null) {
         state = {
           status: restored.remainingCharacters.length === 0 ? 'complete' : 'active',
@@ -317,7 +323,8 @@
     }
 
     function currentIndex(nextState) {
-      return nextState.character === null ? orderedCharacters.length : orderedCharacters.indexOf(nextState.character);
+      if (nextState.status === 'complete') return orderedCharacters.length;
+      return orderedCharacters.length - nextState.remainingCharacters.length;
     }
 
     function snapshot(nextState) {

@@ -1,13 +1,25 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import test from 'node:test';
 import vm from 'node:vm';
 
+import dataStoreModule from '../js/data-store.js';
 import practiceProgressStoreModule from '../js/practice-progress-store.js';
 import practiceSessionModule from '../js/practice-session.js';
 
+const require = createRequire(import.meta.url);
+const { createDataStore } = dataStoreModule;
 const { PRACTICE_STORAGE_KEY, createPracticeProgressStore } = practiceProgressStoreModule;
 const { createPracticeSession } = practiceSessionModule;
+const { createPracticeModel } = require('../js/views.js');
+
+async function createRuntimeStore() {
+  const source = await readFile(new URL('../data/library-data.js', import.meta.url), 'utf8');
+  const context = { window: {} };
+  vm.runInNewContext(source, context, { filename: 'data/library-data.js' });
+  return createDataStore(context.window.HANZI_LIBRARY);
+}
 
 function groupProgress(overrides = {}) {
   return {
@@ -271,9 +283,11 @@ test('group resume restores compatible state and ignores incompatible saved queu
       currentCharacter: null, currentPhase: null
     })
   });
-  const ignoredReversedCompleted = createPracticeSession(options(reversedCompleted));
-  assert.equal(ignoredReversedCompleted.getState().character, '潮');
-  assert.deepEqual(ignoredReversedCompleted.getState().completedCharacters, []);
+  const normalizedComplete = createPracticeSession(options(reversedCompleted));
+  assert.deepEqual(normalizedComplete.getState(), {
+    status: 'complete', phase: null, character: null, index: 2, total: 2,
+    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [], needsPracticeCharacters: []
+  });
 });
 
 test('restores only semantically complete queues and preserves current independent retry overlap', () => {
@@ -292,10 +306,6 @@ test('restores only semantically complete queues and preserves current independe
       completedCharacters: ['潮'], remainingCharacters: ['据'], needsPracticeCharacters: ['据'],
       currentCharacter: '据', currentPhase: 'guided'
     }),
-    groupProgress({
-      completedCharacters: ['潮'], remainingCharacters: ['潮', '据'],
-      currentCharacter: '潮', currentPhase: 'guided'
-    })
   ];
   invalidGroups.forEach((group) => {
     const session = createPracticeSession(options(createFakeProgress({ group })));
@@ -584,7 +594,7 @@ test('preflights official progress-store attempt overflow before single completi
   });
 });
 
-test('keeps official store group completion and deferred needs lists in source order across scopes', () => {
+test('normalizes a future single completion into queue progress accepted by the practice model', async () => {
   const progress = createPracticeProgressStore(createStorage());
   progress.saveGroup('lesson-1', 'write', groupProgress({
     remainingCharacters: ['潮', '据'], currentCharacter: '潮', currentPhase: 'guided'
@@ -597,9 +607,20 @@ test('keeps official store group completion and deferred needs lists in source o
 
   const group = createPracticeSession(options(progress));
   assert.deepEqual(group.getState(), {
-    status: 'active', phase: 'guided', character: '潮', index: 0, total: 2,
+    status: 'active', phase: 'guided', character: '潮', index: 1, total: 2,
     mistakes: 0, completedCharacters: ['据'], remainingCharacters: ['潮'], needsPracticeCharacters: []
   });
+  const store = await createRuntimeStore();
+  const resolved = {
+    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    scope: 'group'
+  };
+  assert.doesNotThrow(() => createPracticeModel(
+    resolved,
+    { ...group.getState(), masteredCount: 1 },
+    true
+  ));
+
   group.completeCharacter({ totalMistakes: 0 });
   group.completeCharacter({ totalMistakes: 0 });
   assert.deepEqual(progress.getGroup('lesson-1', 'write'), groupProgress({
@@ -612,19 +633,69 @@ test('keeps official store group completion and deferred needs lists in source o
     status: 'complete', phase: null, character: null, index: 2, total: 2,
     mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [], needsPracticeCharacters: []
   });
+});
+
+test('advances a saved group when its guided current character completes in single scope', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  progress.saveGroup('lesson-1', 'write', groupProgress({
+    remainingCharacters: ['潮', '据'], currentCharacter: '潮', currentPhase: 'guided'
+  }));
+
+  const singleCurrent = createPracticeSession(options(progress, { scope: 'single' }));
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  progress.recordCharacterOutcome('据', 'mastered');
+
+  const group = createPracticeSession(options(progress));
+  assert.deepEqual(group.getState(), {
+    status: 'active', phase: 'independent', character: '据', index: 1, total: 2,
+    mistakes: 0, completedCharacters: ['潮'], remainingCharacters: ['据'], needsPracticeCharacters: []
+  });
+});
+
+test('restores append-order cross-scope completions and needs lists in source order', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  progress.saveGroup('lesson-1', 'write', groupProgress({
+    remainingCharacters: ['潮', '据'], currentCharacter: '潮', currentPhase: 'guided'
+  }));
+
+  const singleLater = createPracticeSession(options(progress, { scope: 'single', startCharacter: '据' }));
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  const singleCurrent = createPracticeSession(options(progress, { scope: 'single' }));
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  assert.deepEqual(progress.getGroup('lesson-1', 'write').completedCharacters, ['据', '潮']);
+
+  const complete = createPracticeSession(options(progress));
+  assert.deepEqual(complete.getState(), {
+    status: 'complete', phase: null, character: null, index: 2, total: 2,
+    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [], needsPracticeCharacters: []
+  });
 
   progress.saveGroup('lesson-2', 'write', groupProgress({
+    completedCharacters: ['据', '潮'], remainingCharacters: [], needsPracticeCharacters: ['据', '潮'],
+    currentCharacter: null, currentPhase: null
+  }));
+  const orderedNeeds = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  assert.deepEqual(orderedNeeds.getState(), {
+    status: 'complete', phase: null, character: null, index: 2, total: 2,
+    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [],
+    needsPracticeCharacters: ['潮', '据']
+  });
+
+  progress.saveGroup('lesson-3', 'write', groupProgress({
     completedCharacters: ['据'], remainingCharacters: ['潮'], needsPracticeCharacters: ['据'],
     currentCharacter: '潮', currentPhase: 'independent'
   }));
-  const deferred = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  const deferred = createPracticeSession(options(progress, { lessonId: 'lesson-3' }));
   deferred.completeCharacter({ totalMistakes: 1 });
   deferred.defer();
-  assert.deepEqual(progress.getGroup('lesson-2', 'write'), groupProgress({
+  assert.deepEqual(progress.getGroup('lesson-3', 'write'), groupProgress({
     completedCharacters: ['潮', '据'], remainingCharacters: [], needsPracticeCharacters: ['潮', '据'],
     currentCharacter: null, currentPhase: null
   }));
-  const resumedDeferred = createPracticeSession(options(progress, { lessonId: 'lesson-2' }));
+  const resumedDeferred = createPracticeSession(options(progress, { lessonId: 'lesson-3' }));
   assert.deepEqual(resumedDeferred.getState().needsPracticeCharacters, ['潮', '据']);
 });
 
