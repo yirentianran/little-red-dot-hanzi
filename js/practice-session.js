@@ -207,9 +207,12 @@
           || (currentPhase !== 'guided' && currentPhase !== 'independent')) {
         return null;
       }
+      var preserveCurrentRetry = currentPhase === 'independent'
+        && completed.indexOf(currentCharacter) !== -1
+        && phaseFor(currentCharacter) !== 'independent';
       var normalizedRemaining = remaining.filter(function (character) {
         if (completed.indexOf(character) === -1) return true;
-        return character === currentCharacter && currentPhase === 'independent';
+        return character === currentCharacter && preserveCurrentRetry;
       });
       if (!coversSource(completed, normalizedRemaining, orderedCharacters)) return null;
       if (normalizedRemaining.length === 0) {

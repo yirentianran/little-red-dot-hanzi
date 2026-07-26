@@ -657,6 +657,65 @@ test('advances a saved group when its guided current character completes in sing
   });
 });
 
+test('resumes a genuine failed independent group attempt at the current character', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  const group = createPracticeSession(options(progress));
+
+  group.completeCharacter({ totalMistakes: 0 });
+  group.completeCharacter({ totalMistakes: 2 });
+  assert.deepEqual(progress.getCharacter('潮'), {
+    attemptCount: 1, lastOutcome: 'needs-practice', mastered: false
+  });
+
+  const resumed = createPracticeSession(options(progress));
+  assert.deepEqual(resumed.getState(), {
+    status: 'active', phase: 'independent', character: '潮', index: 0, total: 2,
+    mistakes: 0, completedCharacters: ['潮'], remainingCharacters: ['潮', '据'],
+    needsPracticeCharacters: []
+  });
+});
+
+test('advances an independent saved current after a later single-scope mastery', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  const group = createPracticeSession(options(progress));
+  group.completeCharacter({ totalMistakes: 0 });
+  group.destroy();
+
+  const singleCurrent = createPracticeSession(options(progress, { scope: 'single' }));
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+
+  const resumed = createPracticeSession(options(progress));
+  assert.deepEqual(resumed.getState(), {
+    status: 'active', phase: 'guided', character: '据', index: 1, total: 2,
+    mistakes: 0, completedCharacters: ['潮'], remainingCharacters: ['据'],
+    needsPracticeCharacters: []
+  });
+});
+
+test('completes an independent saved group after every character is mastered in single scope', () => {
+  const progress = createPracticeProgressStore(createStorage());
+  const group = createPracticeSession(options(progress));
+  group.completeCharacter({ totalMistakes: 0 });
+  group.destroy();
+
+  const singleLater = createPracticeSession(options(progress, {
+    scope: 'single', startCharacter: '据'
+  }));
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  singleLater.completeCharacter({ totalMistakes: 0 });
+  const singleCurrent = createPracticeSession(options(progress, { scope: 'single' }));
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+  singleCurrent.completeCharacter({ totalMistakes: 0 });
+
+  const resumed = createPracticeSession(options(progress));
+  assert.deepEqual(resumed.getState(), {
+    status: 'complete', phase: null, character: null, index: 2, total: 2,
+    mistakes: 0, completedCharacters: ['潮', '据'], remainingCharacters: [],
+    needsPracticeCharacters: []
+  });
+});
+
 test('restores append-order cross-scope completions but rejects reversed needs lists', () => {
   const progress = createPracticeProgressStore(createStorage());
   progress.saveGroup('lesson-1', 'write', groupProgress({
