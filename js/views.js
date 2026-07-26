@@ -16,6 +16,10 @@
   var ANIMATION_MODES = Object.freeze(['continuous', 'step']);
   var SPEEDS = Object.freeze(['slow', 'normal', 'fast']);
   var AUDIO_STATES = Object.freeze(['ready', 'loading', 'unavailable', 'error']);
+  var PRACTICE_STATUSES = Object.freeze(['active', 'needs-retry', 'complete']);
+  var PRACTICE_PHASES = Object.freeze(['guided', 'independent']);
+  var PRACTICE_FEEDBACK_KINDS = Object.freeze(['neutral', 'success', 'error', 'hint']);
+  var HAN_CHARACTER = /^\p{Script=Han}$/u;
   var ANIMATION_LABELS = Object.freeze({
     idle: '准备开始',
     playing: '正在书写',
@@ -76,6 +80,179 @@
   function requireOneOf(value, allowed, path) {
     if (allowed.indexOf(value) === -1) reject(path, 'has an unsupported value');
     return value;
+  }
+
+  function isPlainObject(value) {
+    if (!isRecord(value)) return false;
+    try {
+      var prototype = Object.getPrototypeOf(value);
+      if (prototype === null || prototype === Object.prototype) return true;
+      if (Object.getPrototypeOf(prototype) !== null) return false;
+      var constructor = Object.getOwnPropertyDescriptor(prototype, 'constructor');
+      var constructorPrototype = constructor && Object.hasOwn(constructor, 'value')
+        ? Object.getOwnPropertyDescriptor(constructor.value, 'prototype')
+        : null;
+      return Boolean(constructorPrototype && Object.hasOwn(constructorPrototype, 'value')
+        && constructorPrototype.value === prototype
+        && typeof constructor.value === 'function'
+        && Function.prototype.toString.call(constructor.value)
+          === 'function Object() { [native code] }');
+    } catch (_error) {
+      return false;
+    }
+  }
+
+  function requirePlainObject(value, path) {
+    if (!isPlainObject(value)) reject(path, 'must be a plain object');
+    return value;
+  }
+
+  function ownDataValue(value, field, path) {
+    var descriptor;
+    try {
+      descriptor = Object.getOwnPropertyDescriptor(value, field);
+    } catch (_error) {
+      reject(path + '.' + field, 'must be an own data property');
+    }
+    if (!descriptor || !Object.hasOwn(descriptor, 'value')) {
+      reject(path + '.' + field, 'must be an own data property');
+    }
+    return descriptor.value;
+  }
+
+  function ownNames(value, path) {
+    var names;
+    var symbols;
+    try {
+      names = Object.getOwnPropertyNames(value);
+      symbols = Object.getOwnPropertySymbols(value);
+    } catch (_error) {
+      reject(path, 'must expose own fields');
+    }
+    if (symbols.length !== 0) reject(path, 'must not contain symbol fields');
+    return names;
+  }
+
+  function requireOwnDataFields(value, path) {
+    requirePlainObject(value, path);
+    var names = ownNames(value, path);
+    names.forEach(function (name) { ownDataValue(value, name, path); });
+    return names;
+  }
+
+  function requireExactOwnFields(value, fields, path) {
+    var names = requireOwnDataFields(value, path);
+    if (names.length !== fields.length) reject(path, 'must contain exactly the supported fields');
+    fields.forEach(function (field) {
+      if (names.indexOf(field) === -1) reject(path + '.' + field, 'must be an own data property');
+    });
+  }
+
+  function requireRegularArray(value, path) {
+    if (!Array.isArray(value)) reject(path, 'must be an array');
+    var names = ownNames(value, path);
+    if (names.length !== value.length + 1 || names.indexOf('length') === -1) {
+      reject(path, 'must contain only own array elements');
+    }
+    for (var index = 0; index < value.length; index += 1) {
+      if (names.indexOf(String(index)) === -1) {
+        reject(path + '[' + index + ']', 'must be an own array element');
+      }
+      ownDataValue(value, String(index), path);
+    }
+  }
+
+  function requireSafeInteger(value, path, minimum) {
+    if (!Number.isSafeInteger(value) || value < minimum) {
+      reject(path, 'must be a safe integer greater than or equal to ' + minimum);
+    }
+    return value;
+  }
+
+  function requireHanCharacter(value, path) {
+    if (typeof value !== 'string' || !HAN_CHARACTER.test(value)) {
+      reject(path, 'must be one Unicode Han character');
+    }
+    return value;
+  }
+
+  function cloneCharacterList(value, path) {
+    requireRegularArray(value, path);
+    var result = [];
+    var seen = new Set();
+    for (var index = 0; index < value.length; index += 1) {
+      var character = requireHanCharacter(
+        ownDataValue(value, String(index), path), path + '[' + index + ']'
+      );
+      if (seen.has(character)) reject(path + '[' + index + ']', 'must not repeat a character');
+      seen.add(character);
+      result.push(character);
+    }
+    return result;
+  }
+
+  function isOrderedSubset(characters, source) {
+    var previous = -1;
+    for (var index = 0; index < characters.length; index += 1) {
+      var position = source.indexOf(characters[index]);
+      if (position <= previous) return false;
+      previous = position;
+    }
+    return true;
+  }
+
+  function copyUnitStrict(unit, path) {
+    requireOwnDataFields(unit, path);
+    return {
+      id: requireNonBlankString(ownDataValue(unit, 'id', path), path + '.id'),
+      title: requireNonBlankString(ownDataValue(unit, 'title', path), path + '.title')
+    };
+  }
+
+  function copyLessonStrict(lesson, path) {
+    requireOwnDataFields(lesson, path);
+    var kind = requireOneOf(
+      ownDataValue(lesson, 'kind', path), ['lesson', 'garden'], path + '.kind'
+    );
+    var copy = {
+      kind: kind,
+      id: requireNonBlankString(ownDataValue(lesson, 'id', path), path + '.id'),
+      title: requireNonBlankString(ownDataValue(lesson, 'title', path), path + '.title')
+    };
+    if (kind === 'lesson') {
+      copy.number = requireSafeInteger(ownDataValue(lesson, 'number', path), path + '.number', 1);
+    }
+    return copy;
+  }
+
+  function copyPracticeSnapshot(practice) {
+    if (practice === undefined) {
+      return { mastered: new Set(), completed: new Set() };
+    }
+    requireExactOwnFields(practice, ['characters', 'group'], 'practice');
+    var characters = ownDataValue(practice, 'characters', 'practice');
+    requireOwnDataFields(characters, 'practice.characters');
+    var mastered = new Set();
+    ownNames(characters, 'practice.characters').forEach(function (character) {
+      requireHanCharacter(character, 'practice.characters key');
+      var record = ownDataValue(characters, character, 'practice.characters');
+      requireOwnDataFields(record, 'practice.characters.' + character);
+      var value = ownDataValue(record, 'mastered', 'practice.characters.' + character);
+      if (typeof value !== 'boolean') {
+        reject('practice.characters.' + character + '.mastered', 'must be a boolean');
+      }
+      if (value) mastered.add(character);
+    });
+    var group = ownDataValue(practice, 'group', 'practice');
+    var completed = [];
+    if (group !== null) {
+      requireOwnDataFields(group, 'practice.group');
+      completed = cloneCharacterList(
+        ownDataValue(group, 'completedCharacters', 'practice.group'),
+        'practice.group.completedCharacters'
+      );
+    }
+    return { mastered: mastered, completed: new Set(completed) };
   }
 
   function freezeTree(value, seen) {
@@ -175,9 +352,10 @@
     return freezeTree({ units: units });
   }
 
-  function createLessonModel(store, options) {
+  function createLessonModel(store, options, practice) {
     requireStore(store);
     requireRecord(options, 'options');
+    var practiceState = copyPracticeSnapshot(practice);
     var lessonId = requireNonBlankString(
       requireOwn(options, 'lessonId', 'options'), 'options.lessonId'
     );
@@ -245,14 +423,24 @@
       }
     };
     var entries = selected.map(function (entry, index) {
-      return copyEntry(entry, index, 'store.getEntries()[' + index + ']');
+      var copy = copyEntry(entry, index, 'store.getEntries()[' + index + ']');
+      copy.mastered = practiceState.mastered.has(copy.character);
+      copy.completedHere = practiceState.completed.has(copy.character);
+      return copy;
     });
+    var completedCount = entries.filter(function (entry) { return entry.completedHere; }).length;
+    var masteredCount = entries.filter(function (entry) { return entry.mastered; }).length;
     return freezeTree({
       unit: copyUnit(sourceUnit, 'store.getUnit()'),
       lesson: lesson,
       group: group,
       groups: groups,
-      entries: entries
+      entries: entries,
+      practice: {
+        completed: completedCount,
+        mastered: masteredCount,
+        total: entries.length
+      }
     });
   }
 
@@ -275,8 +463,9 @@
     return Object.freeze(copy);
   }
 
-  function createCharacterModel(resolved) {
+  function createCharacterModel(resolved, practice) {
     requireRecord(resolved, 'resolved');
+    var practiceState = copyPracticeSnapshot(practice);
     var unit = copyUnit(requireOwn(resolved, 'unit', 'resolved'), 'resolved.unit');
     var lesson = copyLesson(requireOwn(resolved, 'lesson', 'resolved'), 'resolved.lesson');
     var group = requireOneOf(requireOwn(resolved, 'group', 'resolved'), GROUPS, 'resolved.group');
@@ -312,10 +501,199 @@
       index: index,
       total: total,
       isReview: Object.hasOwn(entry, 'counted') && entry.counted === false,
+      mastered: practiceState.mastered.has(character),
+      completedHere: practiceState.completed.has(character),
       previous: previous,
       next: next,
       previousDisabled: previous === null,
       nextDisabled: next === null
+    });
+  }
+
+  function copyResolvedPractice(resolved) {
+    var fields = [
+      'unit', 'lesson', 'group', 'entries', 'entry', 'index', 'total',
+      'previous', 'next', 'geometry', 'audio', 'scope'
+    ];
+    requireExactOwnFields(resolved, fields, 'resolved');
+    var unit = copyUnitStrict(ownDataValue(resolved, 'unit', 'resolved'), 'resolved.unit');
+    var lesson = copyLessonStrict(
+      ownDataValue(resolved, 'lesson', 'resolved'), 'resolved.lesson'
+    );
+    var group = requireOneOf(
+      ownDataValue(resolved, 'group', 'resolved'), GROUPS, 'resolved.group'
+    );
+    var scope = requireOneOf(
+      ownDataValue(resolved, 'scope', 'resolved'), ['single', 'group'], 'resolved.scope'
+    );
+    var entry = ownDataValue(resolved, 'entry', 'resolved');
+    requireOwnDataFields(entry, 'resolved.entry');
+    var character = requireHanCharacter(
+      ownDataValue(entry, 'character', 'resolved.entry'), 'resolved.entry.character'
+    );
+    var pinyin = requireNonBlankString(
+      ownDataValue(entry, 'pinyin', 'resolved.entry'), 'resolved.entry.pinyin'
+    );
+    var geometry = ownDataValue(resolved, 'geometry', 'resolved');
+    requireOwnDataFields(geometry, 'resolved.geometry');
+    var strokeCount = requireSafeInteger(
+      ownDataValue(geometry, 'strokeCount', 'resolved.geometry'),
+      'resolved.geometry.strokeCount',
+      1
+    );
+    var index = requireSafeInteger(ownDataValue(resolved, 'index', 'resolved'), 'resolved.index', 0);
+    var total = requireSafeInteger(ownDataValue(resolved, 'total', 'resolved'), 'resolved.total', 1);
+    if (index >= total) reject('resolved.index', 'must be less than resolved.total');
+    var entries = ownDataValue(resolved, 'entries', 'resolved');
+    requireRegularArray(entries, 'resolved.entries');
+    if (entries.length !== total) reject('resolved.entries', 'must match resolved.total');
+    var characters = [];
+    var pinyins = [];
+    var seenCharacters = new Set();
+    for (var entryIndex = 0; entryIndex < entries.length; entryIndex += 1) {
+      var entryPath = 'resolved.entries[' + entryIndex + ']';
+      var sourceEntry = ownDataValue(entries, String(entryIndex), 'resolved.entries');
+      requireOwnDataFields(sourceEntry, entryPath);
+      var sourceCharacter = requireHanCharacter(
+        ownDataValue(sourceEntry, 'character', entryPath), entryPath + '.character'
+      );
+      if (seenCharacters.has(sourceCharacter)) {
+        reject(entryPath + '.character', 'must not repeat a character');
+      }
+      var sourcePinyin = requireNonBlankString(
+        ownDataValue(sourceEntry, 'pinyin', entryPath), entryPath + '.pinyin'
+      );
+      seenCharacters.add(sourceCharacter);
+      characters.push(sourceCharacter);
+      pinyins.push(sourcePinyin);
+    }
+    if (characters[index] !== character || pinyins[index] !== pinyin) {
+      reject('resolved.entry', 'must match resolved.entries at resolved.index');
+    }
+    return {
+      unit: unit,
+      lesson: lesson,
+      group: group,
+      scope: scope,
+      character: character,
+      pinyin: pinyin,
+      strokeCount: strokeCount,
+      index: index,
+      total: total,
+      characters: characters
+    };
+  }
+
+  function copyPracticeState(state) {
+    var fields = [
+      'status', 'phase', 'character', 'index', 'total', 'mistakes',
+      'completedCharacters', 'remainingCharacters', 'needsPracticeCharacters', 'masteredCount'
+    ];
+    requireExactOwnFields(state, fields, 'state');
+    return {
+      status: requireOneOf(
+        ownDataValue(state, 'status', 'state'), PRACTICE_STATUSES, 'state.status'
+      ),
+      phase: ownDataValue(state, 'phase', 'state'),
+      character: ownDataValue(state, 'character', 'state'),
+      index: requireSafeInteger(ownDataValue(state, 'index', 'state'), 'state.index', 0),
+      total: requireSafeInteger(ownDataValue(state, 'total', 'state'), 'state.total', 1),
+      mistakes: requireSafeInteger(
+        ownDataValue(state, 'mistakes', 'state'), 'state.mistakes', 0
+      ),
+      completedCharacters: cloneCharacterList(
+        ownDataValue(state, 'completedCharacters', 'state'), 'state.completedCharacters'
+      ),
+      remainingCharacters: cloneCharacterList(
+        ownDataValue(state, 'remainingCharacters', 'state'), 'state.remainingCharacters'
+      ),
+      needsPracticeCharacters: cloneCharacterList(
+        ownDataValue(state, 'needsPracticeCharacters', 'state'),
+        'state.needsPracticeCharacters'
+      ),
+      masteredCount: requireSafeInteger(
+        ownDataValue(state, 'masteredCount', 'state'), 'state.masteredCount', 0
+      )
+    };
+  }
+
+  function validatePracticeState(resolved, state) {
+    if (state.index > state.total) reject('state.index', 'must not exceed state.total');
+    if (state.completedCharacters.length > state.total) {
+      reject('state.completedCharacters', 'must not exceed state.total');
+    }
+    if (state.remainingCharacters.length > state.total) {
+      reject('state.remainingCharacters', 'must not exceed state.total');
+    }
+    if (state.needsPracticeCharacters.length > state.total) {
+      reject('state.needsPracticeCharacters', 'must not exceed state.total');
+    }
+    if (state.masteredCount > state.total) reject('state.masteredCount', 'must not exceed state.total');
+    if (resolved.scope === 'group' && state.total > resolved.total) {
+      reject('state.total', 'must not exceed resolved.total for group practice');
+    }
+    if (resolved.scope === 'single' && state.total !== 1) {
+      reject('state.total', 'must equal 1 for single-character practice');
+    }
+    var sourceCharacters = resolved.scope === 'single'
+      ? [resolved.character]
+      : resolved.characters;
+    [
+      ['completedCharacters', state.completedCharacters],
+      ['remainingCharacters', state.remainingCharacters],
+      ['needsPracticeCharacters', state.needsPracticeCharacters]
+    ].forEach(function (item) {
+      if (!isOrderedSubset(item[1], sourceCharacters)) {
+        reject('state.' + item[0], 'must be an ordered subset of the practice characters');
+      }
+    });
+    if (state.status === 'complete') {
+      if (state.phase !== null || state.character !== null || state.index !== state.total
+          || state.mistakes !== 0 || state.remainingCharacters.length !== 0) {
+        reject('state', 'complete state must use null current fields and final counts');
+      }
+      return;
+    }
+    requireOneOf(state.phase, PRACTICE_PHASES, 'state.phase');
+    requireHanCharacter(state.character, 'state.character');
+    if (state.character !== resolved.character) {
+      reject('state.character', 'must match resolved.entry.character');
+    }
+    if (state.index >= state.total) reject('state.index', 'must be less than state.total');
+    if (state.remainingCharacters.indexOf(state.character) === -1) {
+      reject('state.remainingCharacters', 'must include state.character');
+    }
+    if (state.remainingCharacters[0] !== state.character) {
+      reject('state.remainingCharacters', 'must start with state.character');
+    }
+    if (state.status === 'needs-retry'
+        && (state.phase !== 'independent' || state.mistakes === 0)) {
+      reject('state', 'needs-retry requires independent phase and at least one mistake');
+    }
+  }
+
+  function createPracticeModel(resolved, state, persistent) {
+    if (typeof persistent !== 'boolean') reject('persistent', 'must be a boolean');
+    var resolvedCopy = copyResolvedPractice(resolved);
+    var stateCopy = copyPracticeState(state);
+    validatePracticeState(resolvedCopy, stateCopy);
+    return freezeTree({
+      unit: resolvedCopy.unit,
+      lesson: resolvedCopy.lesson,
+      group: resolvedCopy.group,
+      scope: resolvedCopy.scope,
+      character: resolvedCopy.character,
+      pinyin: resolvedCopy.pinyin,
+      strokeCount: resolvedCopy.strokeCount,
+      status: stateCopy.status,
+      phase: stateCopy.phase,
+      index: stateCopy.index,
+      total: stateCopy.total,
+      mistakes: stateCopy.mistakes,
+      completedCount: stateCopy.completedCharacters.length,
+      masteredCount: stateCopy.masteredCount,
+      needsPracticeCharacters: stateCopy.needsPracticeCharacters.slice(),
+      persistent: persistent
     });
   }
 
@@ -470,6 +848,8 @@
     var accessibleName = label
       ? label + '，' + entry.character + '，' + entry.pinyin
       : entry.character + '，' + entry.pinyin + (entry.isReview ? '，复习' : '');
+    if (entry.mastered === true) accessibleName += '，已掌握';
+    if (entry.completedHere === true) accessibleName += '，本组已完成';
     var attributes = {
       'class': extraClass,
       'type': 'button',
@@ -477,6 +857,8 @@
       'data-lesson-id': model.lesson.id,
       'data-group': model.group,
       'data-character': entry.character,
+      'data-practice-mastered': String(entry.mastered === true),
+      'data-practice-completed-here': String(entry.completedHere === true),
       'aria-label': accessibleName
     };
     if (label) return node(documentObject, 'button', attributes, label);
@@ -486,6 +868,12 @@
     ];
     if (entry.isReview) {
       pieces.push(node(documentObject, 'span', { 'class': 'character-card__review' }, '复习'));
+    }
+    if (entry.mastered === true) {
+      pieces.push(node(documentObject, 'span', {
+        'class': 'character-card__mastered',
+        'aria-hidden': 'true'
+      }, '✓'));
     }
     return node(documentObject, 'button', attributes, undefined, pieces);
   }
@@ -519,11 +907,31 @@
     }, undefined, GROUPS.map(function (group) {
       return groupButton(documentObject, model, group);
     }));
+    var practice = isRecord(model.practice) ? model.practice : {
+      completed: 0, mastered: 0, total: model.entries.length
+    };
+    var practiceSummary = node(documentObject, 'section', {
+      'class': 'lesson-practice-summary',
+      'aria-label': '本组练习进度'
+    }, undefined, [
+      node(documentObject, 'p', { 'class': 'lesson-practice-summary__counts' },
+        '本组已完成 ' + practice.completed + ' / ' + practice.total
+          + '，当前掌握 ' + practice.mastered + ' 个'),
+      node(documentObject, 'button', {
+        'class': 'button button--primary lesson-practice-start',
+        'type': 'button',
+        'data-action': 'start-group-practice',
+        'data-lesson-id': model.lesson.id,
+        'data-group': model.group
+      }, '练习本组')
+    ]);
+    setDisabled(practiceSummary.childNodes[1], model.entries.length === 0);
     var header = node(documentObject, 'div', { 'class': 'lesson-heading' }, undefined, [
       back,
       eyebrow,
       heading,
-      groupControl
+      groupControl,
+      practiceSummary
     ]);
     var grid = node(documentObject, 'ul', {
       'class': 'character-grid',
@@ -636,6 +1044,21 @@
     var hanzi = node(documentObject, 'p', { 'class': 'character-display' }, model.character);
     var strokeCount = node(documentObject, 'p', { 'class': 'stroke-count' },
       '共 ' + model.strokeCount + ' 笔');
+    var practiceStatusText = model.mastered === true
+      ? '练习状态：已掌握'
+      : (model.completedHere === true ? '练习状态：本组已完成' : '练习状态：尚未完成');
+    var practiceStatus = node(documentObject, 'p', {
+      'class': 'character-practice-status',
+      'data-slot': 'character-practice-status'
+    }, practiceStatusText);
+    var practiceButton = node(documentObject, 'button', {
+      'class': 'button button--primary character-practice-start',
+      'type': 'button',
+      'data-action': 'start-character-practice',
+      'data-lesson-id': model.lesson.id,
+      'data-group': model.group,
+      'data-character': model.character
+    }, '练习这个字');
     var audioButton = node(documentObject, 'button', {
       'class': 'button button--audio',
       'type': 'button',
@@ -692,6 +1115,8 @@
     toolChildren.push(
       hanzi,
       strokeCount,
+      practiceStatus,
+      practiceButton,
       audioButton,
       audioFeedback,
       animationStatus,
@@ -799,12 +1224,270 @@
     });
   }
 
+  function copyPracticeViewModel(model) {
+    var fields = [
+      'unit', 'lesson', 'group', 'scope', 'character', 'pinyin', 'strokeCount',
+      'status', 'phase', 'index', 'total', 'mistakes', 'completedCount',
+      'masteredCount', 'needsPracticeCharacters', 'persistent'
+    ];
+    requireExactOwnFields(model, fields, 'model');
+    var copy = {
+      unit: copyUnitStrict(ownDataValue(model, 'unit', 'model'), 'model.unit'),
+      lesson: copyLessonStrict(ownDataValue(model, 'lesson', 'model'), 'model.lesson'),
+      group: requireOneOf(ownDataValue(model, 'group', 'model'), GROUPS, 'model.group'),
+      scope: requireOneOf(
+        ownDataValue(model, 'scope', 'model'), ['single', 'group'], 'model.scope'
+      ),
+      character: requireHanCharacter(
+        ownDataValue(model, 'character', 'model'), 'model.character'
+      ),
+      pinyin: requireNonBlankString(ownDataValue(model, 'pinyin', 'model'), 'model.pinyin'),
+      strokeCount: requireSafeInteger(
+        ownDataValue(model, 'strokeCount', 'model'), 'model.strokeCount', 1
+      ),
+      status: requireOneOf(
+        ownDataValue(model, 'status', 'model'), PRACTICE_STATUSES, 'model.status'
+      ),
+      phase: ownDataValue(model, 'phase', 'model'),
+      index: requireSafeInteger(ownDataValue(model, 'index', 'model'), 'model.index', 0),
+      total: requireSafeInteger(ownDataValue(model, 'total', 'model'), 'model.total', 1),
+      mistakes: requireSafeInteger(
+        ownDataValue(model, 'mistakes', 'model'), 'model.mistakes', 0
+      ),
+      completedCount: requireSafeInteger(
+        ownDataValue(model, 'completedCount', 'model'), 'model.completedCount', 0
+      ),
+      masteredCount: requireSafeInteger(
+        ownDataValue(model, 'masteredCount', 'model'), 'model.masteredCount', 0
+      ),
+      needsPracticeCharacters: cloneCharacterList(
+        ownDataValue(model, 'needsPracticeCharacters', 'model'),
+        'model.needsPracticeCharacters'
+      ),
+      persistent: ownDataValue(model, 'persistent', 'model')
+    };
+    if (typeof copy.persistent !== 'boolean') reject('model.persistent', 'must be a boolean');
+    if (copy.index > copy.total) reject('model.index', 'must not exceed model.total');
+    if (copy.completedCount > copy.total) reject('model.completedCount', 'must not exceed model.total');
+    if (copy.masteredCount > copy.total) reject('model.masteredCount', 'must not exceed model.total');
+    if (copy.needsPracticeCharacters.length > copy.total) {
+      reject('model.needsPracticeCharacters', 'must not exceed model.total');
+    }
+    if (copy.scope === 'single' && copy.total !== 1) {
+      reject('model.total', 'must equal 1 for single-character practice');
+    }
+    if (copy.status === 'complete') {
+      if (copy.phase !== null || copy.index !== copy.total || copy.mistakes !== 0) {
+        reject('model', 'complete state must use null phase and final counts');
+      }
+    } else {
+      requireOneOf(copy.phase, PRACTICE_PHASES, 'model.phase');
+      if (copy.index >= copy.total) reject('model.index', 'must be less than model.total');
+      if (copy.status === 'needs-retry'
+          && (copy.phase !== 'independent' || copy.mistakes === 0)) {
+        reject('model', 'needs-retry requires independent phase and at least one mistake');
+      }
+    }
+    return freezeTree(copy);
+  }
+
+  function practiceContextAttributes(model, action) {
+    return {
+      'class': 'button',
+      'type': 'button',
+      'data-action': action,
+      'data-lesson-id': model.lesson.id,
+      'data-group': model.group,
+      'data-scope': model.scope,
+      'data-character': model.character
+    };
+  }
+
+  function practiceBoardLabel(model, current) {
+    var phaseLabel = model.phase === 'guided' ? '引导描写' : '独立描写';
+    return model.character + '，' + phaseLabel + '，第' + current + '笔，共'
+      + model.strokeCount + '笔';
+  }
+
+  function renderPractice(container, model) {
+    var documentObject = requireContainer(container);
+    var viewModel = copyPracticeViewModel(model);
+    var groupLabel = viewModel.group === 'write' ? '会写' : '会认';
+    var lessonTitle = viewModel.lesson.kind === 'lesson'
+      ? '第' + viewModel.lesson.number + '课  ' + viewModel.lesson.title
+      : viewModel.lesson.title;
+    var root = node(documentObject, 'div', {
+      'class': 'view view--practice',
+      'data-view': 'practice'
+    });
+    var backAttributes = practiceContextAttributes(viewModel, 'practice-back');
+    backAttributes['class'] = 'button button--quiet back-button';
+    backAttributes['aria-label'] = '返回《' + viewModel.lesson.title + '》' + groupLabel + '字表';
+    var back = node(documentObject, 'button', backAttributes, undefined, [
+      icon(documentObject, '←'),
+      node(documentObject, 'span', {}, viewModel.lesson.title)
+    ]);
+    var position = node(documentObject, 'p', {
+      'class': 'practice-round-position',
+      'data-slot': 'practice-round-position'
+    }, '第 ' + Math.min(viewModel.index + 1, viewModel.total) + ' / ' + viewModel.total + ' 个');
+    var topbar = node(documentObject, 'div', { 'class': 'practice-topbar' }, undefined, [
+      back,
+      position
+    ]);
+    var lesson = node(documentObject, 'p', { 'class': 'practice-lesson-title' }, lessonTitle);
+    var group = node(documentObject, 'p', { 'class': 'practice-group-label' }, groupLabel);
+    var heading = viewHeading(documentObject, '练习“' + viewModel.character + '”');
+    var common = [topbar, lesson, group, heading];
+    if (!viewModel.persistent) {
+      common.push(node(documentObject, 'p', {
+        'class': 'practice-persistence-warning',
+        'role': 'status'
+      }, '本次进度不会保存'));
+    }
+
+    var board = null;
+    var feedback = null;
+    var strokePosition = null;
+    var progress = null;
+    var content = [];
+    if (viewModel.status === 'active') {
+      board = node(documentObject, 'div', {
+        'class': 'practice-board',
+        'data-slot': 'practice-board',
+        'role': 'img',
+        'aria-label': practiceBoardLabel(viewModel, 1)
+      });
+      var phaseLabel = viewModel.phase === 'guided' ? '引导描写' : '独立描写';
+      strokePosition = node(documentObject, 'p', {
+        'class': 'practice-stroke-position',
+        'data-slot': 'practice-stroke-position'
+      }, '第 1 / ' + viewModel.strokeCount + ' 笔');
+      feedback = node(documentObject, 'p', {
+        'class': 'practice-feedback',
+        'data-slot': 'practice-feedback',
+        'data-kind': 'neutral',
+        'aria-live': 'polite',
+        'aria-atomic': 'true'
+      }, '准备书写');
+      progress = node(documentObject, 'progress', {
+        'class': 'practice-progress',
+        'max': viewModel.strokeCount,
+        'value': 0,
+        'aria-label': viewModel.character + '书写进度'
+      }, '');
+      var hint = actionIconButton(
+        documentObject, 'practice-hint', '?', '提示当前笔', '提示当前笔'
+      );
+      var restartAttributes = practiceContextAttributes(viewModel, 'practice-restart');
+      restartAttributes['class'] = 'button practice-restart';
+      var restart = node(documentObject, 'button', restartAttributes, '重写这个字');
+      var tools = node(documentObject, 'section', {
+        'class': 'practice-tools',
+        'aria-label': viewModel.character + '的书写练习工具'
+      }, undefined, [
+        node(documentObject, 'p', { 'class': 'practice-character' }, viewModel.character),
+        node(documentObject, 'p', { 'class': 'practice-pinyin' }, viewModel.pinyin),
+        node(documentObject, 'p', { 'class': 'practice-phase' }, phaseLabel),
+        strokePosition,
+        feedback,
+        progress,
+        node(documentObject, 'div', {
+          'class': 'practice-actions',
+          'role': 'group',
+          'aria-label': '练习操作'
+        }, undefined, [hint, restart])
+      ]);
+      content = [board, tools];
+    } else if (viewModel.status === 'needs-retry') {
+      var retryAttributes = practiceContextAttributes(viewModel, 'practice-retry');
+      retryAttributes['class'] = 'button button--primary';
+      var retryActions = [node(documentObject, 'button', retryAttributes, '立即再练')];
+      if (viewModel.scope === 'group') {
+        var deferAttributes = practiceContextAttributes(viewModel, 'practice-defer');
+        deferAttributes['class'] = 'button';
+        retryActions.push(node(documentObject, 'button', deferAttributes, '稍后再练'));
+      }
+      content = [node(documentObject, 'section', {
+        'class': 'practice-retry-result',
+        'aria-labelledby': 'practice-retry-heading'
+      }, undefined, [
+        node(documentObject, 'h2', { 'id': 'practice-retry-heading' }, '需要再练'),
+        node(documentObject, 'p', {}, '本次出现 ' + viewModel.mistakes + ' 次需要调整的笔画。'),
+        node(documentObject, 'div', { 'class': 'practice-actions' }, undefined, retryActions)
+      ])];
+    } else {
+      var resultChildren = [
+        node(documentObject, 'h2', { 'id': 'practice-result-heading' }, '本轮练习完成'),
+        node(documentObject, 'p', {}, '本轮完成 ' + viewModel.completedCount + ' 个'),
+        node(documentObject, 'p', {}, '当前掌握 ' + viewModel.masteredCount + ' 个'),
+        node(documentObject, 'p', {}, '需要再练 '
+          + viewModel.needsPracticeCharacters.length + ' 个')
+      ];
+      var resultActions = [];
+      if (viewModel.needsPracticeCharacters.length > 0) {
+        var reviewAttributes = practiceContextAttributes(viewModel, 'practice-review-needs');
+        reviewAttributes['class'] = 'button button--primary';
+        resultActions.push(node(documentObject, 'button', reviewAttributes, '练习需要再练的字'));
+      }
+      var returnAttributes = practiceContextAttributes(viewModel, 'practice-return-lesson');
+      returnAttributes['class'] = 'button';
+      resultActions.push(node(documentObject, 'button', returnAttributes, '返回字表'));
+      resultChildren.push(node(documentObject, 'div', {
+        'class': 'practice-actions'
+      }, undefined, resultActions));
+      content = [node(documentObject, 'section', {
+        'class': 'practice-complete-result',
+        'aria-labelledby': 'practice-result-heading'
+      }, undefined, resultChildren)];
+    }
+
+    root.replaceChildren.apply(root, common.concat(content));
+    container.replaceChildren(root);
+
+    function requireActiveHandle() {
+      if (viewModel.status !== 'active') {
+        throw new Error('Practice view mutators are only available in the active state');
+      }
+    }
+
+    function setFeedback(message, kind) {
+      requireActiveHandle();
+      if (typeof message !== 'string') reject('message', 'must be a string');
+      requireOneOf(kind, PRACTICE_FEEDBACK_KINDS, 'feedback kind');
+      feedback.textContent = message;
+      feedback.setAttribute('data-kind', kind);
+    }
+
+    function setStrokePosition(current, total) {
+      requireActiveHandle();
+      requireSafeInteger(current, 'current stroke', 1);
+      requireSafeInteger(total, 'total strokes', 1);
+      if (total !== viewModel.strokeCount || current > total) {
+        reject('stroke position', 'must be within the model stroke count');
+      }
+      strokePosition.textContent = '第 ' + current + ' / ' + total + ' 笔';
+      progress.setAttribute('value', current - 1);
+      board.setAttribute('aria-label', practiceBoardLabel(viewModel, current));
+    }
+
+    return Object.freeze({
+      root: root,
+      heading: heading,
+      board: board,
+      setFeedback: setFeedback,
+      setStrokePosition: setStrokePosition
+    });
+  }
+
   return Object.freeze({
     createDirectoryModel: createDirectoryModel,
     createLessonModel: createLessonModel,
     createCharacterModel: createCharacterModel,
+    createPracticeModel: createPracticeModel,
     renderDirectory: renderDirectory,
     renderLesson: renderLesson,
-    renderCharacter: renderCharacter
+    renderCharacter: renderCharacter,
+    renderPractice: renderPractice
   });
 }));
