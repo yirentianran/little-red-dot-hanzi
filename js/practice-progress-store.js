@@ -128,8 +128,8 @@
     var attemptCount = ownValue(value, 'attemptCount', path);
     var lastOutcome = ownValue(value, 'lastOutcome', path);
     var mastered = ownValue(value, 'mastered', path);
-    if (!Number.isInteger(attemptCount) || attemptCount < 0) {
-      reject(path + '.attemptCount', 'must be a non-negative integer');
+    if (!Number.isSafeInteger(attemptCount) || attemptCount < 0) {
+      reject(path + '.attemptCount', 'must be a non-negative safe integer');
     }
     if (lastOutcome !== null && lastOutcome !== 'mastered' && lastOutcome !== 'needs-practice') {
       reject(path + '.lastOutcome', 'must be null, mastered, or needs-practice');
@@ -268,7 +268,10 @@
     function loadState() {
       var source = readStorage();
       if (source === null) return emptyState();
-      if (typeof source !== 'string') return emptyState();
+      if (typeof source !== 'string') {
+        disableStorage();
+        return emptyState();
+      }
       try {
         return freezeState(cloneState(JSON.parse(source), 'stored state'));
       } catch (_error) {
@@ -309,6 +312,9 @@
         reject('outcome', 'must be mastered or needs-practice');
       }
       var prior = getCharacter(character);
+      if (prior.attemptCount >= Number.MAX_SAFE_INTEGER) {
+        reject('character.attemptCount', 'must not exceed the safe integer limit');
+      }
       var record = {
         attemptCount: prior.attemptCount + 1,
         lastOutcome: outcome,
