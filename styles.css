@@ -9,6 +9,7 @@
   --action-blue: #1769aa;
   --action-blue-dark: #0f4f83;
   --tracking-red: #d92d20;
+  --error-text: #a61b12;
   --review-green: #2f7653;
   --focus: #8b3d00;
   --shadow: 0 2px 8px rgba(32, 37, 43, 0.09);
@@ -772,7 +773,7 @@ a:focus-visible,
 }
 
 .practice-feedback[data-kind="error"] {
-  color: var(--tracking-red);
+  color: var(--error-text);
 }
 
 .practice-progress {

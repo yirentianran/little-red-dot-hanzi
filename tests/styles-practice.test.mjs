@@ -21,8 +21,52 @@ function ruleBody(css, selector, containing) {
 function mediaBody(css, query) {
   const start = css.indexOf(`@media (${query})`);
   assert.notEqual(start, -1, `Missing media query ${query}`);
-  return css.slice(start);
+  const openingBrace = css.indexOf('{', start);
+  assert.notEqual(openingBrace, -1, `Missing opening brace for media query ${query}`);
+  let depth = 1;
+  for (let index = openingBrace + 1; index < css.length; index += 1) {
+    if (css[index] === '{') depth += 1;
+    if (css[index] === '}') depth -= 1;
+    if (depth === 0) return css.slice(openingBrace + 1, index);
+  }
+  assert.fail(`Missing closing brace for media query ${query}`);
 }
+
+function customProperty(body, name) {
+  const match = body.match(new RegExp(`${name}:\\s*(#[0-9a-f]{6})`, 'i'));
+  assert.ok(match, `Missing six-digit color token ${name}`);
+  return match[1];
+}
+
+function relativeLuminance(hexColor) {
+  const channels = hexColor.slice(1).match(/.{2}/g).map((value) => {
+    const channel = Number.parseInt(value, 16) / 255;
+    return channel <= 0.04045
+      ? channel / 12.92
+      : ((channel + 0.055) / 1.055) ** 2.4;
+  });
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+}
+
+function contrastRatio(first, second) {
+  const luminances = [relativeLuminance(first), relativeLuminance(second)]
+    .sort((a, b) => b - a);
+  return (luminances[0] + 0.05) / (luminances[1] + 0.05);
+}
+
+test('media helper isolates one nested media block', () => {
+  const fixture = [
+    '@media (example) {',
+    '  .inside { color: red; }',
+    '}',
+    '.outside { color: blue; }'
+  ].join('\n');
+
+  const body = mediaBody(fixture, 'example');
+
+  assert.match(body, /\.inside/);
+  assert.doesNotMatch(body, /\.outside/);
+});
 
 test('practice board keeps a stable square drawing surface', async () => {
   const css = await readStyles();
@@ -99,6 +143,20 @@ test('practice tools, actions, and long text remain usable without nested cards'
     ruleBody(css, '.practice-feedback', /overflow-wrap:/i),
     /overflow-wrap:\s*anywhere/i
   );
+});
+
+test('error feedback text meets normal-text contrast on the yellow toolbar', async () => {
+  const css = await readStyles();
+  const root = ruleBody(css, ':root');
+  const errorFeedback = ruleBody(css, '.practice-feedback[data-kind="error"]');
+  const colorReference = errorFeedback.match(/color:\s*var\((--[a-z0-9-]+)\)/i);
+
+  assert.ok(colorReference, 'Error feedback must use a named color token');
+  const foreground = customProperty(root, colorReference[1]);
+  const background = customProperty(root, '--sunny-yellow');
+  const ratio = contrastRatio(foreground, background);
+
+  assert.ok(ratio >= 4.5, `Error feedback contrast ${ratio.toFixed(2)} must be at least 4.5:1`);
 });
 
 test('error traces fade unless reduced motion is requested', async () => {
