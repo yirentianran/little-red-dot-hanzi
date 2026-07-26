@@ -162,6 +162,17 @@ export function validateLibrary(curriculum, characterDocument, audioIds) {
           if (typeof entry.audio !== 'string' || entry.audio.trim() === '' || !availableAudioIds.has(entry.audio)) {
             errors.push(`${label}: missing audio ${entry.audio ?? '<missing audio id>'}`);
           }
+          if (!Array.isArray(entry.words) || entry.words.length < 1 || entry.words.length > 3) {
+            errors.push(`${label}: words must be an array with 1 to 3 words`);
+          } else {
+            entry.words.forEach((word, index) => {
+              if (!hasNonBlankString(word)) {
+                errors.push(`${label}: words[${index}] must be a non-blank string`);
+              } else if (!word.includes(character)) {
+                errors.push(`${label}: words[${index}] must include ${character}`);
+              }
+            });
+          }
 
           const geometry = geometryByCharacter[character];
           if (!geometry || typeof geometry !== 'object') {

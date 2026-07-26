@@ -243,6 +243,23 @@ test('matches every ordered appendix character sequence exactly', () => {
   }
 });
 
+test('every curriculum entry has one to three vocabulary words containing the character', () => {
+  for (const section of sections()) {
+    for (const group of ['recognize', 'write']) {
+      for (const [index, entry] of section[group].entries()) {
+        const label = `${section.id}.${group}[${index}] ${entry.character}`;
+        assert.ok(Array.isArray(entry.words), `${label}: words must be an array`);
+        assert.ok(entry.words.length >= 1 && entry.words.length <= 3, `${label}: expected 1 to 3 words`);
+        for (const [wordIndex, word] of entry.words.entries()) {
+          assert.equal(typeof word, 'string', `${label}.words[${wordIndex}] must be a string`);
+          assert.notEqual(word.trim(), '', `${label}.words[${wordIndex}] must not be blank`);
+          assert.ok(word.includes(entry.character), `${label}.words[${wordIndex}] must include ${entry.character}`);
+        }
+      }
+    }
+  }
+});
+
 test('includes the four language-garden literacy groups without write entries', () => {
   const gardens = sections().filter(section => section.kind === 'garden');
   assert.deepEqual(gardens.map(section => section.id), ['garden-2', 'garden-4', 'garden-6', 'garden-8']);
@@ -408,20 +425,37 @@ test('preserves contextual readings and 2019 edition discriminators', () => {
     ['lesson-27', '纪', 'jǐ']
   ];
   for (const [lessonId, character, pinyin] of expectedRecognize) {
-    assert.deepEqual(entry(lessonId, 'recognize', character), {
+    const actual = entry(lessonId, 'recognize', character);
+    assert.deepEqual({
+      character: actual.character,
+      pinyin: actual.pinyin,
+      audio: actual.audio,
+      counted: actual.counted
+    }, {
       character,
       pinyin,
       audio: pinyinToAudioId(pinyin),
       counted: false
     });
+    assert.ok(actual.words.some(word => word.includes(character)));
   }
 
-  assert.deepEqual(entry('lesson-9', 'write', '降'), {
+  const writeXiang = entry('lesson-9', 'write', '降');
+  assert.deepEqual({
+    character: writeXiang.character,
+    pinyin: writeXiang.pinyin,
+    audio: writeXiang.audio
+  }, {
     character: '降',
     pinyin: 'xiáng',
     audio: 'xiang2'
   });
-  assert.deepEqual(entry('lesson-12', 'write', '血'), {
+  const writeBlood = entry('lesson-12', 'write', '血');
+  assert.deepEqual({
+    character: writeBlood.character,
+    pinyin: writeBlood.pinyin,
+    audio: writeBlood.audio
+  }, {
     character: '血',
     pinyin: 'xuè',
     audio: 'xue4'

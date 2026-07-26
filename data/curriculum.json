@@ -20,145 +20,282 @@
             {
               "character": "盐",
               "pinyin": "yán",
-              "audio": "yan2"
+              "audio": "yan2",
+              "words": [
+                "食盐",
+                "盐水",
+                "海盐"
+              ]
             },
             {
               "character": "薄",
               "pinyin": "bó",
               "audio": "bo2",
-              "counted": false
+              "counted": false,
+              "words": [
+                "薄雾",
+                "薄片",
+                "单薄"
+              ]
             },
             {
               "character": "屹",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "屹立",
+                "屹然"
+              ]
             },
             {
               "character": "昂",
               "pinyin": "áng",
-              "audio": "ang2"
+              "audio": "ang2",
+              "words": [
+                "昂首",
+                "昂贵",
+                "激昂"
+              ]
             },
             {
               "character": "顿",
               "pinyin": "dùn",
-              "audio": "dun4"
+              "audio": "dun4",
+              "words": [
+                "顿时",
+                "停顿",
+                "安顿"
+              ]
             },
             {
               "character": "鼎",
               "pinyin": "dǐng",
-              "audio": "ding3"
+              "audio": "ding3",
+              "words": [
+                "鼎沸",
+                "鼎力",
+                "大鼎"
+              ]
             },
             {
               "character": "沸",
               "pinyin": "fèi",
-              "audio": "fei4"
+              "audio": "fei4",
+              "words": [
+                "沸腾",
+                "沸水",
+                "鼎沸"
+              ]
             },
             {
               "character": "贯",
               "pinyin": "guàn",
-              "audio": "guan4"
+              "audio": "guan4",
+              "words": [
+                "横贯",
+                "贯穿",
+                "一贯"
+              ]
             },
             {
               "character": "浩",
               "pinyin": "hào",
-              "audio": "hao4"
+              "audio": "hao4",
+              "words": [
+                "浩荡",
+                "浩大",
+                "浩瀚"
+              ]
             },
             {
               "character": "崩",
               "pinyin": "bēng",
-              "audio": "beng1"
+              "audio": "beng1",
+              "words": [
+                "崩塌",
+                "崩裂",
+                "山崩"
+              ]
             },
             {
               "character": "震",
               "pinyin": "zhèn",
-              "audio": "zhen4"
+              "audio": "zhen4",
+              "words": [
+                "震动",
+                "地震",
+                "震撼"
+              ]
             },
             {
               "character": "霎",
               "pinyin": "shà",
-              "audio": "sha4"
+              "audio": "sha4",
+              "words": [
+                "霎时",
+                "一霎"
+              ]
             },
             {
               "character": "余",
               "pinyin": "yú",
-              "audio": "yu2"
+              "audio": "yu2",
+              "words": [
+                "剩余",
+                "多余",
+                "余光"
+              ]
             }
           ],
           "write": [
             {
               "character": "潮",
               "pinyin": "cháo",
-              "audio": "chao2"
+              "audio": "chao2",
+              "words": [
+                "潮水",
+                "浪潮",
+                "涨潮"
+              ]
             },
             {
               "character": "据",
               "pinyin": "jù",
-              "audio": "ju4"
+              "audio": "ju4",
+              "words": [
+                "根据",
+                "据说",
+                "证据"
+              ]
             },
             {
               "character": "堤",
               "pinyin": "dī",
-              "audio": "di1"
+              "audio": "di1",
+              "words": [
+                "堤岸",
+                "河堤",
+                "大堤"
+              ]
             },
             {
               "character": "阔",
               "pinyin": "kuò",
-              "audio": "kuo4"
+              "audio": "kuo4",
+              "words": [
+                "宽阔",
+                "辽阔",
+                "开阔"
+              ]
             },
             {
               "character": "盼",
               "pinyin": "pàn",
-              "audio": "pan4"
+              "audio": "pan4",
+              "words": [
+                "盼望",
+                "期盼",
+                "左顾右盼"
+              ]
             },
             {
               "character": "滚",
               "pinyin": "gǔn",
-              "audio": "gun3"
+              "audio": "gun3",
+              "words": [
+                "滚动",
+                "滚烫",
+                "翻滚"
+              ]
             },
             {
               "character": "顿",
               "pinyin": "dùn",
-              "audio": "dun4"
+              "audio": "dun4",
+              "words": [
+                "顿时",
+                "停顿",
+                "安顿"
+              ]
             },
             {
               "character": "逐",
               "pinyin": "zhú",
-              "audio": "zhu2"
+              "audio": "zhu2",
+              "words": [
+                "逐渐",
+                "追逐",
+                "逐步"
+              ]
             },
             {
               "character": "渐",
               "pinyin": "jiàn",
-              "audio": "jian4"
+              "audio": "jian4",
+              "words": [
+                "逐渐",
+                "渐渐",
+                "渐变"
+              ]
             },
             {
               "character": "堵",
               "pinyin": "dǔ",
-              "audio": "du3"
+              "audio": "du3",
+              "words": [
+                "一堵墙",
+                "堵车",
+                "堵住"
+              ]
             },
             {
               "character": "犹",
               "pinyin": "yóu",
-              "audio": "you2"
+              "audio": "you2",
+              "words": [
+                "犹如",
+                "犹豫",
+                "记忆犹新"
+              ]
             },
             {
               "character": "崩",
               "pinyin": "bēng",
-              "audio": "beng1"
+              "audio": "beng1",
+              "words": [
+                "崩塌",
+                "崩裂",
+                "山崩"
+              ]
             },
             {
               "character": "震",
               "pinyin": "zhèn",
-              "audio": "zhen4"
+              "audio": "zhen4",
+              "words": [
+                "震动",
+                "地震",
+                "震撼"
+              ]
             },
             {
               "character": "霎",
               "pinyin": "shà",
-              "audio": "sha4"
+              "audio": "sha4",
+              "words": [
+                "霎时",
+                "一霎"
+              ]
             },
             {
               "character": "余",
               "pinyin": "yú",
-              "audio": "yu2"
+              "audio": "yu2",
+              "words": [
+                "剩余",
+                "多余",
+                "余光"
+              ]
             }
           ]
         },
@@ -171,119 +308,228 @@
             {
               "character": "鹅",
               "pinyin": "é",
-              "audio": "e2"
+              "audio": "e2",
+              "words": [
+                "白鹅",
+                "鹅卵石",
+                "天鹅"
+              ]
             },
             {
               "character": "卵",
               "pinyin": "luǎn",
-              "audio": "luan3"
+              "audio": "luan3",
+              "words": [
+                "鹅卵石",
+                "卵石",
+                "产卵"
+              ]
             },
             {
               "character": "俗",
               "pinyin": "sú",
-              "audio": "su2"
+              "audio": "su2",
+              "words": [
+                "风俗",
+                "习俗",
+                "俗语"
+              ]
             },
             {
               "character": "跃",
               "pinyin": "yuè",
-              "audio": "yue4"
+              "audio": "yue4",
+              "words": [
+                "跳跃",
+                "飞跃",
+                "活跃"
+              ]
             },
             {
               "character": "穗",
               "pinyin": "suì",
-              "audio": "sui4"
+              "audio": "sui4",
+              "words": [
+                "稻穗",
+                "麦穗",
+                "穗子"
+              ]
             },
             {
               "character": "镀",
               "pinyin": "dù",
-              "audio": "du4"
+              "audio": "du4",
+              "words": [
+                "镀金",
+                "镀银"
+              ]
             },
             {
               "character": "埂",
               "pinyin": "gěng",
-              "audio": "geng3"
+              "audio": "geng3",
+              "words": [
+                "田埂",
+                "地埂"
+              ]
             },
             {
               "character": "烁",
               "pinyin": "shuò",
-              "audio": "shuo4"
+              "audio": "shuo4",
+              "words": [
+                "闪烁",
+                "烁亮"
+              ]
             }
           ],
           "write": [
             {
               "character": "淘",
               "pinyin": "táo",
-              "audio": "tao2"
+              "audio": "tao2",
+              "words": [
+                "淘洗",
+                "淘气",
+                "淘米"
+              ]
             },
             {
               "character": "牵",
               "pinyin": "qiān",
-              "audio": "qian1"
+              "audio": "qian1",
+              "words": [
+                "牵手",
+                "牵挂",
+                "牵牛花"
+              ]
             },
             {
               "character": "鹅",
               "pinyin": "é",
-              "audio": "e2"
+              "audio": "e2",
+              "words": [
+                "白鹅",
+                "鹅卵石",
+                "天鹅"
+              ]
             },
             {
               "character": "卵",
               "pinyin": "luǎn",
-              "audio": "luan3"
+              "audio": "luan3",
+              "words": [
+                "鹅卵石",
+                "卵石",
+                "产卵"
+              ]
             },
             {
               "character": "坑",
               "pinyin": "kēng",
-              "audio": "keng1"
+              "audio": "keng1",
+              "words": [
+                "土坑",
+                "水坑",
+                "坑洼"
+              ]
             },
             {
               "character": "洼",
               "pinyin": "wā",
-              "audio": "wa1"
+              "audio": "wa1",
+              "words": [
+                "洼地",
+                "水洼",
+                "坑洼"
+              ]
             },
             {
               "character": "填",
               "pinyin": "tián",
-              "audio": "tian2"
+              "audio": "tian2",
+              "words": [
+                "填空",
+                "填土",
+                "填写"
+              ]
             },
             {
               "character": "庄",
               "pinyin": "zhuāng",
-              "audio": "zhuang1"
+              "audio": "zhuang1",
+              "words": [
+                "庄稼",
+                "村庄",
+                "庄重"
+              ]
             },
             {
               "character": "稼",
               "pinyin": "jià",
-              "audio": "jia4"
+              "audio": "jia4",
+              "words": [
+                "庄稼",
+                "稼穑"
+              ]
             },
             {
               "character": "俗",
               "pinyin": "sú",
-              "audio": "su2"
+              "audio": "su2",
+              "words": [
+                "风俗",
+                "习俗",
+                "俗语"
+              ]
             },
             {
               "character": "跃",
               "pinyin": "yuè",
-              "audio": "yue4"
+              "audio": "yue4",
+              "words": [
+                "跳跃",
+                "飞跃",
+                "活跃"
+              ]
             },
             {
               "character": "葡",
               "pinyin": "pú",
-              "audio": "pu2"
+              "audio": "pu2",
+              "words": [
+                "葡萄",
+                "葡萄干"
+              ]
             },
             {
               "character": "萄",
               "pinyin": "táo",
-              "audio": "tao2"
+              "audio": "tao2",
+              "words": [
+                "葡萄",
+                "葡萄架"
+              ]
             },
             {
               "character": "稻",
               "pinyin": "dào",
-              "audio": "dao4"
+              "audio": "dao4",
+              "words": [
+                "稻谷",
+                "稻田",
+                "水稻"
+              ]
             },
             {
               "character": "熟",
               "pinyin": "shú",
-              "audio": "shu2"
+              "audio": "shu2",
+              "words": [
+                "成熟",
+                "熟悉",
+                "熟练"
+              ]
             }
           ]
         },
@@ -296,32 +542,61 @@
             {
               "character": "巢",
               "pinyin": "cháo",
-              "audio": "chao2"
+              "audio": "chao2",
+              "words": [
+                "鸟巢",
+                "巢穴",
+                "归巢"
+              ]
             },
             {
               "character": "苇",
               "pinyin": "wěi",
-              "audio": "wei3"
+              "audio": "wei3",
+              "words": [
+                "芦苇",
+                "苇秆"
+              ]
             },
             {
               "character": "罗",
               "pinyin": "luó",
-              "audio": "luo2"
+              "audio": "luo2",
+              "words": [
+                "罗列",
+                "网罗",
+                "罗盘"
+              ]
             },
             {
               "character": "眠",
               "pinyin": "mián",
-              "audio": "mian2"
+              "audio": "mian2",
+              "words": [
+                "睡眠",
+                "冬眠",
+                "安眠"
+              ]
             },
             {
               "character": "霸",
               "pinyin": "bà",
-              "audio": "ba4"
+              "audio": "ba4",
+              "words": [
+                "霸占",
+                "霸道",
+                "霸王"
+              ]
             },
             {
               "character": "占",
               "pinyin": "zhàn",
-              "audio": "zhan4"
+              "audio": "zhan4",
+              "words": [
+                "占有",
+                "占领",
+                "霸占"
+              ]
             }
           ],
           "write": []
@@ -335,17 +610,32 @@
             {
               "character": "昧",
               "pinyin": "mèi",
-              "audio": "mei4"
+              "audio": "mei4",
+              "words": [
+                "冒昧",
+                "愚昧",
+                "昏昧"
+              ]
             },
             {
               "character": "坠",
               "pinyin": "zhuì",
-              "audio": "zhui4"
+              "audio": "zhui4",
+              "words": [
+                "坠落",
+                "下坠",
+                "坠入"
+              ]
             },
             {
               "character": "怀",
               "pinyin": "huái",
-              "audio": "huai2"
+              "audio": "huai2",
+              "words": [
+                "怀抱",
+                "怀念",
+                "胸怀"
+              ]
             }
           ],
           "write": []
@@ -365,119 +655,228 @@
             {
               "character": "豌",
               "pinyin": "wān",
-              "audio": "wan1"
+              "audio": "wan1",
+              "words": [
+                "豌豆",
+                "豌豆苗"
+              ]
             },
             {
               "character": "按",
               "pinyin": "àn",
-              "audio": "an4"
+              "audio": "an4",
+              "words": [
+                "按照",
+                "按时",
+                "按钮"
+              ]
             },
             {
               "character": "僵",
               "pinyin": "jiāng",
-              "audio": "jiang1"
+              "audio": "jiang1",
+              "words": [
+                "僵硬",
+                "冻僵",
+                "僵持"
+              ]
             },
             {
               "character": "预",
               "pinyin": "yù",
-              "audio": "yu4"
+              "audio": "yu4",
+              "words": [
+                "预习",
+                "预报",
+                "预备"
+              ]
             },
             {
               "character": "揭",
               "pinyin": "jiē",
-              "audio": "jie1"
+              "audio": "jie1",
+              "words": [
+                "揭开",
+                "揭示",
+                "揭晓"
+              ]
             },
             {
               "character": "苔",
               "pinyin": "tái",
-              "audio": "tai2"
+              "audio": "tai2",
+              "words": [
+                "青苔",
+                "苔藓"
+              ]
             },
             {
               "character": "囚",
               "pinyin": "qiú",
-              "audio": "qiu2"
+              "audio": "qiu2",
+              "words": [
+                "囚犯",
+                "囚禁"
+              ]
             },
             {
               "character": "框",
               "pinyin": "kuàng",
-              "audio": "kuang4"
+              "audio": "kuang4",
+              "words": [
+                "门框",
+                "相框",
+                "框架"
+              ]
             },
             {
               "character": "溢",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "洋溢",
+                "溢出",
+                "充溢"
+              ]
             }
           ],
           "write": [
             {
               "character": "豌",
               "pinyin": "wān",
-              "audio": "wan1"
+              "audio": "wan1",
+              "words": [
+                "豌豆",
+                "豌豆苗"
+              ]
             },
             {
               "character": "按",
               "pinyin": "àn",
-              "audio": "an4"
+              "audio": "an4",
+              "words": [
+                "按照",
+                "按时",
+                "按钮"
+              ]
             },
             {
               "character": "舒",
               "pinyin": "shū",
-              "audio": "shu1"
+              "audio": "shu1",
+              "words": [
+                "舒适",
+                "舒服",
+                "舒展"
+              ]
             },
             {
               "character": "适",
               "pinyin": "shì",
-              "audio": "shi4"
+              "audio": "shi4",
+              "words": [
+                "舒适",
+                "适合",
+                "适当"
+              ]
             },
             {
               "character": "暗",
               "pinyin": "àn",
-              "audio": "an4"
+              "audio": "an4",
+              "words": [
+                "黑暗",
+                "暗处",
+                "暗示"
+              ]
             },
             {
               "character": "恐",
               "pinyin": "kǒng",
-              "audio": "kong3"
+              "audio": "kong3",
+              "words": [
+                "恐怕",
+                "恐龙",
+                "惊恐"
+              ]
             },
             {
               "character": "僵",
               "pinyin": "jiāng",
-              "audio": "jiang1"
+              "audio": "jiang1",
+              "words": [
+                "僵硬",
+                "冻僵",
+                "僵持"
+              ]
             },
             {
               "character": "硬",
               "pinyin": "yìng",
-              "audio": "ying4"
+              "audio": "ying4",
+              "words": [
+                "坚硬",
+                "硬币",
+                "硬朗"
+              ]
             },
             {
               "character": "枪",
               "pinyin": "qiāng",
-              "audio": "qiang1"
+              "audio": "qiang1",
+              "words": [
+                "手枪",
+                "水枪",
+                "枪声"
+              ]
             },
             {
               "character": "耐",
               "pinyin": "nài",
-              "audio": "nai4"
+              "audio": "nai4",
+              "words": [
+                "耐心",
+                "耐用",
+                "忍耐"
+              ]
             },
             {
               "character": "探",
               "pinyin": "tàn",
-              "audio": "tan4"
+              "audio": "tan4",
+              "words": [
+                "探头",
+                "探索",
+                "探望"
+              ]
             },
             {
               "character": "愉",
               "pinyin": "yú",
-              "audio": "yu2"
+              "audio": "yu2",
+              "words": [
+                "愉快",
+                "欢愉"
+              ]
             },
             {
               "character": "曾",
               "pinyin": "céng",
-              "audio": "ceng2"
+              "audio": "ceng2",
+              "words": [
+                "曾经",
+                "未曾"
+              ]
             },
             {
               "character": "沟",
               "pinyin": "gōu",
-              "audio": "gou1"
+              "audio": "gou1",
+              "words": [
+                "水沟",
+                "沟通",
+                "山沟"
+              ]
             }
           ]
         },
@@ -490,135 +889,259 @@
             {
               "character": "蝙",
               "pinyin": "biān",
-              "audio": "bian1"
+              "audio": "bian1",
+              "words": [
+                "蝙蝠"
+              ]
             },
             {
               "character": "蝠",
               "pinyin": "fú",
-              "audio": "fu2"
+              "audio": "fu2",
+              "words": [
+                "蝙蝠"
+              ]
             },
             {
               "character": "即",
               "pinyin": "jí",
-              "audio": "ji2"
+              "audio": "ji2",
+              "words": [
+                "即使",
+                "立即",
+                "即将"
+              ]
             },
             {
               "character": "锐",
               "pinyin": "ruì",
-              "audio": "rui4"
+              "audio": "rui4",
+              "words": [
+                "敏锐",
+                "锐利",
+                "尖锐"
+              ]
             },
             {
               "character": "系",
               "pinyin": "jì",
               "audio": "ji4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "关系",
+                "联系",
+                "系统"
+              ]
             },
             {
               "character": "铛",
               "pinyin": "dāng",
-              "audio": "dang1"
+              "audio": "dang1",
+              "words": [
+                "铃铛",
+                "锒铛"
+              ]
             },
             {
               "character": "蝇",
               "pinyin": "yíng",
-              "audio": "ying2"
+              "audio": "ying2",
+              "words": [
+                "苍蝇",
+                "蚊蝇",
+                "蝇拍"
+              ]
             },
             {
               "character": "证",
               "pinyin": "zhèng",
-              "audio": "zheng4"
+              "audio": "zheng4",
+              "words": [
+                "证明",
+                "证据",
+                "保证"
+              ]
             },
             {
               "character": "障",
               "pinyin": "zhàng",
-              "audio": "zhang4"
+              "audio": "zhang4",
+              "words": [
+                "障碍",
+                "屏障",
+                "故障"
+              ]
             },
             {
               "character": "碍",
               "pinyin": "ài",
-              "audio": "ai4"
+              "audio": "ai4",
+              "words": [
+                "障碍",
+                "碍事",
+                "阻碍"
+              ]
             },
             {
               "character": "荧",
               "pinyin": "yíng",
-              "audio": "ying2"
+              "audio": "ying2",
+              "words": [
+                "荧光",
+                "荧屏"
+              ]
             },
             {
               "character": "屏",
               "pinyin": "píng",
-              "audio": "ping2"
+              "audio": "ping2",
+              "words": [
+                "屏幕",
+                "屏风",
+                "荧屏"
+              ]
             }
           ],
           "write": [
             {
               "character": "蚊",
               "pinyin": "wén",
-              "audio": "wen2"
+              "audio": "wen2",
+              "words": [
+                "蚊子",
+                "蚊香",
+                "蚊帐"
+              ]
             },
             {
               "character": "即",
               "pinyin": "jí",
-              "audio": "ji2"
+              "audio": "ji2",
+              "words": [
+                "即使",
+                "立即",
+                "即将"
+              ]
             },
             {
               "character": "科",
               "pinyin": "kē",
-              "audio": "ke1"
+              "audio": "ke1",
+              "words": [
+                "科学",
+                "学科",
+                "科目"
+              ]
             },
             {
               "character": "横",
               "pinyin": "héng",
-              "audio": "heng2"
+              "audio": "heng2",
+              "words": [
+                "横线",
+                "横竖",
+                "横穿"
+              ]
             },
             {
               "character": "竖",
               "pinyin": "shù",
-              "audio": "shu4"
+              "audio": "shu4",
+              "words": [
+                "竖立",
+                "横竖",
+                "竖线"
+              ]
             },
             {
               "character": "绳",
               "pinyin": "shéng",
-              "audio": "sheng2"
+              "audio": "sheng2",
+              "words": [
+                "绳子",
+                "跳绳",
+                "麻绳"
+              ]
             },
             {
               "character": "系",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "关系",
+                "联系",
+                "系统"
+              ]
             },
             {
               "character": "蝇",
               "pinyin": "yíng",
-              "audio": "ying2"
+              "audio": "ying2",
+              "words": [
+                "苍蝇",
+                "蚊蝇",
+                "蝇拍"
+              ]
             },
             {
               "character": "证",
               "pinyin": "zhèng",
-              "audio": "zheng4"
+              "audio": "zheng4",
+              "words": [
+                "证明",
+                "证据",
+                "保证"
+              ]
             },
             {
               "character": "研",
               "pinyin": "yán",
-              "audio": "yan2"
+              "audio": "yan2",
+              "words": [
+                "研究",
+                "研读",
+                "科研"
+              ]
             },
             {
               "character": "究",
               "pinyin": "jiū",
-              "audio": "jiu1"
+              "audio": "jiu1",
+              "words": [
+                "研究",
+                "究竟",
+                "追究"
+              ]
             },
             {
               "character": "达",
               "pinyin": "dá",
-              "audio": "da2"
+              "audio": "da2",
+              "words": [
+                "到达",
+                "表达",
+                "发达"
+              ]
             },
             {
               "character": "驾",
               "pinyin": "jià",
-              "audio": "jia4"
+              "audio": "jia4",
+              "words": [
+                "驾驶",
+                "驾车",
+                "驾照"
+              ]
             },
             {
               "character": "驶",
               "pinyin": "shǐ",
-              "audio": "shi3"
+              "audio": "shi3",
+              "words": [
+                "驾驶",
+                "行驶",
+                "驶过"
+              ]
             }
           ]
         },
@@ -631,134 +1154,263 @@
             {
               "character": "唤",
               "pinyin": "huàn",
-              "audio": "huan4"
+              "audio": "huan4",
+              "words": [
+                "呼唤",
+                "唤醒",
+                "召唤"
+              ]
             },
             {
               "character": "获",
               "pinyin": "huò",
-              "audio": "huo4"
+              "audio": "huo4",
+              "words": [
+                "获得",
+                "收获",
+                "获胜"
+              ]
             },
             {
               "character": "赖",
               "pinyin": "lài",
-              "audio": "lai4"
+              "audio": "lai4",
+              "words": [
+                "依赖",
+                "赖皮",
+                "信赖"
+              ]
             },
             {
               "character": "潜",
               "pinyin": "qián",
-              "audio": "qian2"
+              "audio": "qian2",
+              "words": [
+                "潜水",
+                "潜入",
+                "潜力"
+              ]
             },
             {
               "character": "亿",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "一亿",
+                "亿万",
+                "十亿"
+              ]
             },
             {
               "character": "索",
               "pinyin": "suǒ",
-              "audio": "suo3"
+              "audio": "suo3",
+              "words": [
+                "探索",
+                "搜索",
+                "线索"
+              ]
             },
             {
               "character": "奥",
               "pinyin": "ào",
-              "audio": "ao4"
+              "audio": "ao4",
+              "words": [
+                "奥秘",
+                "深奥",
+                "奥妙"
+              ]
             },
             {
               "character": "舶",
               "pinyin": "bó",
-              "audio": "bo2"
+              "audio": "bo2",
+              "words": [
+                "船舶",
+                "海舶"
+              ]
             },
             {
               "character": "质",
               "pinyin": "zhì",
-              "audio": "zhi4"
+              "audio": "zhi4",
+              "words": [
+                "质量",
+                "本质",
+                "品质"
+              ]
             },
             {
               "character": "哲",
               "pinyin": "zhé",
-              "audio": "zhe2"
+              "audio": "zhe2",
+              "words": [
+                "哲学",
+                "哲理",
+                "哲人"
+              ]
             },
             {
               "character": "兰",
               "pinyin": "lán",
-              "audio": "lan2"
+              "audio": "lan2",
+              "words": [
+                "兰花",
+                "兰草",
+                "木兰"
+              ]
             }
           ],
           "write": [
             {
               "character": "唤",
               "pinyin": "huàn",
-              "audio": "huan4"
+              "audio": "huan4",
+              "words": [
+                "呼唤",
+                "唤醒",
+                "召唤"
+              ]
             },
             {
               "character": "纪",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "世纪",
+                "纪律",
+                "纪念"
+              ]
             },
             {
               "character": "技",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "技术",
+                "科技",
+                "技巧"
+              ]
             },
             {
               "character": "改",
               "pinyin": "gǎi",
-              "audio": "gai3"
+              "audio": "gai3",
+              "words": [
+                "改变",
+                "修改",
+                "改正"
+              ]
             },
             {
               "character": "程",
               "pinyin": "chéng",
-              "audio": "cheng2"
+              "audio": "cheng2",
+              "words": [
+                "过程",
+                "工程",
+                "路程"
+              ]
             },
             {
               "character": "超",
               "pinyin": "chāo",
-              "audio": "chao1"
+              "audio": "chao1",
+              "words": [
+                "超过",
+                "超市",
+                "超越"
+              ]
             },
             {
               "character": "亿",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "一亿",
+                "亿万",
+                "十亿"
+              ]
             },
             {
               "character": "核",
               "pinyin": "hé",
-              "audio": "he2"
+              "audio": "he2",
+              "words": [
+                "核心",
+                "核桃",
+                "审核"
+              ]
             },
             {
               "character": "奥",
               "pinyin": "ào",
-              "audio": "ao4"
+              "audio": "ao4",
+              "words": [
+                "奥秘",
+                "深奥",
+                "奥妙"
+              ]
             },
             {
               "character": "益",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "利益",
+                "有益",
+                "益处"
+              ]
             },
             {
               "character": "联",
               "pinyin": "lián",
-              "audio": "lian2"
+              "audio": "lian2",
+              "words": [
+                "联系",
+                "联合",
+                "春联"
+              ]
             },
             {
               "character": "质",
               "pinyin": "zhì",
-              "audio": "zhi4"
+              "audio": "zhi4",
+              "words": [
+                "质量",
+                "本质",
+                "品质"
+              ]
             },
             {
               "character": "哲",
               "pinyin": "zhé",
-              "audio": "zhe2"
+              "audio": "zhe2",
+              "words": [
+                "哲学",
+                "哲理",
+                "哲人"
+              ]
             },
             {
               "character": "任",
               "pinyin": "rèn",
-              "audio": "ren4"
+              "audio": "ren4",
+              "words": [
+                "任务",
+                "责任",
+                "任命"
+              ]
             },
             {
               "character": "善",
               "pinyin": "shàn",
-              "audio": "shan4"
+              "audio": "shan4",
+              "words": [
+                "善良",
+                "完善",
+                "友善"
+              ]
             }
           ]
         },
@@ -771,28 +1423,49 @@
             {
               "character": "避",
               "pinyin": "bì",
-              "audio": "bi4"
+              "audio": "bi4",
+              "words": [
+                "躲避",
+                "避免",
+                "避开"
+              ]
             },
             {
               "character": "撼",
               "pinyin": "hàn",
-              "audio": "han4"
+              "audio": "han4",
+              "words": [
+                "震撼",
+                "摇撼"
+              ]
             },
             {
               "character": "喧",
               "pinyin": "xuān",
-              "audio": "xuan1"
+              "audio": "xuan1",
+              "words": [
+                "喧闹",
+                "喧哗"
+              ]
             },
             {
               "character": "雀",
               "pinyin": "qiǎo",
               "audio": "qiao3",
-              "counted": false
+              "counted": false,
+              "words": [
+                "家雀儿",
+                "麻雀"
+              ]
             },
             {
               "character": "檐",
               "pinyin": "yán",
-              "audio": "yan2"
+              "audio": "yan2",
+              "words": [
+                "屋檐",
+                "房檐"
+              ]
             }
           ],
           "write": []
@@ -805,62 +1478,115 @@
             {
               "character": "驻",
               "pinyin": "zhù",
-              "audio": "zhu4"
+              "audio": "zhu4",
+              "words": [
+                "驻守",
+                "驻足",
+                "驻地"
+              ]
             },
             {
               "character": "钞",
               "pinyin": "chāo",
-              "audio": "chao1"
+              "audio": "chao1",
+              "words": [
+                "钞票",
+                "现钞"
+              ]
             },
             {
               "character": "培",
               "pinyin": "péi",
-              "audio": "pei2"
+              "audio": "pei2",
+              "words": [
+                "培养",
+                "培土",
+                "培训"
+              ]
             },
             {
               "character": "赌",
               "pinyin": "dǔ",
-              "audio": "du3"
+              "audio": "du3",
+              "words": [
+                "赌博",
+                "打赌"
+              ]
             },
             {
               "character": "媒",
               "pinyin": "méi",
-              "audio": "mei2"
+              "audio": "mei2",
+              "words": [
+                "媒体",
+                "媒人",
+                "传媒"
+              ]
             },
             {
               "character": "氛",
               "pinyin": "fēn",
-              "audio": "fen1"
+              "audio": "fen1",
+              "words": [
+                "气氛",
+                "氛围"
+              ]
             },
             {
               "character": "账",
               "pinyin": "zhàng",
-              "audio": "zhang4"
+              "audio": "zhang4",
+              "words": [
+                "账本",
+                "账单",
+                "算账"
+              ]
             },
             {
               "character": "贺",
               "pinyin": "hè",
-              "audio": "he4"
+              "audio": "he4",
+              "words": [
+                "祝贺",
+                "贺卡",
+                "庆贺"
+              ]
             },
             {
               "character": "樟",
               "pinyin": "zhāng",
-              "audio": "zhang1"
+              "audio": "zhang1",
+              "words": [
+                "樟树",
+                "樟木"
+              ]
             },
             {
               "character": "杠",
               "pinyin": "gàng",
-              "audio": "gang4"
+              "audio": "gang4",
+              "words": [
+                "杠杆",
+                "单杠",
+                "抬杠"
+              ]
             },
             {
               "character": "狡",
               "pinyin": "jiǎo",
-              "audio": "jiao3"
+              "audio": "jiao3",
+              "words": [
+                "狡猾",
+                "狡辩"
+              ]
             },
             {
               "character": "猾",
               "pinyin": "huá",
-              "audio": "hua2"
+              "audio": "hua2",
+              "words": [
+                "狡猾"
+              ]
             }
           ],
           "write": []
@@ -880,100 +1606,190 @@
             {
               "character": "暮",
               "pinyin": "mù",
-              "audio": "mu4"
+              "audio": "mu4",
+              "words": [
+                "暮色",
+                "日暮",
+                "暮春"
+              ]
             },
             {
               "character": "瑟",
               "pinyin": "sè",
-              "audio": "se4"
+              "audio": "se4",
+              "words": [
+                "瑟瑟",
+                "琴瑟"
+              ]
             },
             {
               "character": "缘",
               "pinyin": "yuán",
-              "audio": "yuan2"
+              "audio": "yuan2",
+              "words": [
+                "缘故",
+                "边缘",
+                "缘分"
+              ]
             },
             {
               "character": "降",
               "pinyin": "xiáng",
               "audio": "xiang2",
-              "counted": false
+              "counted": false,
+              "words": [
+                "投降",
+                "降服",
+                "降将"
+              ]
             },
             {
               "character": "骚",
               "pinyin": "sāo",
-              "audio": "sao1"
+              "audio": "sao1",
+              "words": [
+                "骚动",
+                "牢骚"
+              ]
             },
             {
               "character": "逊",
               "pinyin": "xùn",
-              "audio": "xun4"
+              "audio": "xun4",
+              "words": [
+                "谦逊",
+                "逊色"
+              ]
             },
             {
               "character": "输",
               "pinyin": "shū",
-              "audio": "shu1"
+              "audio": "shu1",
+              "words": [
+                "输赢",
+                "运输",
+                "认输"
+              ]
             }
           ],
           "write": [
             {
               "character": "暮",
               "pinyin": "mù",
-              "audio": "mu4"
+              "audio": "mu4",
+              "words": [
+                "暮色",
+                "日暮",
+                "暮春"
+              ]
             },
             {
               "character": "吟",
               "pinyin": "yín",
-              "audio": "yin2"
+              "audio": "yin2",
+              "words": [
+                "吟诵",
+                "吟诗",
+                "低吟"
+              ]
             },
             {
               "character": "题",
               "pinyin": "tí",
-              "audio": "ti2"
+              "audio": "ti2",
+              "words": [
+                "题目",
+                "问题",
+                "题字"
+              ]
             },
             {
               "character": "侧",
               "pinyin": "cè",
-              "audio": "ce4"
+              "audio": "ce4",
+              "words": [
+                "侧面",
+                "侧身",
+                "一侧"
+              ]
             },
             {
               "character": "峰",
               "pinyin": "fēng",
-              "audio": "feng1"
+              "audio": "feng1",
+              "words": [
+                "山峰",
+                "顶峰",
+                "峰顶"
+              ]
             },
             {
               "character": "庐",
               "pinyin": "lú",
-              "audio": "lu2"
+              "audio": "lu2",
+              "words": [
+                "庐山",
+                "茅庐"
+              ]
             },
             {
               "character": "缘",
               "pinyin": "yuán",
-              "audio": "yuan2"
+              "audio": "yuan2",
+              "words": [
+                "缘故",
+                "边缘",
+                "缘分"
+              ]
             },
             {
               "character": "降",
               "pinyin": "xiáng",
-              "audio": "xiang2"
+              "audio": "xiang2",
+              "words": [
+                "投降",
+                "降服",
+                "降将"
+              ]
             },
             {
               "character": "费",
               "pinyin": "fèi",
-              "audio": "fei4"
+              "audio": "fei4",
+              "words": [
+                "花费",
+                "费用",
+                "浪费"
+              ]
             },
             {
               "character": "须",
               "pinyin": "xū",
-              "audio": "xu1"
+              "audio": "xu1",
+              "words": [
+                "必须",
+                "胡须",
+                "须知"
+              ]
             },
             {
               "character": "逊",
               "pinyin": "xùn",
-              "audio": "xun4"
+              "audio": "xun4",
+              "words": [
+                "谦逊",
+                "逊色"
+              ]
             },
             {
               "character": "输",
               "pinyin": "shū",
-              "audio": "shu1"
+              "audio": "shu1",
+              "words": [
+                "输赢",
+                "运输",
+                "认输"
+              ]
             }
           ]
         },
@@ -986,95 +1802,180 @@
             {
               "character": "均",
               "pinyin": "jūn",
-              "audio": "jun1"
+              "audio": "jun1",
+              "words": [
+                "平均",
+                "均匀",
+                "人均"
+              ]
             },
             {
               "character": "柄",
               "pinyin": "bǐng",
-              "audio": "bing3"
+              "audio": "bing3",
+              "words": [
+                "叶柄",
+                "把柄",
+                "刀柄"
+              ]
             },
             {
               "character": "蜗",
               "pinyin": "wō",
-              "audio": "wo1"
+              "audio": "wo1",
+              "words": [
+                "蜗牛",
+                "蜗居"
+              ]
             },
             {
               "character": "曲",
               "pinyin": "qū",
               "audio": "qu1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "弯曲",
+                "曲折",
+                "曲线"
+              ]
             },
             {
               "character": "萎",
               "pinyin": "wěi",
-              "audio": "wei3"
+              "audio": "wei3",
+              "words": [
+                "枯萎",
+                "萎缩"
+              ]
             }
           ],
           "write": [
             {
               "character": "虎",
               "pinyin": "hǔ",
-              "audio": "hu3"
+              "audio": "hu3",
+              "words": [
+                "老虎",
+                "虎牙",
+                "虎头"
+              ]
             },
             {
               "character": "操",
               "pinyin": "cāo",
-              "audio": "cao1"
+              "audio": "cao1",
+              "words": [
+                "操场",
+                "早操",
+                "操心"
+              ]
             },
             {
               "character": "占",
               "pinyin": "zhàn",
-              "audio": "zhan4"
+              "audio": "zhan4",
+              "words": [
+                "占有",
+                "占领",
+                "霸占"
+              ]
             },
             {
               "character": "嫩",
               "pinyin": "nèn",
-              "audio": "nen4"
+              "audio": "nen4",
+              "words": [
+                "嫩绿",
+                "鲜嫩",
+                "嫩芽"
+              ]
             },
             {
               "character": "顺",
               "pinyin": "shùn",
-              "audio": "shun4"
+              "audio": "shun4",
+              "words": [
+                "顺利",
+                "顺序",
+                "顺风"
+              ]
             },
             {
               "character": "均",
               "pinyin": "jūn",
-              "audio": "jun1"
+              "audio": "jun1",
+              "words": [
+                "平均",
+                "均匀",
+                "人均"
+              ]
             },
             {
               "character": "叠",
               "pinyin": "dié",
-              "audio": "die2"
+              "audio": "die2",
+              "words": [
+                "重叠",
+                "折叠",
+                "叠加"
+              ]
             },
             {
               "character": "隙",
               "pinyin": "xì",
-              "audio": "xi4"
+              "audio": "xi4",
+              "words": [
+                "缝隙",
+                "空隙",
+                "间隙"
+              ]
             },
             {
               "character": "茎",
               "pinyin": "jīng",
-              "audio": "jing1"
+              "audio": "jing1",
+              "words": [
+                "茎叶",
+                "花茎"
+              ]
             },
             {
               "character": "柄",
               "pinyin": "bǐng",
-              "audio": "bing3"
+              "audio": "bing3",
+              "words": [
+                "叶柄",
+                "把柄",
+                "刀柄"
+              ]
             },
             {
               "character": "萎",
               "pinyin": "wěi",
-              "audio": "wei3"
+              "audio": "wei3",
+              "words": [
+                "枯萎",
+                "萎缩"
+              ]
             },
             {
               "character": "瞧",
               "pinyin": "qiáo",
-              "audio": "qiao2"
+              "audio": "qiao2",
+              "words": [
+                "瞧见",
+                "瞧一瞧"
+              ]
             },
             {
               "character": "固",
               "pinyin": "gù",
-              "audio": "gu4"
+              "audio": "gu4",
+              "words": [
+                "牢固",
+                "固定",
+                "坚固"
+              ]
             }
           ]
         },
@@ -1087,129 +1988,248 @@
             {
               "character": "宅",
               "pinyin": "zhái",
-              "audio": "zhai2"
+              "audio": "zhai2",
+              "words": [
+                "住宅",
+                "宅院"
+              ]
             },
             {
               "character": "隐",
               "pinyin": "yǐn",
-              "audio": "yin3"
+              "audio": "yin3",
+              "words": [
+                "隐藏",
+                "隐约",
+                "隐身"
+              ]
             },
             {
               "character": "毫",
               "pinyin": "háo",
-              "audio": "hao2"
+              "audio": "hao2",
+              "words": [
+                "丝毫",
+                "毫米",
+                "毫毛"
+              ]
             },
             {
               "character": "慎",
               "pinyin": "shèn",
-              "audio": "shen4"
+              "audio": "shen4",
+              "words": [
+                "慎重",
+                "谨慎"
+              ]
             },
             {
               "character": "址",
               "pinyin": "zhǐ",
-              "audio": "zhi3"
+              "audio": "zhi3",
+              "words": [
+                "地址",
+                "住址",
+                "旧址"
+              ]
             },
             {
               "character": "良",
               "pinyin": "liáng",
-              "audio": "liang2"
+              "audio": "liang2",
+              "words": [
+                "良好",
+                "善良",
+                "优良"
+              ]
             },
             {
               "character": "掘",
               "pinyin": "jué",
-              "audio": "jue2"
+              "audio": "jue2",
+              "words": [
+                "挖掘",
+                "发掘"
+              ]
             },
             {
               "character": "搜",
               "pinyin": "sōu",
-              "audio": "sou1"
+              "audio": "sou1",
+              "words": [
+                "搜索",
+                "搜寻",
+                "搜集"
+              ]
             },
             {
               "character": "倾",
               "pinyin": "qīng",
-              "audio": "qing1"
+              "audio": "qing1",
+              "words": [
+                "倾斜",
+                "倾听",
+                "倾倒"
+              ]
             },
             {
               "character": "骤",
               "pinyin": "zhòu",
-              "audio": "zhou4"
+              "audio": "zhou4",
+              "words": [
+                "骤然",
+                "步骤",
+                "暴风骤雨"
+              ]
             },
             {
               "character": "置",
               "pinyin": "zhì",
-              "audio": "zhi4"
+              "audio": "zhi4",
+              "words": [
+                "位置",
+                "布置",
+                "放置"
+              ]
             },
             {
               "character": "抛",
               "pinyin": "pāo",
-              "audio": "pao1"
+              "audio": "pao1",
+              "words": [
+                "抛弃",
+                "抛开",
+                "抛出"
+              ]
             }
           ],
           "write": [
             {
               "character": "宅",
               "pinyin": "zhái",
-              "audio": "zhai2"
+              "audio": "zhai2",
+              "words": [
+                "住宅",
+                "宅院"
+              ]
             },
             {
               "character": "临",
               "pinyin": "lín",
-              "audio": "lin2"
+              "audio": "lin2",
+              "words": [
+                "临时",
+                "来临",
+                "面临"
+              ]
             },
             {
               "character": "慎",
               "pinyin": "shèn",
-              "audio": "shen4"
+              "audio": "shen4",
+              "words": [
+                "慎重",
+                "谨慎"
+              ]
             },
             {
               "character": "选",
               "pinyin": "xuǎn",
-              "audio": "xuan3"
+              "audio": "xuan3",
+              "words": [
+                "选择",
+                "挑选",
+                "选手"
+              ]
             },
             {
               "character": "择",
               "pinyin": "zé",
-              "audio": "ze2"
+              "audio": "ze2",
+              "words": [
+                "选择",
+                "择优"
+              ]
             },
             {
               "character": "址",
               "pinyin": "zhǐ",
-              "audio": "zhi3"
+              "audio": "zhi3",
+              "words": [
+                "地址",
+                "住址",
+                "旧址"
+              ]
             },
             {
               "character": "良",
               "pinyin": "liáng",
-              "audio": "liang2"
+              "audio": "liang2",
+              "words": [
+                "良好",
+                "善良",
+                "优良"
+              ]
             },
             {
               "character": "穴",
               "pinyin": "xué",
-              "audio": "xue2"
+              "audio": "xue2",
+              "words": [
+                "洞穴",
+                "巢穴",
+                "穴位"
+              ]
             },
             {
               "character": "厅",
               "pinyin": "tīng",
-              "audio": "ting1"
+              "audio": "ting1",
+              "words": [
+                "客厅",
+                "大厅",
+                "餐厅"
+              ]
             },
             {
               "character": "卧",
               "pinyin": "wò",
-              "audio": "wo4"
+              "audio": "wo4",
+              "words": [
+                "卧室",
+                "卧倒",
+                "卧铺"
+              ]
             },
             {
               "character": "专",
               "pinyin": "zhuān",
-              "audio": "zhuan1"
+              "audio": "zhuan1",
+              "words": [
+                "专心",
+                "专业",
+                "专门"
+              ]
             },
             {
               "character": "卫",
               "pinyin": "wèi",
-              "audio": "wei4"
+              "audio": "wei4",
+              "words": [
+                "保卫",
+                "卫生",
+                "门卫"
+              ]
             },
             {
               "character": "较",
               "pinyin": "jiào",
-              "audio": "jiao4"
+              "audio": "jiao4",
+              "words": [
+                "比较",
+                "较量",
+                "较好"
+              ]
             }
           ]
         }
@@ -1228,119 +2248,227 @@
             {
               "character": "劈",
               "pinyin": "pī",
-              "audio": "pi1"
+              "audio": "pi1",
+              "words": [
+                "劈开",
+                "劈柴"
+              ]
             },
             {
               "character": "缓",
               "pinyin": "huǎn",
-              "audio": "huan3"
+              "audio": "huan3",
+              "words": [
+                "缓慢",
+                "缓缓",
+                "缓和"
+              ]
             },
             {
               "character": "浊",
               "pinyin": "zhuó",
-              "audio": "zhuo2"
+              "audio": "zhuo2",
+              "words": [
+                "浑浊",
+                "污浊",
+                "清浊"
+              ]
             },
             {
               "character": "丈",
               "pinyin": "zhàng",
-              "audio": "zhang4"
+              "audio": "zhang4",
+              "words": [
+                "丈量",
+                "一丈",
+                "丈夫"
+              ]
             },
             {
               "character": "隆",
               "pinyin": "lóng",
-              "audio": "long2"
+              "audio": "long2",
+              "words": [
+                "隆隆",
+                "隆重",
+                "兴隆"
+              ]
             },
             {
               "character": "肢",
               "pinyin": "zhī",
-              "audio": "zhi1"
+              "audio": "zhi1",
+              "words": [
+                "四肢",
+                "肢体"
+              ]
             },
             {
               "character": "躯",
               "pinyin": "qū",
-              "audio": "qu1"
+              "audio": "qu1",
+              "words": [
+                "身躯",
+                "躯体"
+              ]
             },
             {
               "character": "液",
               "pinyin": "yè",
-              "audio": "ye4"
+              "audio": "ye4",
+              "words": [
+                "血液",
+                "液体",
+                "汁液"
+              ]
             }
           ],
           "write": [
             {
               "character": "睁",
               "pinyin": "zhēng",
-              "audio": "zheng1"
+              "audio": "zheng1",
+              "words": [
+                "睁眼",
+                "睁开"
+              ]
             },
             {
               "character": "翻",
               "pinyin": "fān",
-              "audio": "fan1"
+              "audio": "fan1",
+              "words": [
+                "翻身",
+                "翻开",
+                "翻滚"
+              ]
             },
             {
               "character": "斧",
               "pinyin": "fǔ",
-              "audio": "fu3"
+              "audio": "fu3",
+              "words": [
+                "斧头",
+                "斧子"
+              ]
             },
             {
               "character": "劈",
               "pinyin": "pī",
-              "audio": "pi1"
+              "audio": "pi1",
+              "words": [
+                "劈开",
+                "劈柴"
+              ]
             },
             {
               "character": "缓",
               "pinyin": "huǎn",
-              "audio": "huan3"
+              "audio": "huan3",
+              "words": [
+                "缓慢",
+                "缓缓",
+                "缓和"
+              ]
             },
             {
               "character": "浊",
               "pinyin": "zhuó",
-              "audio": "zhuo2"
+              "audio": "zhuo2",
+              "words": [
+                "浑浊",
+                "污浊",
+                "清浊"
+              ]
             },
             {
               "character": "丈",
               "pinyin": "zhàng",
-              "audio": "zhang4"
+              "audio": "zhang4",
+              "words": [
+                "丈量",
+                "一丈",
+                "丈夫"
+              ]
             },
             {
               "character": "撑",
               "pinyin": "chēng",
-              "audio": "cheng1"
+              "audio": "cheng1",
+              "words": [
+                "支撑",
+                "撑开",
+                "撑伞"
+              ]
             },
             {
               "character": "竭",
               "pinyin": "jié",
-              "audio": "jie2"
+              "audio": "jie2",
+              "words": [
+                "竭力",
+                "枯竭",
+                "竭尽"
+              ]
             },
             {
               "character": "累",
               "pinyin": "lèi",
-              "audio": "lei4"
+              "audio": "lei4",
+              "words": [
+                "劳累",
+                "疲累",
+                "累坏"
+              ]
             },
             {
               "character": "血",
               "pinyin": "xuè",
-              "audio": "xue4"
+              "audio": "xue4",
+              "words": [
+                "血液",
+                "鲜血",
+                "血管"
+              ]
             },
             {
               "character": "液",
               "pinyin": "yè",
-              "audio": "ye4"
+              "audio": "ye4",
+              "words": [
+                "血液",
+                "液体",
+                "汁液"
+              ]
             },
             {
               "character": "奔",
               "pinyin": "bēn",
-              "audio": "ben1"
+              "audio": "ben1",
+              "words": [
+                "奔跑",
+                "飞奔",
+                "奔流"
+              ]
             },
             {
               "character": "茂",
               "pinyin": "mào",
-              "audio": "mao4"
+              "audio": "mao4",
+              "words": [
+                "茂盛",
+                "茂密"
+              ]
             },
             {
               "character": "滋",
               "pinyin": "zī",
-              "audio": "zi1"
+              "audio": "zi1",
+              "words": [
+                "滋润",
+                "滋养",
+                "滋味"
+              ]
             }
           ]
         },
@@ -1353,55 +2481,99 @@
             {
               "character": "帝",
               "pinyin": "dì",
-              "audio": "di4"
+              "audio": "di4",
+              "words": [
+                "皇帝",
+                "炎帝"
+              ]
             },
             {
               "character": "少",
               "pinyin": "shào",
               "audio": "shao4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "少女",
+                "少爷",
+                "年少"
+              ]
             },
             {
               "character": "曰",
               "pinyin": "yuē",
-              "audio": "yue1"
+              "audio": "yue1",
+              "words": [
+                "子曰",
+                "美其名曰"
+              ]
             },
             {
               "character": "溺",
               "pinyin": "nì",
-              "audio": "ni4"
+              "audio": "ni4",
+              "words": [
+                "溺水",
+                "沉溺"
+              ]
             },
             {
               "character": "返",
               "pinyin": "fǎn",
-              "audio": "fan3"
+              "audio": "fan3",
+              "words": [
+                "返回",
+                "往返",
+                "返校"
+              ]
             }
           ],
           "write": [
             {
               "character": "帝",
               "pinyin": "dì",
-              "audio": "di4"
+              "audio": "di4",
+              "words": [
+                "皇帝",
+                "炎帝"
+              ]
             },
             {
               "character": "曰",
               "pinyin": "yuē",
-              "audio": "yue1"
+              "audio": "yue1",
+              "words": [
+                "子曰",
+                "美其名曰"
+              ]
             },
             {
               "character": "溺",
               "pinyin": "nì",
-              "audio": "ni4"
+              "audio": "ni4",
+              "words": [
+                "溺水",
+                "沉溺"
+              ]
             },
             {
               "character": "返",
               "pinyin": "fǎn",
-              "audio": "fan3"
+              "audio": "fan3",
+              "words": [
+                "返回",
+                "往返",
+                "返校"
+              ]
             },
             {
               "character": "衔",
               "pinyin": "xián",
-              "audio": "xian2"
+              "audio": "xian2",
+              "words": [
+                "衔接",
+                "衔来",
+                "头衔"
+              ]
             }
           ]
         },
@@ -1414,141 +2586,273 @@
             {
               "character": "斯",
               "pinyin": "sī",
-              "audio": "si1"
+              "audio": "si1",
+              "words": [
+                "斯文",
+                "瓦斯"
+              ]
             },
             {
               "character": "惨",
               "pinyin": "cǎn",
-              "audio": "can3"
+              "audio": "can3",
+              "words": [
+                "悲惨",
+                "惨痛",
+                "凄惨"
+              ]
             },
             {
               "character": "盗",
               "pinyin": "dào",
-              "audio": "dao4"
+              "audio": "dao4",
+              "words": [
+                "盗取",
+                "强盗",
+                "盗窃"
+              ]
             },
             {
               "character": "驰",
               "pinyin": "chí",
-              "audio": "chi2"
+              "audio": "chi2",
+              "words": [
+                "奔驰",
+                "飞驰",
+                "驰名"
+              ]
             },
             {
               "character": "还",
               "pinyin": "huán",
               "audio": "huan2",
-              "counted": false
+              "counted": false,
+              "words": [
+                "归还",
+                "还给",
+                "偿还"
+              ]
             },
             {
               "character": "恕",
               "pinyin": "shù",
-              "audio": "shu4"
+              "audio": "shu4",
+              "words": [
+                "饶恕",
+                "宽恕"
+              ]
             },
             {
               "character": "坚",
               "pinyin": "jiān",
-              "audio": "jian1"
+              "audio": "jian1",
+              "words": [
+                "坚定",
+                "坚强",
+                "坚持"
+              ]
             },
             {
               "character": "押",
               "pinyin": "yā",
-              "audio": "ya1"
+              "audio": "ya1",
+              "words": [
+                "押送",
+                "押住",
+                "关押"
+              ]
             },
             {
               "character": "锁",
               "pinyin": "suǒ",
-              "audio": "suo3"
+              "audio": "suo3",
+              "words": [
+                "锁门",
+                "铁锁",
+                "锁链"
+              ]
             },
             {
               "character": "遭",
               "pinyin": "zāo",
-              "audio": "zao1"
+              "audio": "zao1",
+              "words": [
+                "遭遇",
+                "遭受",
+                "遭到"
+              ]
             },
             {
               "character": "恶",
               "pinyin": "è",
-              "audio": "e4"
+              "audio": "e4",
+              "words": [
+                "凶恶",
+                "恶人",
+                "恶劣"
+              ]
             },
             {
               "character": "脏",
               "pinyin": "zàng",
               "audio": "zang4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "肝脏",
+                "心脏",
+                "内脏"
+              ]
             },
             {
               "character": "愤",
               "pinyin": "fèn",
-              "audio": "fen4"
+              "audio": "fen4",
+              "words": [
+                "愤怒",
+                "气愤",
+                "愤愤不平"
+              ]
             }
           ],
           "write": [
             {
               "character": "悲",
               "pinyin": "bēi",
-              "audio": "bei1"
+              "audio": "bei1",
+              "words": [
+                "悲伤",
+                "悲惨",
+                "慈悲"
+              ]
             },
             {
               "character": "惨",
               "pinyin": "cǎn",
-              "audio": "can3"
+              "audio": "can3",
+              "words": [
+                "悲惨",
+                "惨痛",
+                "凄惨"
+              ]
             },
             {
               "character": "兽",
               "pinyin": "shòu",
-              "audio": "shou4"
+              "audio": "shou4",
+              "words": [
+                "野兽",
+                "猛兽",
+                "兽医"
+              ]
             },
             {
               "character": "佩",
               "pinyin": "pèi",
-              "audio": "pei4"
+              "audio": "pei4",
+              "words": [
+                "佩服",
+                "佩戴"
+              ]
             },
             {
               "character": "坚",
               "pinyin": "jiān",
-              "audio": "jian1"
+              "audio": "jian1",
+              "words": [
+                "坚定",
+                "坚强",
+                "坚持"
+              ]
             },
             {
               "character": "违",
               "pinyin": "wéi",
-              "audio": "wei2"
+              "audio": "wei2",
+              "words": [
+                "违反",
+                "违背",
+                "违规"
+              ]
             },
             {
               "character": "抗",
               "pinyin": "kàng",
-              "audio": "kang4"
+              "audio": "kang4",
+              "words": [
+                "反抗",
+                "抗争",
+                "抵抗"
+              ]
             },
             {
               "character": "环",
               "pinyin": "huán",
-              "audio": "huan2"
+              "audio": "huan2",
+              "words": [
+                "环绕",
+                "环境",
+                "圆环"
+              ]
             },
             {
               "character": "锁",
               "pinyin": "suǒ",
-              "audio": "suo3"
+              "audio": "suo3",
+              "words": [
+                "锁门",
+                "铁锁",
+                "锁链"
+              ]
             },
             {
               "character": "既",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "既然",
+                "既定",
+                "既往"
+              ]
             },
             {
               "character": "狠",
               "pinyin": "hěn",
-              "audio": "hen3"
+              "audio": "hen3",
+              "words": [
+                "狠心",
+                "凶狠",
+                "狠毒"
+              ]
             },
             {
               "character": "著",
               "pinyin": "zhù",
-              "audio": "zhu4"
+              "audio": "zhu4",
+              "words": [
+                "著名",
+                "显著",
+                "著作"
+              ]
             },
             {
               "character": "愤",
               "pinyin": "fèn",
-              "audio": "fen4"
+              "audio": "fen4",
+              "words": [
+                "愤怒",
+                "气愤",
+                "愤愤不平"
+              ]
             },
             {
               "character": "获",
               "pinyin": "huò",
-              "audio": "huo4"
+              "audio": "huo4",
+              "words": [
+                "获得",
+                "收获",
+                "获胜"
+              ]
             }
           ]
         },
@@ -1561,47 +2865,91 @@
             {
               "character": "措",
               "pinyin": "cuò",
-              "audio": "cuo4"
+              "audio": "cuo4",
+              "words": [
+                "措施",
+                "举措",
+                "不知所措"
+              ]
             },
             {
               "character": "混",
               "pinyin": "hùn",
-              "audio": "hun4"
+              "audio": "hun4",
+              "words": [
+                "混乱",
+                "混合",
+                "混沌"
+              ]
             },
             {
               "character": "项",
               "pinyin": "xiàng",
-              "audio": "xiang4"
+              "audio": "xiang4",
+              "words": [
+                "项目",
+                "一项",
+                "项链"
+              ]
             },
             {
               "character": "熄",
               "pinyin": "xī",
-              "audio": "xi1"
+              "audio": "xi1",
+              "words": [
+                "熄灭",
+                "熄灯"
+              ]
             },
             {
               "character": "浆",
               "pinyin": "jiāng",
-              "audio": "jiang1"
+              "audio": "jiang1",
+              "words": [
+                "泥浆",
+                "豆浆",
+                "岩浆"
+              ]
             },
             {
               "character": "塌",
               "pinyin": "tā",
-              "audio": "ta1"
+              "audio": "ta1",
+              "words": [
+                "倒塌",
+                "塌方",
+                "塌下"
+              ]
             },
             {
               "character": "杀",
               "pinyin": "shā",
-              "audio": "sha1"
+              "audio": "sha1",
+              "words": [
+                "杀害",
+                "杀菌",
+                "杀敌"
+              ]
             },
             {
               "character": "颂",
               "pinyin": "sòng",
-              "audio": "song4"
+              "audio": "song4",
+              "words": [
+                "歌颂",
+                "赞颂",
+                "颂扬"
+              ]
             },
             {
               "character": "绩",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "成绩",
+                "功绩",
+                "业绩"
+              ]
             }
           ],
           "write": []
@@ -1614,52 +2962,89 @@
             {
               "character": "圃",
               "pinyin": "pǔ",
-              "audio": "pu3"
+              "audio": "pu3",
+              "words": [
+                "花圃",
+                "苗圃"
+              ]
             },
             {
               "character": "卉",
               "pinyin": "huì",
-              "audio": "hui4"
+              "audio": "hui4",
+              "words": [
+                "花卉",
+                "卉木"
+              ]
             },
             {
               "character": "蕾",
               "pinyin": "lěi",
-              "audio": "lei3"
+              "audio": "lei3",
+              "words": [
+                "花蕾",
+                "蓓蕾"
+              ]
             },
             {
               "character": "蕊",
               "pinyin": "ruǐ",
-              "audio": "rui3"
+              "audio": "rui3",
+              "words": [
+                "花蕊",
+                "雄蕊"
+              ]
             },
             {
               "character": "玫",
               "pinyin": "méi",
-              "audio": "mei2"
+              "audio": "mei2",
+              "words": [
+                "玫瑰"
+              ]
             },
             {
               "character": "茉",
               "pinyin": "mò",
-              "audio": "mo4"
+              "audio": "mo4",
+              "words": [
+                "茉莉"
+              ]
             },
             {
               "character": "莉",
               "pinyin": "lì",
-              "audio": "li4"
+              "audio": "li4",
+              "words": [
+                "茉莉"
+              ]
             },
             {
               "character": "牡",
               "pinyin": "mǔ",
-              "audio": "mu3"
+              "audio": "mu3",
+              "words": [
+                "牡丹"
+              ]
             },
             {
               "character": "丹",
               "pinyin": "dān",
-              "audio": "dan1"
+              "audio": "dan1",
+              "words": [
+                "牡丹",
+                "丹心",
+                "丹青"
+              ]
             },
             {
               "character": "棠",
               "pinyin": "táng",
-              "audio": "tang2"
+              "audio": "tang2",
+              "words": [
+                "海棠",
+                "棠梨"
+              ]
             }
           ],
           "write": []
@@ -1679,99 +3064,184 @@
             {
               "character": "嗅",
               "pinyin": "xiù",
-              "audio": "xiu4"
+              "audio": "xiu4",
+              "words": [
+                "嗅觉",
+                "嗅到"
+              ]
             },
             {
               "character": "奈",
               "pinyin": "nài",
-              "audio": "nai4"
+              "audio": "nai4",
+              "words": [
+                "无奈",
+                "奈何"
+              ]
             },
             {
               "character": "拯",
               "pinyin": "zhěng",
-              "audio": "zheng3"
+              "audio": "zheng3",
+              "words": [
+                "拯救",
+                "拯救者"
+              ]
             },
             {
               "character": "嘶",
               "pinyin": "sī",
-              "audio": "si1"
+              "audio": "si1",
+              "words": [
+                "嘶哑",
+                "嘶鸣"
+              ]
             },
             {
               "character": "哑",
               "pinyin": "yǎ",
-              "audio": "ya3"
+              "audio": "ya3",
+              "words": [
+                "哑巴",
+                "嘶哑",
+                "哑口无言"
+              ]
             },
             {
               "character": "庞",
               "pinyin": "páng",
-              "audio": "pang2"
+              "audio": "pang2",
+              "words": [
+                "庞大",
+                "面庞"
+              ]
             }
           ],
           "write": [
             {
               "character": "嗅",
               "pinyin": "xiù",
-              "audio": "xiu4"
+              "audio": "xiu4",
+              "words": [
+                "嗅觉",
+                "嗅到"
+              ]
             },
             {
               "character": "呆",
               "pinyin": "dāi",
-              "audio": "dai1"
+              "audio": "dai1",
+              "words": [
+                "发呆",
+                "呆住",
+                "呆板"
+              ]
             },
             {
               "character": "奈",
               "pinyin": "nài",
-              "audio": "nai4"
+              "audio": "nai4",
+              "words": [
+                "无奈",
+                "奈何"
+              ]
             },
             {
               "character": "巢",
               "pinyin": "cháo",
-              "audio": "chao2"
+              "audio": "chao2",
+              "words": [
+                "鸟巢",
+                "巢穴",
+                "归巢"
+              ]
             },
             {
               "character": "齿",
               "pinyin": "chǐ",
-              "audio": "chi3"
+              "audio": "chi3",
+              "words": [
+                "牙齿",
+                "齿轮",
+                "齿痕"
+              ]
             },
             {
               "character": "躯",
               "pinyin": "qū",
-              "audio": "qu1"
+              "audio": "qu1",
+              "words": [
+                "身躯",
+                "躯体"
+              ]
             },
             {
               "character": "掩",
               "pinyin": "yǎn",
-              "audio": "yan3"
+              "audio": "yan3",
+              "words": [
+                "掩护",
+                "掩盖",
+                "掩面"
+              ]
             },
             {
               "character": "护",
               "pinyin": "hù",
-              "audio": "hu4"
+              "audio": "hu4",
+              "words": [
+                "保护",
+                "爱护",
+                "守护"
+              ]
             },
             {
               "character": "幼",
               "pinyin": "yòu",
-              "audio": "you4"
+              "audio": "you4",
+              "words": [
+                "幼小",
+                "幼儿",
+                "幼苗"
+              ]
             },
             {
               "character": "搏",
               "pinyin": "bó",
-              "audio": "bo2"
+              "audio": "bo2",
+              "words": [
+                "搏斗",
+                "拼搏",
+                "搏击"
+              ]
             },
             {
               "character": "庞",
               "pinyin": "páng",
-              "audio": "pang2"
+              "audio": "pang2",
+              "words": [
+                "庞大",
+                "面庞"
+              ]
             },
             {
               "character": "量",
               "pinyin": "liàng",
-              "audio": "liang4"
+              "audio": "liang4",
+              "words": [
+                "力量",
+                "重量",
+                "数量"
+              ]
             },
             {
               "character": "愣",
               "pinyin": "lèng",
-              "audio": "leng4"
+              "audio": "leng4",
+              "words": [
+                "愣住",
+                "发愣"
+              ]
             }
           ]
         },
@@ -1784,75 +3254,140 @@
             {
               "character": "级",
               "pinyin": "jí",
-              "audio": "ji2"
+              "audio": "ji2",
+              "words": [
+                "年级",
+                "级别",
+                "班级"
+              ]
             },
             {
               "character": "链",
               "pinyin": "liàn",
-              "audio": "lian4"
+              "audio": "lian4",
+              "words": [
+                "铁链",
+                "链条",
+                "项链"
+              ]
             },
             {
               "character": "攀",
               "pinyin": "pān",
-              "audio": "pan1"
+              "audio": "pan1",
+              "words": [
+                "攀登",
+                "攀爬",
+                "攀上"
+              ]
             },
             {
               "character": "相",
               "pinyin": "xiàng",
               "audio": "xiang4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "相片",
+                "照相",
+                "相貌"
+              ]
             },
             {
               "character": "辫",
               "pinyin": "biàn",
-              "audio": "bian4"
+              "audio": "bian4",
+              "words": [
+                "辫子",
+                "小辫"
+              ]
             },
             {
               "character": "呵",
               "pinyin": "hē",
-              "audio": "he1"
+              "audio": "he1",
+              "words": [
+                "呵护",
+                "笑呵呵"
+              ]
             }
           ],
           "write": [
             {
               "character": "级",
               "pinyin": "jí",
-              "audio": "ji2"
+              "audio": "ji2",
+              "words": [
+                "年级",
+                "级别",
+                "班级"
+              ]
             },
             {
               "character": "链",
               "pinyin": "liàn",
-              "audio": "lian4"
+              "audio": "lian4",
+              "words": [
+                "铁链",
+                "链条",
+                "项链"
+              ]
             },
             {
               "character": "颤",
               "pinyin": "chàn",
-              "audio": "chan4"
+              "audio": "chan4",
+              "words": [
+                "颤抖",
+                "颤动"
+              ]
             },
             {
               "character": "攀",
               "pinyin": "pān",
-              "audio": "pan1"
+              "audio": "pan1",
+              "words": [
+                "攀登",
+                "攀爬",
+                "攀上"
+              ]
             },
             {
               "character": "猴",
               "pinyin": "hóu",
-              "audio": "hou2"
+              "audio": "hou2",
+              "words": [
+                "猴子",
+                "小猴",
+                "猴王"
+              ]
             },
             {
               "character": "念",
               "pinyin": "niàn",
-              "audio": "nian4"
+              "audio": "nian4",
+              "words": [
+                "思念",
+                "念书",
+                "纪念"
+              ]
             },
             {
               "character": "辫",
               "pinyin": "biàn",
-              "audio": "bian4"
+              "audio": "bian4",
+              "words": [
+                "辫子",
+                "小辫"
+              ]
             },
             {
               "character": "呵",
               "pinyin": "hē",
-              "audio": "he1"
+              "audio": "he1",
+              "words": [
+                "呵护",
+                "笑呵呵"
+              ]
             }
           ]
         }
@@ -1871,140 +3406,263 @@
             {
               "character": "谓",
               "pinyin": "wèi",
-              "audio": "wei4"
+              "audio": "wei4",
+              "words": [
+                "所谓",
+                "称谓"
+              ]
             },
             {
               "character": "拳",
               "pinyin": "quán",
-              "audio": "quan2"
+              "audio": "quan2",
+              "words": [
+                "拳头",
+                "打拳",
+                "拳脚"
+              ]
             },
             {
               "character": "捶",
               "pinyin": "chuí",
-              "audio": "chui2"
+              "audio": "chui2",
+              "words": [
+                "捶背",
+                "捶打"
+              ]
             },
             {
               "character": "顽",
               "pinyin": "wán",
-              "audio": "wan2"
+              "audio": "wan2",
+              "words": [
+                "顽皮",
+                "顽强",
+                "顽固"
+              ]
             },
             {
               "character": "吁",
               "pinyin": "yū",
               "audio": "yu1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "气喘吁吁",
+                "长吁短叹"
+              ]
             },
             {
               "character": "襟",
               "pinyin": "jīn",
-              "audio": "jin1"
+              "audio": "jin1",
+              "words": [
+                "衣襟",
+                "胸襟"
+              ]
             },
             {
               "character": "膊",
               "pinyin": "bó",
-              "audio": "bo2"
+              "audio": "bo2",
+              "words": [
+                "胳膊"
+              ]
             },
             {
               "character": "瓶",
               "pinyin": "píng",
-              "audio": "ping2"
+              "audio": "ping2",
+              "words": [
+                "瓶子",
+                "水瓶",
+                "花瓶"
+              ]
             },
             {
               "character": "怖",
               "pinyin": "bù",
-              "audio": "bu4"
+              "audio": "bu4",
+              "words": [
+                "恐怖",
+                "可怖"
+              ]
             },
             {
               "character": "凭",
               "pinyin": "píng",
-              "audio": "ping2"
+              "audio": "ping2",
+              "words": [
+                "凭借",
+                "凭着",
+                "凭空"
+              ]
             },
             {
               "character": "欺",
               "pinyin": "qī",
-              "audio": "qi1"
+              "audio": "qi1",
+              "words": [
+                "欺负",
+                "欺骗",
+                "欺压"
+              ]
             },
             {
               "character": "掐",
               "pinyin": "qiā",
-              "audio": "qia1"
+              "audio": "qia1",
+              "words": [
+                "掐住",
+                "掐算"
+              ]
             }
           ],
           "write": [
             {
               "character": "摸",
               "pinyin": "mō",
-              "audio": "mo1"
+              "audio": "mo1",
+              "words": [
+                "抚摸",
+                "摸索",
+                "摸黑"
+              ]
             },
             {
               "character": "甚",
               "pinyin": "shèn",
-              "audio": "shen4"
+              "audio": "shen4",
+              "words": [
+                "甚至",
+                "甚好",
+                "欺人太甚"
+              ]
             },
             {
               "character": "跪",
               "pinyin": "guì",
-              "audio": "gui4"
+              "audio": "gui4",
+              "words": [
+                "跪下",
+                "跪拜"
+              ]
             },
             {
               "character": "捶",
               "pinyin": "chuí",
-              "audio": "chui2"
+              "audio": "chui2",
+              "words": [
+                "捶背",
+                "捶打"
+              ]
             },
             {
               "character": "绕",
               "pinyin": "rào",
-              "audio": "rao4"
+              "audio": "rao4",
+              "words": [
+                "围绕",
+                "绕路",
+                "缠绕"
+              ]
             },
             {
               "character": "顽",
               "pinyin": "wán",
-              "audio": "wan2"
+              "audio": "wan2",
+              "words": [
+                "顽皮",
+                "顽强",
+                "顽固"
+              ]
             },
             {
               "character": "脖",
               "pinyin": "bó",
-              "audio": "bo2"
+              "audio": "bo2",
+              "words": [
+                "脖子",
+                "脖颈"
+              ]
             },
             {
               "character": "脱",
               "pinyin": "tuō",
-              "audio": "tuo1"
+              "audio": "tuo1",
+              "words": [
+                "脱下",
+                "逃脱",
+                "脱身"
+              ]
             },
             {
               "character": "概",
               "pinyin": "gài",
-              "audio": "gai4"
+              "audio": "gai4",
+              "words": [
+                "大概",
+                "概括",
+                "气概"
+              ]
             },
             {
               "character": "惹",
               "pinyin": "rě",
-              "audio": "re3"
+              "audio": "re3",
+              "words": [
+                "招惹",
+                "惹事",
+                "惹人喜爱"
+              ]
             },
             {
               "character": "昏",
               "pinyin": "hūn",
-              "audio": "hun1"
+              "audio": "hun1",
+              "words": [
+                "昏暗",
+                "黄昏",
+                "昏倒"
+              ]
             },
             {
               "character": "握",
               "pinyin": "wò",
-              "audio": "wo4"
+              "audio": "wo4",
+              "words": [
+                "握手",
+                "把握",
+                "紧握"
+              ]
             },
             {
               "character": "摔",
               "pinyin": "shuāi",
-              "audio": "shuai1"
+              "audio": "shuai1",
+              "words": [
+                "摔倒",
+                "摔跤",
+                "摔坏"
+              ]
             },
             {
               "character": "凭",
               "pinyin": "píng",
-              "audio": "ping2"
+              "audio": "ping2",
+              "words": [
+                "凭借",
+                "凭着",
+                "凭空"
+              ]
             },
             {
               "character": "掐",
               "pinyin": "qiā",
-              "audio": "qia1"
+              "audio": "qia1",
+              "words": [
+                "掐住",
+                "掐算"
+              ]
             }
           ]
         },
@@ -2017,139 +3675,264 @@
             {
               "character": "囊",
               "pinyin": "náng",
-              "audio": "nang2"
+              "audio": "nang2",
+              "words": [
+                "窝囊",
+                "行囊",
+                "囊中"
+              ]
             },
             {
               "character": "露",
               "pinyin": "lòu",
               "audio": "lou4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "露面",
+                "露出",
+                "露脸"
+              ]
             },
             {
               "character": "羡",
               "pinyin": "xiàn",
-              "audio": "xian4"
+              "audio": "xian4",
+              "words": [
+                "羡慕",
+                "艳羡"
+              ]
             },
             {
               "character": "角",
               "pinyin": "jué",
               "audio": "jue2",
-              "counted": false
+              "counted": false,
+              "words": [
+                "角色",
+                "主角",
+                "角逐"
+              ]
             },
             {
               "character": "殷",
               "pinyin": "yīn",
-              "audio": "yin1"
+              "audio": "yin1",
+              "words": [
+                "殷切",
+                "殷红",
+                "殷勤"
+              ]
             },
             {
               "character": "撇",
               "pinyin": "piě",
-              "audio": "pie3"
+              "audio": "pie3",
+              "words": [
+                "撇嘴",
+                "一撇"
+              ]
             },
             {
               "character": "啊",
               "pinyin": "ā",
               "audio": "a1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "啊呀",
+                "好啊"
+              ]
             },
             {
               "character": "霉",
               "pinyin": "méi",
-              "audio": "mei2"
+              "audio": "mei2",
+              "words": [
+                "倒霉",
+                "发霉",
+                "霉菌"
+              ]
             },
             {
               "character": "亏",
               "pinyin": "kuī",
-              "audio": "kui1"
+              "audio": "kui1",
+              "words": [
+                "吃亏",
+                "亏本",
+                "多亏"
+              ]
             },
             {
               "character": "哄",
               "pinyin": "hōng",
               "audio": "hong1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "哄笑",
+                "起哄",
+                "哄堂大笑"
+              ]
             },
             {
               "character": "拙",
               "pinyin": "zhuō",
-              "audio": "zhuo1"
+              "audio": "zhuo1",
+              "words": [
+                "笨拙",
+                "拙劣",
+                "弄巧成拙"
+              ]
             },
             {
               "character": "唉",
               "pinyin": "āi",
               "audio": "ai1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "唉声叹气",
+                "唉呀"
+              ]
             },
             {
               "character": "砸",
               "pinyin": "zá",
-              "audio": "za2"
+              "audio": "za2",
+              "words": [
+                "砸锅",
+                "砸坏",
+                "砸碎"
+              ]
             }
           ],
           "write": [
             {
               "character": "殷",
               "pinyin": "yīn",
-              "audio": "yin1"
+              "audio": "yin1",
+              "words": [
+                "殷切",
+                "殷红",
+                "殷勤"
+              ]
             },
             {
               "character": "段",
               "pinyin": "duàn",
-              "audio": "duan4"
+              "audio": "duan4",
+              "words": [
+                "一段",
+                "段落",
+                "阶段"
+              ]
             },
             {
               "character": "俩",
               "pinyin": "liǎ",
-              "audio": "lia3"
+              "audio": "lia3",
+              "words": [
+                "他俩",
+                "咱俩"
+              ]
             },
             {
               "character": "练",
               "pinyin": "liàn",
-              "audio": "lian4"
+              "audio": "lian4",
+              "words": [
+                "练习",
+                "训练",
+                "排练"
+              ]
             },
             {
               "character": "套",
               "pinyin": "tào",
-              "audio": "tao4"
+              "audio": "tao4",
+              "words": [
+                "一套",
+                "外套",
+                "手套"
+              ]
             },
             {
               "character": "裤",
               "pinyin": "kù",
-              "audio": "ku4"
+              "audio": "ku4",
+              "words": [
+                "裤子",
+                "短裤",
+                "长裤"
+              ]
             },
             {
               "character": "逃",
               "pinyin": "táo",
-              "audio": "tao2"
+              "audio": "tao2",
+              "words": [
+                "逃跑",
+                "逃走",
+                "逃脱"
+              ]
             },
             {
               "character": "亏",
               "pinyin": "kuī",
-              "audio": "kui1"
+              "audio": "kui1",
+              "words": [
+                "吃亏",
+                "亏本",
+                "多亏"
+              ]
             },
             {
               "character": "挖",
               "pinyin": "wā",
-              "audio": "wa1"
+              "audio": "wa1",
+              "words": [
+                "挖土",
+                "挖坑",
+                "挖开"
+              ]
             },
             {
               "character": "撤",
               "pinyin": "chè",
-              "audio": "che4"
+              "audio": "che4",
+              "words": [
+                "撤退",
+                "撤走",
+                "撤销"
+              ]
             },
             {
               "character": "堂",
               "pinyin": "táng",
-              "audio": "tang2"
+              "audio": "tang2",
+              "words": [
+                "课堂",
+                "礼堂",
+                "堂屋"
+              ]
             },
             {
               "character": "砸",
               "pinyin": "zá",
-              "audio": "za2"
+              "audio": "za2",
+              "words": [
+                "砸锅",
+                "砸坏",
+                "砸碎"
+              ]
             },
             {
               "character": "锅",
               "pinyin": "guō",
-              "audio": "guo1"
+              "audio": "guo1",
+              "words": [
+                "铁锅",
+                "锅盖",
+                "砸锅"
+              ]
             }
           ]
         },
@@ -2163,129 +3946,253 @@
               "character": "钉",
               "pinyin": "dīng",
               "audio": "ding1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "钉子",
+                "铁钉",
+                "图钉"
+              ]
             },
             {
               "character": "兵",
               "pinyin": "bīng",
-              "audio": "bing1"
+              "audio": "bing1",
+              "words": [
+                "士兵",
+                "兵器",
+                "官兵"
+              ]
             },
             {
               "character": "败",
               "pinyin": "bài",
-              "audio": "bai4"
+              "audio": "bai4",
+              "words": [
+                "失败",
+                "打败",
+                "败北"
+              ]
             },
             {
               "character": "恨",
               "pinyin": "hèn",
-              "audio": "hen4"
+              "audio": "hen4",
+              "words": [
+                "仇恨",
+                "悔恨",
+                "恨不得"
+              ]
             },
             {
               "character": "帅",
               "pinyin": "shuài",
-              "audio": "shuai4"
+              "audio": "shuai4",
+              "words": [
+                "元帅",
+                "帅气",
+                "将帅"
+              ]
             },
             {
               "character": "彻",
               "pinyin": "chè",
-              "audio": "che4"
+              "audio": "che4",
+              "words": [
+                "彻底",
+                "清彻",
+                "透彻"
+              ]
             },
             {
               "character": "溃",
               "pinyin": "kuì",
-              "audio": "kui4"
+              "audio": "kui4",
+              "words": [
+                "溃败",
+                "崩溃",
+                "击溃"
+              ]
             },
             {
               "character": "誉",
               "pinyin": "yù",
-              "audio": "yu4"
+              "audio": "yu4",
+              "words": [
+                "荣誉",
+                "赞誉",
+                "名誉"
+              ]
             },
             {
               "character": "丑",
               "pinyin": "chǒu",
-              "audio": "chou3"
+              "audio": "chou3",
+              "words": [
+                "丑陋",
+                "出丑",
+                "小丑"
+              ]
             },
             {
               "character": "豪",
               "pinyin": "háo",
-              "audio": "hao2"
+              "audio": "hao2",
+              "words": [
+                "自豪",
+                "豪迈",
+                "豪杰"
+              ]
             }
           ],
           "write": [
             {
               "character": "否",
               "pinyin": "fǒu",
-              "audio": "fou3"
+              "audio": "fou3",
+              "words": [
+                "否则",
+                "是否",
+                "否定"
+              ]
             },
             {
               "character": "旋",
               "pinyin": "xuán",
-              "audio": "xuan2"
+              "audio": "xuan2",
+              "words": [
+                "旋转",
+                "盘旋",
+                "旋风"
+              ]
             },
             {
               "character": "况",
               "pinyin": "kuàng",
-              "audio": "kuang4"
+              "audio": "kuang4",
+              "words": [
+                "情况",
+                "况且",
+                "状况"
+              ]
             },
             {
               "character": "兵",
               "pinyin": "bīng",
-              "audio": "bing1"
+              "audio": "bing1",
+              "words": [
+                "士兵",
+                "兵器",
+                "官兵"
+              ]
             },
             {
               "character": "败",
               "pinyin": "bài",
-              "audio": "bai4"
+              "audio": "bai4",
+              "words": [
+                "失败",
+                "打败",
+                "败北"
+              ]
             },
             {
               "character": "椅",
               "pinyin": "yǐ",
-              "audio": "yi3"
+              "audio": "yi3",
+              "words": [
+                "椅子",
+                "桌椅",
+                "座椅"
+              ]
             },
             {
               "character": "仍",
               "pinyin": "réng",
-              "audio": "reng2"
+              "audio": "reng2",
+              "words": [
+                "仍然",
+                "仍旧"
+              ]
             },
             {
               "character": "尤",
               "pinyin": "yóu",
-              "audio": "you2"
+              "audio": "you2",
+              "words": [
+                "尤其",
+                "尤为",
+                "怨天尤人"
+              ]
             },
             {
               "character": "恨",
               "pinyin": "hèn",
-              "audio": "hen4"
+              "audio": "hen4",
+              "words": [
+                "仇恨",
+                "悔恨",
+                "恨不得"
+              ]
             },
             {
               "character": "帅",
               "pinyin": "shuài",
-              "audio": "shuai4"
+              "audio": "shuai4",
+              "words": [
+                "元帅",
+                "帅气",
+                "将帅"
+              ]
             },
             {
               "character": "预",
               "pinyin": "yù",
-              "audio": "yu4"
+              "audio": "yu4",
+              "words": [
+                "预习",
+                "预报",
+                "预备"
+              ]
             },
             {
               "character": "溃",
               "pinyin": "kuì",
-              "audio": "kui4"
+              "audio": "kui4",
+              "words": [
+                "溃败",
+                "崩溃",
+                "击溃"
+              ]
             },
             {
               "character": "品",
               "pinyin": "pǐn",
-              "audio": "pin3"
+              "audio": "pin3",
+              "words": [
+                "品尝",
+                "作品",
+                "品格"
+              ]
             },
             {
               "character": "丑",
               "pinyin": "chǒu",
-              "audio": "chou3"
+              "audio": "chou3",
+              "words": [
+                "丑陋",
+                "出丑",
+                "小丑"
+              ]
             },
             {
               "character": "豪",
               "pinyin": "háo",
-              "audio": "hao2"
+              "audio": "hao2",
+              "words": [
+                "自豪",
+                "豪迈",
+                "豪杰"
+              ]
             }
           ]
         },
@@ -2297,42 +4204,76 @@
             {
               "character": "韭",
               "pinyin": "jiǔ",
-              "audio": "jiu3"
+              "audio": "jiu3",
+              "words": [
+                "韭菜",
+                "韭黄"
+              ]
             },
             {
               "character": "芥",
               "pinyin": "jiè",
-              "audio": "jie4"
+              "audio": "jie4",
+              "words": [
+                "芥菜",
+                "芥末"
+              ]
             },
             {
               "character": "芹",
               "pinyin": "qín",
-              "audio": "qin2"
+              "audio": "qin2",
+              "words": [
+                "芹菜",
+                "水芹"
+              ]
             },
             {
               "character": "蒜",
               "pinyin": "suàn",
-              "audio": "suan4"
+              "audio": "suan4",
+              "words": [
+                "大蒜",
+                "蒜苗",
+                "蒜瓣"
+              ]
             },
             {
               "character": "椒",
               "pinyin": "jiāo",
-              "audio": "jiao1"
+              "audio": "jiao1",
+              "words": [
+                "辣椒",
+                "花椒",
+                "青椒"
+              ]
             },
             {
               "character": "藕",
               "pinyin": "ǒu",
-              "audio": "ou3"
+              "audio": "ou3",
+              "words": [
+                "莲藕",
+                "藕粉"
+              ]
             },
             {
               "character": "薯",
               "pinyin": "shǔ",
-              "audio": "shu3"
+              "audio": "shu3",
+              "words": [
+                "红薯",
+                "马铃薯"
+              ]
             },
             {
               "character": "芋",
               "pinyin": "yù",
-              "audio": "yu4"
+              "audio": "yu4",
+              "words": [
+                "芋头",
+                "芋泥"
+              ]
             }
           ],
           "write": []
@@ -2352,80 +4293,154 @@
             {
               "character": "塞",
               "pinyin": "sài",
-              "audio": "sai4"
+              "audio": "sai4",
+              "words": [
+                "边塞",
+                "塞外",
+                "要塞"
+              ]
             },
             {
               "character": "秦",
               "pinyin": "qín",
-              "audio": "qin2"
+              "audio": "qin2",
+              "words": [
+                "秦朝",
+                "秦国",
+                "秦岭"
+              ]
             },
             {
               "character": "征",
               "pinyin": "zhēng",
-              "audio": "zheng1"
+              "audio": "zheng1",
+              "words": [
+                "出征",
+                "长征",
+                "征战"
+              ]
             },
             {
               "character": "将",
               "pinyin": "jiàng",
               "audio": "jiang4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "将领",
+                "大将",
+                "将士"
+              ]
             },
             {
               "character": "杰",
               "pinyin": "jié",
-              "audio": "jie2"
+              "audio": "jie2",
+              "words": [
+                "杰出",
+                "豪杰",
+                "英杰"
+              ]
             }
           ],
           "write": [
             {
               "character": "塞",
               "pinyin": "sài",
-              "audio": "sai4"
+              "audio": "sai4",
+              "words": [
+                "边塞",
+                "塞外",
+                "要塞"
+              ]
             },
             {
               "character": "秦",
               "pinyin": "qín",
-              "audio": "qin2"
+              "audio": "qin2",
+              "words": [
+                "秦朝",
+                "秦国",
+                "秦岭"
+              ]
             },
             {
               "character": "征",
               "pinyin": "zhēng",
-              "audio": "zheng1"
+              "audio": "zheng1",
+              "words": [
+                "出征",
+                "长征",
+                "征战"
+              ]
             },
             {
               "character": "词",
               "pinyin": "cí",
-              "audio": "ci2"
+              "audio": "ci2",
+              "words": [
+                "古诗词",
+                "词语",
+                "歌词"
+              ]
             },
             {
               "character": "催",
               "pinyin": "cuī",
-              "audio": "cui1"
+              "audio": "cui1",
+              "words": [
+                "催促",
+                "催眠",
+                "催人奋进"
+              ]
             },
             {
               "character": "醉",
               "pinyin": "zuì",
-              "audio": "zui4"
+              "audio": "zui4",
+              "words": [
+                "喝醉",
+                "陶醉",
+                "醉人"
+              ]
             },
             {
               "character": "杰",
               "pinyin": "jié",
-              "audio": "jie2"
+              "audio": "jie2",
+              "words": [
+                "杰出",
+                "豪杰",
+                "英杰"
+              ]
             },
             {
               "character": "亦",
               "pinyin": "yì",
-              "audio": "yi4"
+              "audio": "yi4",
+              "words": [
+                "亦然",
+                "人云亦云"
+              ]
             },
             {
               "character": "雄",
               "pinyin": "xióng",
-              "audio": "xiong2"
+              "audio": "xiong2",
+              "words": [
+                "英雄",
+                "雄伟",
+                "雄壮"
+              ]
             },
             {
               "character": "项",
               "pinyin": "xiàng",
-              "audio": "xiang4"
+              "audio": "xiang4",
+              "words": [
+                "项目",
+                "一项",
+                "项链"
+              ]
             }
           ]
         },
@@ -2438,104 +4453,198 @@
             {
               "character": "崛",
               "pinyin": "jué",
-              "audio": "jue2"
+              "audio": "jue2",
+              "words": [
+                "崛起",
+                "崛立"
+              ]
             },
             {
               "character": "范",
               "pinyin": "fàn",
-              "audio": "fan4"
+              "audio": "fan4",
+              "words": [
+                "模范",
+                "范围",
+                "范例"
+              ]
             },
             {
               "character": "魏",
               "pinyin": "wèi",
-              "audio": "wei4"
+              "audio": "wei4",
+              "words": [
+                "魏国",
+                "魏碑"
+              ]
             },
             {
               "character": "晰",
               "pinyin": "xī",
-              "audio": "xi1"
+              "audio": "xi1",
+              "words": [
+                "清晰",
+                "明晰"
+              ]
             },
             {
               "character": "效",
               "pinyin": "xiào",
-              "audio": "xiao4"
+              "audio": "xiao4",
+              "words": [
+                "效果",
+                "效率",
+                "成效"
+              ]
             },
             {
               "character": "淮",
               "pinyin": "huái",
-              "audio": "huai2"
+              "audio": "huai2",
+              "words": [
+                "淮河",
+                "淮南"
+              ]
             },
             {
               "character": "惑",
               "pinyin": "huò",
-              "audio": "huo4"
+              "audio": "huo4",
+              "words": [
+                "疑惑",
+                "迷惑",
+                "困惑"
+              ]
             },
             {
               "character": "惩",
               "pinyin": "chéng",
-              "audio": "cheng2"
+              "audio": "cheng2",
+              "words": [
+                "惩罚",
+                "惩治"
+              ]
             },
             {
               "character": "斥",
               "pinyin": "chì",
-              "audio": "chi4"
+              "audio": "chi4",
+              "words": [
+                "斥责",
+                "训斥",
+                "排斥"
+              ]
             }
           ],
           "write": [
             {
               "character": "肃",
               "pinyin": "sù",
-              "audio": "su4"
+              "audio": "su4",
+              "words": [
+                "严肃",
+                "肃静",
+                "肃立"
+              ]
             },
             {
               "character": "晰",
               "pinyin": "xī",
-              "audio": "xi1"
+              "audio": "xi1",
+              "words": [
+                "清晰",
+                "明晰"
+              ]
             },
             {
               "character": "振",
               "pinyin": "zhèn",
-              "audio": "zhen4"
+              "audio": "zhen4",
+              "words": [
+                "振兴",
+                "振作",
+                "振动"
+              ]
             },
             {
               "character": "胸",
               "pinyin": "xiōng",
-              "audio": "xiong1"
+              "audio": "xiong1",
+              "words": [
+                "胸怀",
+                "胸口",
+                "胸前"
+              ]
             },
             {
               "character": "怀",
               "pinyin": "huái",
-              "audio": "huai2"
+              "audio": "huai2",
+              "words": [
+                "怀抱",
+                "怀念",
+                "胸怀"
+              ]
             },
             {
               "character": "赞",
               "pinyin": "zàn",
-              "audio": "zan4"
+              "audio": "zan4",
+              "words": [
+                "赞美",
+                "称赞",
+                "赞成"
+              ]
             },
             {
               "character": "效",
               "pinyin": "xiào",
-              "audio": "xiao4"
+              "audio": "xiao4",
+              "words": [
+                "效果",
+                "效率",
+                "成效"
+              ]
             },
             {
               "character": "凡",
               "pinyin": "fán",
-              "audio": "fan2"
+              "audio": "fan2",
+              "words": [
+                "平凡",
+                "凡是",
+                "非凡"
+              ]
             },
             {
               "character": "顾",
               "pinyin": "gù",
-              "audio": "gu4"
+              "audio": "gu4",
+              "words": [
+                "照顾",
+                "回顾",
+                "顾客"
+              ]
             },
             {
               "character": "训",
               "pinyin": "xùn",
-              "audio": "xun4"
+              "audio": "xun4",
+              "words": [
+                "教训",
+                "训练",
+                "训斥"
+              ]
             },
             {
               "character": "斥",
               "pinyin": "chì",
-              "audio": "chi4"
+              "audio": "chi4",
+              "words": [
+                "斥责",
+                "训斥",
+                "排斥"
+              ]
             }
           ]
         },
@@ -2548,69 +4657,133 @@
             {
               "character": "蓄",
               "pinyin": "xù",
-              "audio": "xu4"
+              "audio": "xu4",
+              "words": [
+                "蓄须",
+                "储蓄",
+                "积蓄"
+              ]
             },
             {
               "character": "迫",
               "pinyin": "pò",
-              "audio": "po4"
+              "audio": "po4",
+              "words": [
+                "被迫",
+                "迫切",
+                "压迫"
+              ]
             },
             {
               "character": "租",
               "pinyin": "zū",
-              "audio": "zu1"
+              "audio": "zu1",
+              "words": [
+                "出租",
+                "租房",
+                "租金"
+              ]
             },
             {
               "character": "纠",
               "pinyin": "jiū",
-              "audio": "jiu1"
+              "audio": "jiu1",
+              "words": [
+                "纠正",
+                "纠纷",
+                "纠缠"
+              ]
             },
             {
               "character": "缠",
               "pinyin": "chán",
-              "audio": "chan2"
+              "audio": "chan2",
+              "words": [
+                "缠绕",
+                "纠缠",
+                "缠住"
+              ]
             },
             {
               "character": "邀",
               "pinyin": "yāo",
-              "audio": "yao1"
+              "audio": "yao1",
+              "words": [
+                "邀请",
+                "邀约"
+              ]
             },
             {
               "character": "扰",
               "pinyin": "rǎo",
-              "audio": "rao3"
+              "audio": "rao3",
+              "words": [
+                "打扰",
+                "扰乱",
+                "干扰"
+              ]
             },
             {
               "character": "拒",
               "pinyin": "jù",
-              "audio": "ju4"
+              "audio": "ju4",
+              "words": [
+                "拒绝",
+                "拒收",
+                "抗拒"
+              ]
             },
             {
               "character": "签",
               "pinyin": "qiān",
-              "audio": "qian1"
+              "audio": "qian1",
+              "words": [
+                "签字",
+                "签名",
+                "签订"
+              ]
             },
             {
               "character": "订",
               "pinyin": "dìng",
-              "audio": "ding4"
+              "audio": "ding4",
+              "words": [
+                "订正",
+                "签订",
+                "订书机"
+              ]
             },
             {
               "character": "宁",
               "pinyin": "nìng",
               "audio": "ning4",
-              "counted": false
+              "counted": false,
+              "words": [
+                "宁可",
+                "宁愿",
+                "宁死不屈"
+              ]
             },
             {
               "character": "要",
               "pinyin": "yāo",
               "audio": "yao1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "要求",
+                "要挟",
+                "要领"
+              ]
             },
             {
               "character": "妄",
               "pinyin": "wàng",
-              "audio": "wang4"
+              "audio": "wang4",
+              "words": [
+                "妄想",
+                "狂妄",
+                "胆大妄为"
+              ]
             }
           ],
           "write": []
@@ -2624,32 +4797,59 @@
             {
               "character": "延",
               "pinyin": "yán",
-              "audio": "yan2"
+              "audio": "yan2",
+              "words": [
+                "延安",
+                "延长",
+                "延伸"
+              ]
             },
             {
               "character": "昔",
               "pinyin": "xī",
-              "audio": "xi1"
+              "audio": "xi1",
+              "words": [
+                "昔日",
+                "往昔"
+              ]
             },
             {
               "character": "茅",
               "pinyin": "máo",
-              "audio": "mao2"
+              "audio": "mao2",
+              "words": [
+                "茅屋",
+                "茅草",
+                "白茅"
+              ]
             },
             {
               "character": "炕",
               "pinyin": "kàng",
-              "audio": "kang4"
+              "audio": "kang4",
+              "words": [
+                "土炕",
+                "炕头"
+              ]
             },
             {
               "character": "旦",
               "pinyin": "dàn",
-              "audio": "dan4"
+              "audio": "dan4",
+              "words": [
+                "元旦",
+                "旦夕",
+                "一旦"
+              ]
             },
             {
               "character": "媚",
               "pinyin": "mèi",
-              "audio": "mei4"
+              "audio": "mei4",
+              "words": [
+                "明媚",
+                "妩媚"
+              ]
             }
           ],
           "write": []
@@ -2669,49 +4869,90 @@
             {
               "character": "戎",
               "pinyin": "róng",
-              "audio": "rong2"
+              "audio": "rong2",
+              "words": [
+                "王戎",
+                "戎装"
+              ]
             },
             {
               "character": "诸",
               "pinyin": "zhū",
-              "audio": "zhu1"
+              "audio": "zhu1",
+              "words": [
+                "诸位",
+                "诸多",
+                "诸侯"
+              ]
             },
             {
               "character": "竞",
               "pinyin": "jìng",
-              "audio": "jing4"
+              "audio": "jing4",
+              "words": [
+                "竞赛",
+                "竞争",
+                "竞走"
+              ]
             },
             {
               "character": "唯",
               "pinyin": "wéi",
-              "audio": "wei2"
+              "audio": "wei2",
+              "words": [
+                "唯一",
+                "唯独"
+              ]
             }
           ],
           "write": [
             {
               "character": "戎",
               "pinyin": "róng",
-              "audio": "rong2"
+              "audio": "rong2",
+              "words": [
+                "王戎",
+                "戎装"
+              ]
             },
             {
               "character": "尝",
               "pinyin": "cháng",
-              "audio": "chang2"
+              "audio": "chang2",
+              "words": [
+                "品尝",
+                "尝试",
+                "未尝"
+              ]
             },
             {
               "character": "诸",
               "pinyin": "zhū",
-              "audio": "zhu1"
+              "audio": "zhu1",
+              "words": [
+                "诸位",
+                "诸多",
+                "诸侯"
+              ]
             },
             {
               "character": "竞",
               "pinyin": "jìng",
-              "audio": "jing4"
+              "audio": "jing4",
+              "words": [
+                "竞赛",
+                "竞争",
+                "竞走"
+              ]
             },
             {
               "character": "唯",
               "pinyin": "wéi",
-              "audio": "wei2"
+              "audio": "wei2",
+              "words": [
+                "唯一",
+                "唯独"
+              ]
             }
           ]
         },
@@ -2724,134 +4965,251 @@
             {
               "character": "豹",
               "pinyin": "bào",
-              "audio": "bao4"
+              "audio": "bao4",
+              "words": [
+                "豹子",
+                "猎豹",
+                "西门豹"
+              ]
             },
             {
               "character": "娶",
               "pinyin": "qǔ",
-              "audio": "qu3"
+              "audio": "qu3",
+              "words": [
+                "娶妻",
+                "迎娶"
+              ]
             },
             {
               "character": "媳",
               "pinyin": "xí",
-              "audio": "xi2"
+              "audio": "xi2",
+              "words": [
+                "媳妇",
+                "儿媳"
+              ]
             },
             {
               "character": "巫",
               "pinyin": "wū",
-              "audio": "wu1"
+              "audio": "wu1",
+              "words": [
+                "巫婆",
+                "巫师"
+              ]
             },
             {
               "character": "绅",
               "pinyin": "shēn",
-              "audio": "shen1"
+              "audio": "shen1",
+              "words": [
+                "绅士",
+                "乡绅"
+              ]
             },
             {
               "character": "旱",
               "pinyin": "hàn",
-              "audio": "han4"
+              "audio": "han4",
+              "words": [
+                "干旱",
+                "旱灾",
+                "旱地"
+              ]
             },
             {
               "character": "徒",
               "pinyin": "tú",
-              "audio": "tu2"
+              "audio": "tu2",
+              "words": [
+                "徒弟",
+                "师徒",
+                "徒步"
+              ]
             },
             {
               "character": "吊",
               "pinyin": "diào",
-              "audio": "diao4"
+              "audio": "diao4",
+              "words": [
+                "吊车",
+                "吊灯",
+                "吊起"
+              ]
             },
             {
               "character": "磕",
               "pinyin": "kē",
-              "audio": "ke1"
+              "audio": "ke1",
+              "words": [
+                "磕头",
+                "磕碰"
+              ]
             },
             {
               "character": "凿",
               "pinyin": "záo",
-              "audio": "zao2"
+              "audio": "zao2",
+              "words": [
+                "开凿",
+                "凿井",
+                "凿子"
+              ]
             },
             {
               "character": "溉",
               "pinyin": "gài",
-              "audio": "gai4"
+              "audio": "gai4",
+              "words": [
+                "灌溉"
+              ]
             }
           ],
           "write": [
             {
               "character": "豹",
               "pinyin": "bào",
-              "audio": "bao4"
+              "audio": "bao4",
+              "words": [
+                "豹子",
+                "猎豹",
+                "西门豹"
+              ]
             },
             {
               "character": "派",
               "pinyin": "pài",
-              "audio": "pai4"
+              "audio": "pai4",
+              "words": [
+                "派人",
+                "派出",
+                "指派"
+              ]
             },
             {
               "character": "娶",
               "pinyin": "qǔ",
-              "audio": "qu3"
+              "audio": "qu3",
+              "words": [
+                "娶妻",
+                "迎娶"
+              ]
             },
             {
               "character": "媳",
               "pinyin": "xí",
-              "audio": "xi2"
+              "audio": "xi2",
+              "words": [
+                "媳妇",
+                "儿媳"
+              ]
             },
             {
               "character": "妇",
               "pinyin": "fù",
-              "audio": "fu4"
+              "audio": "fu4",
+              "words": [
+                "妇女",
+                "媳妇",
+                "夫妇"
+              ]
             },
             {
               "character": "淹",
               "pinyin": "yān",
-              "audio": "yan1"
+              "audio": "yan1",
+              "words": [
+                "淹没",
+                "淹水"
+              ]
             },
             {
               "character": "逼",
               "pinyin": "bī",
-              "audio": "bi1"
+              "audio": "bi1",
+              "words": [
+                "逼迫",
+                "逼近",
+                "威逼"
+              ]
             },
             {
               "character": "浮",
               "pinyin": "fú",
-              "audio": "fu2"
+              "audio": "fu2",
+              "words": [
+                "漂浮",
+                "浮现",
+                "浮力"
+              ]
             },
             {
               "character": "旱",
               "pinyin": "hàn",
-              "audio": "han4"
+              "audio": "han4",
+              "words": [
+                "干旱",
+                "旱灾",
+                "旱地"
+              ]
             },
             {
               "character": "徒",
               "pinyin": "tú",
-              "audio": "tu2"
+              "audio": "tu2",
+              "words": [
+                "徒弟",
+                "师徒",
+                "徒步"
+              ]
             },
             {
               "character": "扔",
               "pinyin": "rēng",
-              "audio": "reng1"
+              "audio": "reng1",
+              "words": [
+                "扔掉",
+                "扔下"
+              ]
             },
             {
               "character": "饶",
               "pinyin": "ráo",
-              "audio": "rao2"
+              "audio": "rao2",
+              "words": [
+                "饶命",
+                "求饶",
+                "富饶"
+              ]
             },
             {
               "character": "骗",
               "pinyin": "piàn",
-              "audio": "pian4"
+              "audio": "pian4",
+              "words": [
+                "欺骗",
+                "骗人",
+                "受骗"
+              ]
             },
             {
               "character": "灌",
               "pinyin": "guàn",
-              "audio": "guan4"
+              "audio": "guan4",
+              "words": [
+                "灌溉",
+                "灌水",
+                "灌木"
+              ]
             },
             {
               "character": "溉",
               "pinyin": "gài",
-              "audio": "gai4"
+              "audio": "gai4",
+              "words": [
+                "灌溉"
+              ]
             }
           ]
         },
@@ -2864,44 +5222,80 @@
             {
               "character": "拜",
               "pinyin": "bài",
-              "audio": "bai4"
+              "audio": "bai4",
+              "words": [
+                "拜见",
+                "拜师",
+                "拜年"
+              ]
             },
             {
               "character": "侯",
               "pinyin": "hóu",
-              "audio": "hou2"
+              "audio": "hou2",
+              "words": [
+                "王侯",
+                "诸侯"
+              ]
             },
             {
               "character": "肤",
               "pinyin": "fū",
-              "audio": "fu1"
+              "audio": "fu1",
+              "words": [
+                "皮肤",
+                "肤色"
+              ]
             },
             {
               "character": "扎",
               "pinyin": "zhā",
               "audio": "zha1",
-              "counted": false
+              "counted": false,
+              "words": [
+                "扎针",
+                "扎根",
+                "扎实"
+              ]
             },
             {
               "character": "剂",
               "pinyin": "jì",
-              "audio": "ji4"
+              "audio": "ji4",
+              "words": [
+                "药剂",
+                "剂量"
+              ]
             },
             {
               "character": "髓",
               "pinyin": "suǐ",
-              "audio": "sui3"
+              "audio": "sui3",
+              "words": [
+                "骨髓",
+                "精髓"
+              ]
             },
             {
               "character": "纪",
               "pinyin": "jǐ",
               "audio": "ji3",
-              "counted": false
+              "counted": false,
+              "words": [
+                "世纪",
+                "纪律",
+                "纪念"
+              ]
             },
             {
               "character": "标",
               "pinyin": "biāo",
-              "audio": "biao1"
+              "audio": "biao1",
+              "words": [
+                "目标",
+                "标志",
+                "标点"
+              ]
             }
           ],
           "write": []
@@ -2914,62 +5308,117 @@
             {
               "character": "纲",
               "pinyin": "gāng",
-              "audio": "gang1"
+              "audio": "gang1",
+              "words": [
+                "提纲",
+                "纲要"
+              ]
             },
             {
               "character": "授",
               "pinyin": "shòu",
-              "audio": "shou4"
+              "audio": "shou4",
+              "words": [
+                "传授",
+                "教授",
+                "授课"
+              ]
             },
             {
               "character": "揍",
               "pinyin": "zòu",
-              "audio": "zou4"
+              "audio": "zou4",
+              "words": [
+                "挨揍",
+                "揍人"
+              ]
             },
             {
               "character": "键",
               "pinyin": "jiàn",
-              "audio": "jian4"
+              "audio": "jian4",
+              "words": [
+                "键盘",
+                "关键",
+                "按键"
+              ]
             },
             {
               "character": "谱",
               "pinyin": "pǔ",
-              "audio": "pu3"
+              "audio": "pu3",
+              "words": [
+                "乐谱",
+                "谱写",
+                "曲谱"
+              ]
             },
             {
               "character": "锈",
               "pinyin": "xiù",
-              "audio": "xiu4"
+              "audio": "xiu4",
+              "words": [
+                "生锈",
+                "铁锈",
+                "锈迹"
+              ]
             },
             {
               "character": "沫",
               "pinyin": "mò",
-              "audio": "mo4"
+              "audio": "mo4",
+              "words": [
+                "泡沫",
+                "唾沫",
+                "白沫"
+              ]
             },
             {
               "character": "砖",
               "pinyin": "zhuān",
-              "audio": "zhuan1"
+              "audio": "zhuan1",
+              "words": [
+                "砖头",
+                "砖块",
+                "红砖"
+              ]
             },
             {
               "character": "矿",
               "pinyin": "kuàng",
-              "audio": "kuang4"
+              "audio": "kuang4",
+              "words": [
+                "矿石",
+                "矿山",
+                "煤矿"
+              ]
             },
             {
               "character": "综",
               "pinyin": "zōng",
-              "audio": "zong1"
+              "audio": "zong1",
+              "words": [
+                "综合",
+                "综述"
+              ]
             },
             {
               "character": "氧",
               "pinyin": "yǎng",
-              "audio": "yang3"
+              "audio": "yang3",
+              "words": [
+                "氧气",
+                "吸氧"
+              ]
             },
             {
               "character": "俱",
               "pinyin": "jù",
-              "audio": "ju4"
+              "audio": "ju4",
+              "words": [
+                "俱全",
+                "面面俱到"
+              ]
             }
           ],
           "write": []

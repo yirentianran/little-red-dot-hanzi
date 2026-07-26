@@ -138,6 +138,22 @@
     return Object.freeze(geometry);
   }
 
+  function copyWords(value, character, path) {
+    if (!Array.isArray(value) || value.length < 1 || value.length > 3) {
+      reject(path, 'must be an array with 1 to 3 words');
+    }
+    var copy = [];
+    for (var index = 0; index < value.length; index += 1) {
+      var word = requireOwnArrayElement(value, index, path);
+      requireNonBlankString(word, path + '[' + index + ']');
+      if (word.indexOf(character) === -1) {
+        reject(path + '[' + index + ']', 'must include ' + character);
+      }
+      copy.push(word);
+    }
+    return Object.freeze(copy);
+  }
+
   function copyEntry(entry, path) {
     requireRecord(entry, path);
     var character = requireOwn(entry, 'character', path);
@@ -146,12 +162,13 @@
     if (!isSingleCodePoint(character)) reject(path + '.character', 'must be one code point');
     requireNonBlankString(pinyin, path + '.pinyin');
     requireNonBlankString(audio, path + '.audio');
+    var words = copyWords(requireOwn(entry, 'words', path), character, path + '.words');
     var hasCounted = Object.hasOwn(entry, 'counted');
     if (hasCounted && entry.counted !== false) {
       reject(path + '.counted', 'must equal false when present');
     }
 
-    var copy = { character: character, pinyin: pinyin, audio: audio };
+    var copy = { character: character, pinyin: pinyin, audio: audio, words: words };
     if (hasCounted) copy.counted = false;
     return Object.freeze(copy);
   }

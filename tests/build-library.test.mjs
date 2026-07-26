@@ -39,8 +39,12 @@ const curriculum = {
       id: 'lesson-1',
       number: 1,
       title: '示例',
-      recognize: [{ character: '郭', pinyin: 'guō', audio: 'guo1' }],
-      write: []
+      recognize: [
+        { character: '郭', pinyin: 'guō', audio: 'guo1', words: ['城郭', '郭外'] }
+      ],
+      write: [
+        { character: '郭', pinyin: 'guō', audio: 'guo1', words: ['城郭', '郭外'] }
+      ]
     }]
   }]
 };
@@ -155,6 +159,51 @@ test('rejects malformed source documents and missing cross-references with sourc
     [{ ...curriculum, units: [{ ...curriculum.units[0], lessons: [{ kind: 'lesson', id: 'lesson-1', number: 1, title: '示例' }] }] }, characterDocument, audioManifest, /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.recognize/i],
     [{ ...curriculum, units: [{ ...curriculum.units[0], lessons: [{ ...curriculum.units[0].lessons[0], recognize: [{}] }] }] }, characterDocument, audioManifest, /data\/curriculum\.json.*recognize\[0\]\.character/i],
     [{ ...curriculum, units: [{ ...curriculum.units[0], lessons: [{ ...curriculum.units[0].lessons[0], recognize: [{ character: '郭', pinyin: 'guo1', audio: 'guo1' }] }] }] }, characterDocument, audioManifest, /data\/curriculum\.json.*recognize\[0\]\.pinyin.*tone-marked/i],
+    [
+      {
+        ...curriculum,
+        units: [{
+          ...curriculum.units[0],
+          lessons: [{
+            ...curriculum.units[0].lessons[0],
+            recognize: [{ character: '郭', pinyin: 'guō', audio: 'guo1' }]
+          }]
+        }]
+      },
+      characterDocument,
+      audioManifest,
+      /data\/curriculum\.json.*recognize\[0\]\.words.*own property/i
+    ],
+    [
+      {
+        ...curriculum,
+        units: [{
+          ...curriculum.units[0],
+          lessons: [{
+            ...curriculum.units[0].lessons[0],
+            write: [{ character: '郭', pinyin: 'guō', audio: 'guo1', words: ['城郭', '郭外', '郭家', '郭城'] }]
+          }]
+        }]
+      },
+      characterDocument,
+      audioManifest,
+      /data\/curriculum\.json.*write\[0\]\.words.*1 to 3/i
+    ],
+    [
+      {
+        ...curriculum,
+        units: [{
+          ...curriculum.units[0],
+          lessons: [{
+            ...curriculum.units[0].lessons[0],
+            write: [{ character: '郭', pinyin: 'guō', audio: 'guo1', words: ['城墙'] }]
+          }]
+        }]
+      },
+      characterDocument,
+      audioManifest,
+      /data\/curriculum\.json.*write\[0\]\.words\[0\].*include 郭/i
+    ],
     [curriculum, null, audioManifest, /data\/characters\.json.*object/i],
     [curriculum, { ...characterDocument, schemaVersion: 2 }, audioManifest, /data\/characters\.json\.schemaVersion.*1/i],
     [curriculum, { ...characterDocument, modificationNotice: { ...geometryNotice, changes: [] } }, audioManifest, /data\/characters\.json\.modificationNotice\.changes/i],
@@ -204,9 +253,7 @@ test('rejects unknown fields at every source schema layer with the complete fiel
       candidate.units[0].lessons[0].recognize[0].extraField = true;
     }],
     ['data/curriculum.json.units[0].lessons[0].write[0].extraField', ({ curriculum: candidate }) => {
-      candidate.units[0].lessons[0].write.push({
-        character: '郭', pinyin: 'guō', audio: 'guo1', extraField: true
-      });
+      candidate.units[0].lessons[0].write[0].extraField = true;
     }],
     ['data/characters.json.extraField', ({ characters: candidate }) => { candidate.extraField = true; }],
     ['data/characters.json.modificationNotice.extraField', ({ characters: candidate }) => {
@@ -266,9 +313,7 @@ test('enforces section number and counted-field rules by classification', () => 
   );
 
   const countedWrite = structuredClone(curriculum);
-  countedWrite.units[0].lessons[0].write.push({
-    character: '郭', pinyin: 'guō', audio: 'guo1', counted: false
-  });
+  countedWrite.units[0].lessons[0].write[0].counted = false;
   assert.throws(
     () => buildRuntimeSource(countedWrite, characterDocument, audioManifest),
     /data\/curriculum\.json\.units\[0\]\.lessons\[0\]\.write\[0\]\.counted.*unknown field/i
@@ -375,7 +420,7 @@ test('accepts standard tone marks for u and u-diaeresis finals', () => {
 test('sorts character and audio keys deterministically without mutating inputs or lesson order', () => {
   const expandedCurriculum = structuredClone(curriculum);
   expandedCurriculum.units[0].lessons[0].recognize.push({
-    character: '外', pinyin: 'wài', audio: 'wai4'
+    character: '外', pinyin: 'wài', audio: 'wai4', words: ['外面', '户外']
   });
   const outsideGeometry = {
     strokeCount: 1,
@@ -458,12 +503,12 @@ test('runBuild reads one repository root and atomically publishes a complete bun
   assert.deepEqual(result.counts, {
     units: 1,
     sections: 1,
-    entries: 1,
+    entries: 2,
     characters: 1,
     strokes: 1,
     audioReadings: 1
   });
-  assert.match(messages.join('\n'), /1 unit.*1 section.*1 entr.*1 character.*1 stroke.*1 audio/i);
+  assert.match(messages.join('\n'), /1 unit.*1 section.*2 entr.*1 character.*1 stroke.*1 audio/i);
   assert.match(messages.join('\n'), new RegExp(`${result.bytes} bytes`, 'i'));
   assert.match(messages.join('\n'), new RegExp(result.sha256));
   assert.ok(publishedCandidate);

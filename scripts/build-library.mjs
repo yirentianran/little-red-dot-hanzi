@@ -62,6 +62,11 @@ function requireNonBlankString(value, location) {
   if (!isNonBlankString(value)) reject(location, 'must be a non-blank string');
 }
 
+function requireOwn(record, field, location) {
+  if (!Object.hasOwn(record, field)) reject(`${location}.${field}`, 'must be an own property');
+  return record[field];
+}
+
 function requireHttpsUrl(value, location) {
   requireNonBlankString(value, location);
   let parsed;
@@ -73,6 +78,17 @@ function requireHttpsUrl(value, location) {
   if (parsed.protocol !== 'https:' || !parsed.hostname || parsed.username || parsed.password) {
     reject(location, 'must be a valid HTTPS URL without credentials');
   }
+}
+
+function requireWords(value, character, location) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 3) {
+    reject(location, 'must be an array with 1 to 3 words');
+  }
+  value.forEach((word, index) => {
+    const wordLocation = `${location}[${index}]`;
+    requireNonBlankString(word, wordLocation);
+    if (!word.includes(character)) reject(wordLocation, `must include ${character}`);
+  });
 }
 
 function isSafeRelativePath(value) {
@@ -148,8 +164,8 @@ function validateCurriculum(curriculum) {
           requireExactKeys(
             entry,
             group === 'recognize'
-              ? ['character', 'pinyin', 'audio', 'counted']
-              : ['character', 'pinyin', 'audio'],
+              ? ['character', 'pinyin', 'audio', 'words', 'counted']
+              : ['character', 'pinyin', 'audio', 'words'],
             entryLocation
           );
           if (typeof entry.character !== 'string' || Array.from(entry.character).length !== 1) {
@@ -165,6 +181,7 @@ function validateCurriculum(curriculum) {
           if (typeof entry.audio !== 'string' || !/^[a-z]+[1-5]$/.test(entry.audio)) {
             reject(`${entryLocation}.audio`, 'must be a numbered lowercase reading id');
           }
+          requireWords(requireOwn(entry, 'words', entryLocation), entry.character, `${entryLocation}.words`);
           if (Object.hasOwn(entry, 'counted') && entry.counted !== false) {
             reject(`${entryLocation}.counted`, 'must equal false when present');
           }

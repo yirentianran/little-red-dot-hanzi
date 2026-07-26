@@ -52,13 +52,13 @@ function fixtureLibrary() {
               number: 1,
               title: '示例课文',
               recognize: [
-                { character: '重', pinyin: 'zhòng', audio: 'zhong4' },
-                { character: '薄', pinyin: 'bó', audio: 'bo2', counted: false }
+                { character: '重', pinyin: 'zhòng', audio: 'zhong4', words: ['重量'] },
+                { character: '薄', pinyin: 'bó', audio: 'bo2', words: ['薄片'], counted: false }
               ],
               write: [
-                { character: '郭', pinyin: 'guō', audio: 'guo1' },
-                { character: '潮', pinyin: 'cháo', audio: 'chao2' },
-                { character: '重', pinyin: 'chóng', audio: 'chong2' }
+                { character: '郭', pinyin: 'guō', audio: 'guo1', words: ['城郭', '郭外'] },
+                { character: '潮', pinyin: 'cháo', audio: 'chao2', words: ['潮水', '浪潮', '涨潮'] },
+                { character: '重', pinyin: 'chóng', audio: 'chong2', words: ['重复'] }
               ]
             },
             {
@@ -66,7 +66,7 @@ function fixtureLibrary() {
               id: 'lesson-3',
               number: 3,
               title: '现代诗二首',
-              recognize: [{ character: '巢', pinyin: 'cháo', audio: 'chao2' }],
+              recognize: [{ character: '巢', pinyin: 'cháo', audio: 'chao2', words: ['鸟巢'] }],
               write: []
             }
           ]
@@ -79,7 +79,7 @@ function fixtureLibrary() {
               kind: 'garden',
               id: 'garden-2',
               title: '语文园地二',
-              recognize: [{ character: '驻', pinyin: 'zhù', audio: 'zhu4' }],
+              recognize: [{ character: '驻', pinyin: 'zhù', audio: 'zhu4', words: ['驻守'] }],
               write: []
             }
           ]
@@ -163,17 +163,20 @@ test('builds cached frozen directory and section view models with distinct count
 test('copies and freezes small entries without changing the input library', () => {
   const library = fixtureLibrary();
   const before = structuredClone(library);
-  const inputEntry = library.curriculum.units[0].lessons[0].recognize[0];
+  const inputEntry = library.curriculum.units[0].lessons[0].write[1];
   const store = createDataStore(library);
-  const entries = store.getEntries('lesson-1', 'recognize');
+  const entries = store.getEntries('lesson-1', 'write');
 
-  assert.notEqual(entries, library.curriculum.units[0].lessons[0].recognize);
-  assert.notEqual(entries[0], inputEntry);
-  assert.deepEqual(entries[0], inputEntry);
+  assert.notEqual(entries, library.curriculum.units[0].lessons[0].write);
+  assert.notEqual(entries[1], inputEntry);
+  assert.deepEqual(entries[1], inputEntry);
+  assert.deepEqual(entries[1].words, ['潮水', '浪潮', '涨潮']);
+  assert.ok(Object.isFrozen(entries[1].words));
+  assert.notEqual(entries[1].words, inputEntry.words);
   assert.ok(Object.isFrozen(entries));
-  assert.ok(Object.isFrozen(entries[0]));
+  assert.ok(Object.isFrozen(entries[1]));
   assert.throws(() => {
-    entries[0].pinyin = 'changed';
+    entries[1].pinyin = 'changed';
   }, TypeError);
   assert.deepEqual(library, before);
   assert.equal(store.getEntries('missing', 'write'), null);
@@ -297,7 +300,7 @@ test('validates runtime shape, duplicate ids, duplicate group characters, and ow
 
   const duplicateCharacter = fixtureLibrary();
   duplicateCharacter.curriculum.units[0].lessons[0].write.push({
-    character: '潮', pinyin: 'cháo', audio: 'chao2'
+    character: '潮', pinyin: 'cháo', audio: 'chao2', words: ['潮水']
   });
   assert.throws(() => createDataStore(duplicateCharacter), /write\[3\]\.character.*duplicate.*潮/i);
 
@@ -319,6 +322,18 @@ test('validates runtime shape, duplicate ids, duplicate group characters, and ow
     重: geometry(), 薄: geometry(), 潮: geometry(), 巢: geometry(), 驻: geometry()
   });
   assert.throws(() => createDataStore(inheritedGeometry), /write\[0\]\.character.*geometry.*郭/i);
+
+  const missingWords = fixtureLibrary();
+  delete missingWords.curriculum.units[0].lessons[0].write[1].words;
+  assert.throws(() => createDataStore(missingWords), /write\[1\]\.words.*own property/i);
+
+  const tooManyWords = fixtureLibrary();
+  tooManyWords.curriculum.units[0].lessons[0].write[1].words = ['潮水', '浪潮', '涨潮', '潮湿'];
+  assert.throws(() => createDataStore(tooManyWords), /write\[1\]\.words.*1 to 3/i);
+
+  const unrelatedWord = fixtureLibrary();
+  unrelatedWord.curriculum.units[0].lessons[0].write[1].words = ['浪花'];
+  assert.throws(() => createDataStore(unrelatedWord), /write\[1\]\.words\[0\].*include 潮/i);
 });
 
 test('strictly validates geometry own fields, lengths, paths, medians, and finite points', () => {
