@@ -15,6 +15,10 @@ function lessonHash(lessonId, group) {
   return `#/lesson?${new URLSearchParams({ lesson: lessonId, group })}`;
 }
 
+function characterHash(lessonId, group, character) {
+  return `#/character?${new URLSearchParams({ lesson: lessonId, group, character })}`;
+}
+
 function withHash(indexUrl, hash) {
   const url = new URL(indexUrl);
   url.hash = hash;
@@ -80,6 +84,29 @@ async function drawMedian(page, character, strokeIndex, options) {
   await drawPoints(page, await mappedMedian(page, character, strokeIndex, options));
 }
 
+async function drawTouchMedian(client, page, character, strokeIndex) {
+  const points = await mappedMedian(page, character, strokeIndex);
+  const touchPoint = (point) => ({
+    x: point.x,
+    y: point.y,
+    id: 1,
+    radiusX: 4,
+    radiusY: 4,
+    force: 0.5
+  });
+  await client.send('Input.dispatchTouchEvent', {
+    type: 'touchStart',
+    touchPoints: [touchPoint(points[0])]
+  });
+  for (const point of points.slice(1)) {
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [touchPoint(point)]
+    });
+  }
+  await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+}
+
 async function waitForStroke(page, current, total) {
   await page.locator('[data-slot="practice-stroke-position"]')
     .filter({ hasText: `第 ${current} / ${total} 笔` }).waitFor();
@@ -94,6 +121,16 @@ async function drawCharacter(page, character, { jitterStroke = -1 } = {}) {
     if (index + 1 < strokeCount) await waitForStroke(page, index + 2, strokeCount);
   }
   return strokeCount;
+}
+
+async function drawTouchCharacter(client, page, character) {
+  const strokeCount = await page.evaluate((hanzi) => (
+    window.HANZI_LIBRARY.characters[hanzi].strokeCount
+  ), character);
+  for (let index = 0; index < strokeCount; index += 1) {
+    await drawTouchMedian(client, page, character, index);
+    if (index + 1 < strokeCount) await waitForStroke(page, index + 2, strokeCount);
+  }
 }
 
 async function restartPractice(page) {
@@ -113,14 +150,14 @@ async function expectRejected(page, character, strokeIndex, options) {
   assert.equal(await page.locator('[data-slot="practice-stroke-position"]').textContent(), before);
 }
 
-async function seedRecognizeTail(page) {
+function recognizeTailState() {
   const completed = LESSON_ONE_RECOGNIZE.slice(2);
   const characters = Object.fromEntries(completed.map((character) => [character, {
     attemptCount: 1,
     lastOutcome: 'mastered',
     mastered: true
   }]));
-  const state = {
+  return {
     schemaVersion: 2,
     characters,
     groups: {
@@ -137,13 +174,80 @@ async function seedRecognizeTail(page) {
       }
     }
   };
-  await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), {
+}
+
+async function seedRecognizeTail(page) {
+  await page.addInitScript(({ key, value }) => {
+    if (localStorage.getItem(key) === null) localStorage.setItem(key, value);
+  }, {
     key: PRACTICE_STORAGE_KEY,
-    value: JSON.stringify(state)
+    value: JSON.stringify(recognizeTailState())
+  });
+}
+
+async function installDocumentListenerProbe(page) {
+  await page.addInitScript(() => {
+    const tracked = new Map();
+    const originalAdd = Document.prototype.addEventListener;
+    const originalRemove = Document.prototype.removeEventListener;
+    Document.prototype.addEventListener = function (type, callback, options) {
+      let listeners = tracked.get(type);
+      if (!listeners) tracked.set(type, listeners = new Set());
+      listeners.add(callback);
+      return originalAdd.call(this, type, callback, options);
+    };
+    Document.prototype.removeEventListener = function (type, callback, options) {
+      tracked.get(type)?.delete(callback);
+      return originalRemove.call(this, type, callback, options);
+    };
+    window.__documentListenerCount = () => [...tracked.values()]
+      .reduce((total, listeners) => total + listeners.size, 0);
   });
 }
 
 export async function registerBrowserTests({ test }) {
+  test('starts group and character practice from write and recognize views and returns to each origin', async ({
+    indexUrl,
+    openPage
+  }) => {
+    const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
+    const groupEntries = [
+      { group: 'write', character: '潮' },
+      { group: 'recognize', character: '盐' }
+    ];
+    for (const entry of groupEntries) {
+      const origin = lessonHash('lesson-1', entry.group);
+      await page.goto(withHash(indexUrl, origin));
+      await page.locator('[data-view="lesson"]').waitFor();
+      await page.locator('[data-action="start-group-practice"]').click();
+      await waitForPractice(page, entry.character, '引导描写');
+      assert.equal(new URL(page.url()).hash, practiceHash(
+        'lesson-1', entry.group, 'group', entry.character
+      ));
+      await page.locator('[data-action="practice-back"]').click();
+      await page.locator('[data-view="lesson"]').waitFor();
+      assert.equal(new URL(page.url()).hash, origin);
+    }
+
+    const characterEntries = [
+      { group: 'write', character: '潮' },
+      { group: 'recognize', character: '盐' }
+    ];
+    for (const entry of characterEntries) {
+      const origin = characterHash('lesson-1', entry.group, entry.character);
+      await page.goto(withHash(indexUrl, origin));
+      await page.locator('[data-view="character"]').waitFor();
+      await page.locator('[data-action="start-character-practice"]').click();
+      await waitForPractice(page, entry.character, '引导描写');
+      assert.equal(new URL(page.url()).hash, practiceHash(
+        'lesson-1', entry.group, 'single', entry.character
+      ));
+      await page.locator('[data-action="practice-back"]').click();
+      await page.locator('[data-view="character"]').waitFor();
+      assert.equal(new URL(page.url()).hash, origin);
+    }
+  });
+
   test('practices a 16-stroke recognize character through guided and independent rounds', async ({
     indexUrl,
     openPage
@@ -212,6 +316,31 @@ export async function registerBrowserTests({ test }) {
       .filter({ hasText: '请看当前笔的提示' }).waitFor();
   });
 
+  test('retries an actual failed independent round and then masters the character', async ({
+    indexUrl,
+    openPage
+  }) => {
+    const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
+    await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
+    await waitForPractice(page, '丈', '引导描写');
+    await drawCharacter(page, '丈');
+    await waitForPractice(page, '丈', '独立描写');
+    await expectRejected(page, '丈', 0, { offsetY: 150 });
+    await drawCharacter(page, '丈');
+    await page.locator('.practice-retry-result').waitFor();
+    await page.locator('[data-action="practice-retry"]').click();
+    await waitForPractice(page, '丈', '独立描写');
+    await waitForStroke(page, 1, 3);
+    await drawCharacter(page, '丈');
+    await page.locator('.practice-complete-result').waitFor();
+    const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), PRACTICE_STORAGE_KEY);
+    assert.deepEqual(saved.characters['丈'], {
+      attemptCount: 2,
+      lastOutcome: 'mastered',
+      mastered: true
+    });
+  });
+
   test('defers a failed group character and reviews only the needs-practice subset', async ({
     indexUrl,
     openPage
@@ -254,23 +383,7 @@ export async function registerBrowserTests({ test }) {
     openPage
   }) => {
     const page = await openPage({ viewport: { width: 1180, height: 900 } });
-    await page.addInitScript(() => {
-      const tracked = new Map();
-      const originalAdd = Document.prototype.addEventListener;
-      const originalRemove = Document.prototype.removeEventListener;
-      Document.prototype.addEventListener = function (type, callback, options) {
-        let listeners = tracked.get(type);
-        if (!listeners) tracked.set(type, listeners = new Set());
-        listeners.add(callback);
-        return originalAdd.call(this, type, callback, options);
-      };
-      Document.prototype.removeEventListener = function (type, callback, options) {
-        tracked.get(type)?.delete(callback);
-        return originalRemove.call(this, type, callback, options);
-      };
-      window.__documentListenerCount = () => [...tracked.values()]
-        .reduce((total, listeners) => total + listeners.size, 0);
-    });
+    await installDocumentListenerProbe(page);
     await page.goto(withHash(indexUrl, lessonHash('lesson-1', 'recognize')));
     await page.locator('[data-view="lesson"]').waitFor();
     const baselineListeners = await page.evaluate(() => window.__documentListenerCount());
@@ -312,6 +425,79 @@ export async function registerBrowserTests({ test }) {
     assert.equal(await page.locator('.practice-writer-host').count(), 0);
     assert.equal(await page.locator('[data-slot="practice-board"] svg').count(), 0);
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), baselineListeners);
+  });
+
+  test('reloads an independent group round and keeps one writer through history and rapid routes', async ({
+    indexUrl,
+    openPage
+  }) => {
+    const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
+    await seedRecognizeTail(page);
+    await installDocumentListenerProbe(page);
+    const lessonUrl = withHash(indexUrl, lessonHash('lesson-1', 'recognize'));
+    await page.goto(lessonUrl);
+    await page.locator('[data-view="lesson"]').waitFor();
+    const baselineListeners = await page.evaluate(() => window.__documentListenerCount());
+    await page.locator('[data-action="start-group-practice"]').click();
+    await waitForPractice(page, '盐', '引导描写');
+    await drawCharacter(page, '盐');
+    await waitForPractice(page, '盐', '独立描写');
+    await waitForStroke(page, 1, 10);
+    const activeListeners = await page.evaluate(() => window.__documentListenerCount());
+    assert.ok(activeListeners > baselineListeners);
+
+    await page.reload({ waitUntil: 'load' });
+    await waitForPractice(page, '盐', '独立描写');
+    await waitForStroke(page, 1, 10);
+    assert.equal(await page.locator('.practice-writer-host').count(), 1);
+    assert.equal(await page.locator('.practice-overlay').count(), 1);
+    assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
+
+    await page.goBack();
+    await page.locator('[data-view="lesson"]').waitFor();
+    assert.equal(await page.locator('.practice-writer-host').count(), 0);
+    assert.equal(await page.evaluate(() => window.__documentListenerCount()), baselineListeners);
+    await page.goForward();
+    await waitForPractice(page, '盐', '独立描写');
+    assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
+    await page.locator('.practice-writer-host').evaluate((host) => { window.__historyWriterHost = host; });
+
+    const finalHash = practiceHash('lesson-1', 'recognize', 'single', '薄');
+    await page.evaluate(({ middle, final }) => {
+      window.location.hash = middle;
+      window.location.hash = '#/';
+      window.location.hash = final;
+    }, { middle: lessonHash('lesson-22', 'write'), final: finalHash });
+    await waitForPractice(page, '薄', '引导描写');
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    assert.equal(new URL(page.url()).hash, finalHash);
+    assert.equal(await page.evaluate(() => window.__historyWriterHost.isConnected), false);
+    assert.equal(await page.locator('.practice-writer-host').count(), 1);
+    assert.equal(await page.locator('.practice-overlay').count(), 1);
+    assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
+  });
+
+  test('completes a short character with trusted Chromium touch input', async ({
+    indexUrl,
+    openPage
+  }) => {
+    const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
+    const client = await page.context().newCDPSession(page);
+    await client.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
+    await waitForPractice(page, '丈', '引导描写');
+    await page.evaluate(() => {
+      window.__practiceTouchTrusted = null;
+      document.addEventListener('touchstart', (event) => {
+        window.__practiceTouchTrusted = event.isTrusted;
+      }, { capture: true, once: true });
+    });
+    await drawTouchCharacter(client, page, '丈');
+    await waitForPractice(page, '丈', '独立描写');
+    await drawTouchCharacter(client, page, '丈');
+    await page.locator('.practice-complete-result').waitFor();
+    assert.equal(await page.evaluate(() => window.__practiceTouchTrusted), true);
+    await client.detach();
   });
 
   test('matches representative real strokes without accepting reverse short or wrong-order input', async ({
