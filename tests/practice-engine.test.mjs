@@ -22,6 +22,7 @@ class FakeElement {
   setAttributeNS(_namespace, name, value) { this.attributes.set(name, String(value)); }
   setAttribute(name, value) { this.attributes.set(name, String(value)); }
   getAttribute(name) { return this.attributes.get(name) ?? null; }
+  removeAttribute(name) { this.attributes.delete(name); }
   appendChild(child) { child.parentNode = this; this.children.push(child); return child; }
   removeChild(child) { this.children.splice(this.children.indexOf(child), 1); child.parentNode = null; }
   remove() { if (this.parentNode) this.parentNode.removeChild(this); }
@@ -165,6 +166,12 @@ async function flushMicrotasks(turns = 12) {
   for (let index = 0; index < turns; index += 1) await Promise.resolve();
 }
 
+function deferred() {
+  let resolve;
+  const promise = new Promise((settle) => { resolve = settle; });
+  return { promise, resolve };
+}
+
 function dot(target) { return target.queryByClass('practice-start-dot')[0]; }
 function errorPath(target) { return target.queryByClass('practice-error-path')[0]; }
 function validStrokeData(overrides = {}) {
@@ -287,6 +294,65 @@ test('serialized promise activation leaves only the latest quiz installed', asyn
   assert.equal(calls.installedQuiz, calls.quiz[0]);
   assert.equal(calls.installedQuiz.quizStartStrokeNum, 1);
   assert.deepEqual(calls.outline.at(-1), ['hide', { duration: 0 }]);
+});
+
+test('exposes public busy state until the owned quiz activation fulfills', async () => {
+  const { engine, target } = createHarness({ deferredOperations: true });
+  engine.start({ phase: 'guided', strokeIndex: 0 });
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+  await flushMicrotasks();
+  assert.equal(target.getAttribute('aria-busy'), 'false');
+});
+
+test('stale activation cannot clear busy state for a replacement quiz', async () => {
+  const firstOutline = deferred();
+  const secondOutline = deferred();
+  const firstQuiz = deferred();
+  const secondQuiz = deferred();
+  let outlineCalls = 0;
+  let quizCalls = 0;
+  const { engine, target } = createHarness({
+    writer: {
+      showOutline() {
+        outlineCalls += 1;
+        return outlineCalls === 1 ? firstOutline.promise : secondOutline.promise;
+      },
+      quiz() {
+        quizCalls += 1;
+        return quizCalls === 1 ? firstQuiz.promise : secondQuiz.promise;
+      }
+    }
+  });
+  engine.start({ phase: 'guided', strokeIndex: 0 });
+  firstOutline.resolve();
+  await flushMicrotasks();
+  assert.equal(quizCalls, 1);
+  engine.restart();
+  firstQuiz.resolve();
+  await flushMicrotasks();
+  assert.equal(outlineCalls, 2);
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+  secondOutline.resolve();
+  await flushMicrotasks();
+  assert.equal(quizCalls, 2);
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+  secondQuiz.resolve();
+  await flushMicrotasks();
+  assert.equal(target.getAttribute('aria-busy'), 'false');
+});
+
+test('destroy removes busy state and stale activation cannot restore it', async () => {
+  const outline = deferred();
+  const { engine, target } = createHarness({
+    writer: { showOutline() { return outline.promise; } }
+  });
+  engine.start({ phase: 'guided', strokeIndex: 0 });
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+  engine.destroy();
+  assert.equal(target.getAttribute('aria-busy'), null);
+  outline.resolve();
+  await flushMicrotasks();
+  assert.equal(target.getAttribute('aria-busy'), null);
 });
 
 test('rejected public activation promises are contained and do not start quiz', async () => {
@@ -449,9 +515,12 @@ test('resize updates the writer, overlay, and public transform without recreatio
 
 test('second pointer and abnormal primary termination restart the same stroke without events', () => {
   const { calls, engine, events, target } = createHarness();
+  const writerSvg = target.children[0].children[0];
   engine.start({ phase: 'independent', strokeIndex: 1 });
   target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
   target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+  assert.equal(calls.cancelQuiz, 0);
+  target.dispatch('pointerleave', { pointerId: 4, target: writerSvg });
   assert.equal(calls.cancelQuiz, 0);
   target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
   assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);

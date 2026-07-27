@@ -450,6 +450,14 @@
       return !destroyed && active && revision === ownerRevision;
     }
 
+    function setActivationBusy(busy) {
+      setAttribute(target, 'aria-busy', busy ? 'true' : 'false');
+    }
+
+    function clearActivationBusy() {
+      if (typeof target.removeAttribute === 'function') target.removeAttribute('aria-busy');
+    }
+
     function safeCancelQuiz() {
       try {
         writer.cancelQuiz();
@@ -510,6 +518,7 @@
           }
           settleOperation(quizResult, function () {
             if (!ownsActivation(task.revision)) safeCancelQuiz();
+            else setActivationBusy(false);
             finishActivation();
           }, function () {
             safeCancelQuiz();
@@ -535,6 +544,7 @@
       active = false;
       clearError();
       updateDot();
+      clearActivationBusy();
     }
 
     function begin(nextPhase, nextStroke) {
@@ -548,6 +558,7 @@
       currentStroke = nextStroke;
       active = true;
       var ownerRevision = revision;
+      setActivationBusy(true);
       updateDot();
       var quizOptions = {
         quizStartStrokeNum: currentStroke,
@@ -660,12 +671,17 @@
       restartInterruptedStroke();
     }
 
+    function onPointerLeave(event) {
+      if (event.target && event.target !== target) return;
+      onPointerAborted(event);
+    }
+
     var listenerByType = {
       pointerdown: onPointerDown,
       pointerup: onPointerUp,
       pointercancel: onPointerAborted,
       lostpointercapture: onPointerAborted,
-      pointerleave: onPointerAborted
+      pointerleave: onPointerLeave
     };
 
     function installListeners() {
@@ -822,6 +838,7 @@
       removeNode(writerHost);
       writerHostInstalled = false;
       restorePosition();
+      clearActivationBusy();
     }
 
     return Object.freeze({
