@@ -8,6 +8,10 @@
 
 学习路径为：目录 -> 课文 -> “会写 / 会认” -> 单字。单字页会显示拼音；发音只在点击“听读音”后播放，不会自动播放。米字格内按规范笔顺显示汉字，红点沿当前笔画移动；可播放或暂停、上一笔、下一笔、重新播放，并选择慢速、适中或快速。
 
+课文字表中的“会写”和“会认”都可以选择“练习本组”，单字页可以选择“练习这个字”。未掌握的字先进行一遍引导描写，再进行一遍只显示起笔点的独立描写；独立描写零错误完成后标记为已掌握。练习支持鼠标、触屏和手写笔，笔画判断在本机完成。
+
+练习次数、最近结果、汉字掌握状态和课文分类进度仅保存在当前浏览器。浏览器禁止本地存储或写入失败时，描写仍可继续，但关闭页面后不保留本次进度。
+
 打开过单字后，目录页会显示“继续上次学习”。浏览器不允许本地存储时，其余学习功能仍可使用。
 
 ## 项目校验
@@ -44,3 +48,5 @@ npm run test:browser
 字库对应 2019 年审定的人教版语文四年级上册，共 8 个单元、31 节学习内容、521 条学习记录和 428 个唯一汉字。
 
 汉字几何提取自 `hanzi-writer-data` 2.0.1，依照 ARPHICPL 分发；来源、修改内容和许可说明见 [data/source-data-license.md](data/source-data-license.md) 与 [data/ARPHICPL.TXT](data/ARPHICPL.TXT)。普通话音频来自 `hugolpz/audio-cmn` 的 `64k/syllabs` 子集，来源与许可见 [assets/audio/THIRD_PARTY_NOTICES.md](assets/audio/THIRD_PARTY_NOTICES.md)。
+
+描写判断使用随项目本地分发的 Hanzi Writer 3.7.3，运行时不会从 CDN 或其他网络地址加载资源；其 MIT 许可见 [vendor/HANZI_WRITER_LICENSE.txt](vendor/HANZI_WRITER_LICENSE.txt)。

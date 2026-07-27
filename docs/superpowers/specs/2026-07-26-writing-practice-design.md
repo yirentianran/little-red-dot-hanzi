@@ -224,13 +224,13 @@ Hanzi Writer 在抬笔后判断，不在移动过程中中断书写。
 
 ## 8. 数据与持久化
 
-新增独立存储键 `hanzi-tracking:practice-progress:v1`，与现有最近学习位置分开。
+新增独立存储键 `hanzi-tracking:practice-progress:v2`，与现有最近学习位置分开。
 
 逻辑结构：
 
 ```json
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "characters": {
     "潮": {
       "attemptCount": 3,
@@ -241,8 +241,12 @@ Hanzi Writer 在抬笔后判断，不在移动过程中中断书写。
   "groups": {
     "lesson-1:write": {
       "completedCharacters": ["潮", "据"],
+      "roundCharacters": ["潮", "据", "堤", "阔"],
+      "roundCompletedCharacters": ["潮", "据"],
       "remainingCharacters": ["堤", "阔"],
       "needsPracticeCharacters": ["据"],
+      "roundInitialMasteredCharacters": ["潮"],
+      "roundNewlyMasteredCharacters": [],
       "currentCharacter": "堤",
       "currentPhase": "guided"
     }
@@ -263,12 +267,16 @@ Hanzi Writer 在抬笔后判断，不在移动过程中中断书写。
 
 - 以 `lessonId:group` 为键。
 - 单字练习完成后，同样把该字加入对应课文分类的 `completedCharacters`。
+- `completedCharacters` 是跨轮次累计完成记录；`roundCharacters` 及其他 `round*` 字段只描述当前一轮，筛选重练不会缩小累计记录。
+- `roundInitialMasteredCharacters` 固定记录开轮时已经掌握的字，`roundNewlyMasteredCharacters` 记录本轮新掌握的字，用于恢复后仍能准确汇总结果。
+- `remainingCharacters`、`needsPracticeCharacters`、`currentCharacter` 和 `currentPhase` 支持中断后恢复当前队列与阶段。
 - 完成记录表示该课文位置已经练过，不要求当前仍为全局已掌握。
 - 字表同时显示“已完成练习”和“当前掌握”两个不同统计。
 
 ### 8.3 写入与恢复
 
 - 只在一笔结束、阶段切换、汉字切换和退出时写入，不在指针移动过程中写入。
+- 独立描写结果与对应轮次进度通过一次事务写入，页面不会观察到只更新其中一层的中间状态。
 - 存储解析采用严格版本和字段校验。
 - 数据损坏或版本不支持时只重置练习进度键。
 - `localStorage` 不可用或写入失败时切换为内存状态，练习继续可用，并显示“本次进度不会保存”。
