@@ -384,15 +384,21 @@ function createHarness(options = {}) {
       return installView('practice', handle);
     },
     createPracticeEngine(engineOptions) {
+      log.push('practice-engine.create');
+      if (state.onPracticeEngineCreate) state.onPracticeEngineCreate(engineOptions);
+      if (options.throwPracticeEngineCreate) throw new Error('practice engine create failed');
       const engine = {
         options: engineOptions,
         starts: [],
         restartCalls: 0,
         hintCalls: 0,
+        resizeCalls: 0,
         destroyed: false,
         start(value) {
           this.starts.push(value);
           log.push('practice-engine.start=' + value.phase + ':' + value.strokeIndex);
+          if (state.onPracticeEngineStart) state.onPracticeEngineStart(this);
+          if (options.throwPracticeEngineStart) throw new Error('practice engine start failed');
         },
         restart() {
           this.restartCalls += 1;
@@ -403,6 +409,12 @@ function createHarness(options = {}) {
           this.hintCalls += 1;
           log.push('practice-engine.hint');
           if (state.onPracticeEngineHint) state.onPracticeEngineHint(this);
+        },
+        resize() {
+          this.resizeCalls += 1;
+          log.push('practice-engine.resize');
+          if (state.onPracticeEngineResize) state.onPracticeEngineResize(this);
+          if (options.throwPracticeEngineResize) throw new Error('resize failed');
         },
         emit(event) {
           engineOptions.onEvent(event);
@@ -607,6 +619,43 @@ test('starts group practice from both lesson groups and replaces hashes between 
   }
 });
 
+test('resumed group practice pushes its canonical current character after the lesson entry', () => {
+  const savedProgress = JSON.stringify({
+    schemaVersion: 1,
+    characters: {
+      郭: { attemptCount: 1, lastOutcome: 'mastered', mastered: true }
+    },
+    groups: {
+      'lesson-1:write': {
+        completedCharacters: ['郭'],
+        remainingCharacters: ['城'],
+        needsPracticeCharacters: [],
+        currentCharacter: '城',
+        currentPhase: 'guided'
+      }
+    }
+  });
+  const storage = createStorage({
+    [practiceProgressModule.PRACTICE_STORAGE_KEY]: savedProgress
+  });
+  const lessonHash = '#/lesson?lesson=lesson-1&group=write';
+  const harness = createHarness({ hash: lessonHash, storage });
+  const app = loadApp().createApp(harness.createOptions);
+  harness.state.log.length = 0;
+
+  harness.click('start-group-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'write'
+  });
+
+  assert.deepEqual(app.getRoute(), practiceRoute('城', 'write', 'group'));
+  assert.equal(harness.location.hash, practiceHash('城', 'write', 'group'));
+  assert.ok(harness.state.log.includes('location.hash=' + practiceHash('城', 'write', 'group')));
+  assert.equal(
+    harness.state.log.includes('location.replace=' + practiceHash('城', 'write', 'group')),
+    false
+  );
+});
+
 test('quiz events drive guided, independent, retry and exactly-once progress updates', () => {
   const harness = createHarness({ hash: practiceHash() });
   loadApp().createApp(harness.createOptions);
@@ -673,6 +722,126 @@ test('reentrant practice commands never write feedback into a replacement view',
   assert.equal(firstEngine.destroyed, true);
   assert.notEqual(currentHandle(harness), firstHandle);
   assert.equal(currentHandle(harness).feedback.length, 0);
+});
+
+test('window resize updates only the current practice engine without restarting its session', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const engine = harness.state.practiceEngines.at(-1);
+  const session = harness.state.practiceSessions.at(-1).session;
+  const engineCount = harness.state.practiceEngines.length;
+  const renderCount = harness.state.renderCounts.practice;
+
+  assert.equal(harness.windowObject.listenerCount('resize'), 1);
+  harness.windowObject.emit('resize');
+  assert.equal(engine.resizeCalls, 1);
+  assert.equal(harness.state.practiceEngines.length, engineCount);
+  assert.equal(harness.state.renderCounts.practice, renderCount);
+  assert.equal(app.debugControllers().practiceSession, session);
+
+  app.destroy();
+  assert.equal(harness.windowObject.listenerCount('resize'), 0);
+  harness.windowObject.emit('resize');
+  assert.equal(engine.resizeCalls, 1);
+});
+
+test('resize failures announce safely and reentrant resize cannot affect a replacement view', () => {
+  const failing = createHarness({ hash: practiceHash(), throwPracticeEngineResize: true });
+  loadApp().createApp(failing.createOptions);
+  failing.windowObject.emit('resize');
+  assert.equal(failing.announcer.textContent, '练习画板尺寸暂时无法更新');
+  assert.deepEqual(currentHandle(failing).feedback.at(-1), [
+    '练习画板尺寸暂时无法更新', 'error'
+  ]);
+
+  const reentrant = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(reentrant.createOptions);
+  const engine = reentrant.state.practiceEngines.at(-1);
+  reentrant.state.onPracticeEngineResize = () => {
+    reentrant.state.onPracticeEngineResize = null;
+    app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+  };
+  const announcements = reentrant.state.announcements.length;
+  reentrant.windowObject.emit('resize');
+  assert.equal(app.getRoute().view, 'lesson');
+  assert.equal(engine.destroyed, true);
+  assert.equal(reentrant.state.announcements.length, announcements);
+  assert.equal(reentrant.state.practiceEngines.length, 1);
+});
+
+test('practice engine constructor failure keeps a direct group practice route recoverable', () => {
+  const config = { hash: practiceHash(), throwPracticeEngineCreate: true };
+  const harness = createHarness(config);
+  let app;
+
+  assert.doesNotThrow(() => { app = loadApp().createApp(harness.createOptions); });
+  assert.deepEqual(app.getRoute(), practiceRoute());
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['这个字暂时无法练习', 'error']);
+  assert.equal(harness.announcer.textContent, '这个字暂时无法练习');
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.ok(app.debugControllers().practiceSession);
+  assert.equal(harness.root.listenerCount('click'), 1);
+  assert.equal(harness.windowObject.listenerCount('resize'), 1);
+
+  config.throwPracticeEngineCreate = false;
+  assert.equal(app.dispatch('practice-restart'), true);
+  assert.equal(harness.state.practiceEngines.length, 1);
+  assert.equal(app.debugControllers().practiceEngine, harness.state.practiceEngines[0]);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['已经重新开始', 'neutral']);
+
+  harness.click('practice-back');
+  assert.deepEqual(app.getRoute(), { view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+});
+
+test('practice engine start failure destroys its candidate and can retry without resetting session', () => {
+  const config = {
+    hash: practiceHash('字', 'recognize', 'single'),
+    throwPracticeEngineStart: true
+  };
+  const harness = createHarness(config);
+  let app;
+
+  assert.doesNotThrow(() => { app = loadApp().createApp(harness.createOptions); });
+  const failedEngine = harness.state.practiceEngines[0];
+  const session = app.debugControllers().practiceSession;
+  assert.equal(failedEngine.destroyed, true);
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['这个字暂时无法练习', 'error']);
+  assert.equal(harness.announcer.textContent, '这个字暂时无法练习');
+
+  config.throwPracticeEngineStart = false;
+  assert.equal(app.dispatch('practice-restart'), true);
+  const recoveredEngine = harness.state.practiceEngines.at(-1);
+  assert.notEqual(recoveredEngine, failedEngine);
+  assert.deepEqual(recoveredEngine.starts, [{ phase: 'guided', strokeIndex: 0 }]);
+  assert.equal(app.debugControllers().practiceSession, session);
+  assert.deepEqual(session.getState(), {
+    status: 'active', phase: 'guided', character: '字', index: 0, total: 1, mistakes: 0,
+    completedCharacters: [], remainingCharacters: ['字'], needsPracticeCharacters: []
+  });
+
+  harness.click('practice-back');
+  assert.deepEqual(app.getRoute(), characterRoute('字', 'recognize'));
+});
+
+test('reentrant practice engine start failure cannot degrade a replacement view', () => {
+  const config = { hash: practiceHash(), throwPracticeEngineCreate: true };
+  const harness = createHarness(config);
+  const app = loadApp().createApp(harness.createOptions);
+  const announcements = harness.state.announcements.length;
+
+  config.throwPracticeEngineCreate = false;
+  config.throwPracticeEngineStart = true;
+  harness.state.onPracticeEngineStart = () => {
+    harness.state.onPracticeEngineStart = null;
+    app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+  };
+
+  assert.equal(app.dispatch('practice-restart'), false);
+  assert.deepEqual(app.getRoute(), { view: 'lesson', lessonId: 'lesson-1', group: 'write' });
+  assert.equal(harness.state.practiceEngines.at(-1).destroyed, true);
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.equal(harness.state.announcements.length, announcements);
 });
 
 test('practice preserves the last learning route and returns to remembered or direct-url origins', () => {

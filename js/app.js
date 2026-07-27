@@ -460,7 +460,7 @@
       return Object.freeze(Object.assign({}, resolved, { scope: practiceContext.scope }));
     }
 
-    function syncPracticeCharacter(character) {
+    function syncPracticeCharacter(character, replaceLocation) {
       if (!route || route.view !== 'practice' || route.character === character) return;
       route = Object.freeze({
         view: 'practice',
@@ -470,7 +470,7 @@
         character: character
       });
       routeKey = api.serializeHash(route);
-      replaceHash(routeKey);
+      if (replaceLocation) replaceHash(routeKey);
     }
 
     function practiceStateWithMastery(state) {
@@ -488,6 +488,64 @@
         && owner.engine === practiceEngine
         && route
         && route.view === 'practice';
+    }
+
+    function ownsPracticeView(revision, session, handle) {
+      return ownsTransition(revision)
+        && practiceSession === session
+        && currentHandle === handle
+        && route
+        && route.view === 'practice';
+    }
+
+    function degradePracticeEngine(revision, session, handle) {
+      if (!ownsPracticeView(revision, session, handle)) return false;
+      try {
+        handle.setFeedback('这个字暂时无法练习', 'error');
+      } catch (ignored) {
+        // The announcement still exposes the recoverable engine failure.
+      }
+      if (!ownsPracticeView(revision, session, handle)) return false;
+      announce('这个字暂时无法练习');
+      return ownsPracticeView(revision, session, handle);
+    }
+
+    function startPracticeEngine(revision, state, resolved, handle, session) {
+      var owner = {
+        active: true,
+        revision: revision,
+        session: session,
+        engine: null
+      };
+      var candidate = null;
+      try {
+        candidate = api.createPracticeEngine({
+          target: handle.board,
+          HanziWriter: HanziWriter,
+          character: state.character,
+          geometry: resolved.geometry,
+          reducedMotion: reducedMotion,
+          onEvent: function (event) { handlePracticeEvent(owner, event); }
+        });
+        if (!ownsPracticeView(revision, session, handle)) {
+          owner.active = false;
+          destroyCandidate(candidate);
+          return 'stale';
+        }
+        owner.engine = candidate;
+        practiceEngineOwner = owner;
+        practiceEngine = candidate;
+        candidate.start({ phase: state.phase, strokeIndex: 0 });
+        return isCurrentPracticeOwner(owner) && currentHandle === handle ? 'started' : 'stale';
+      } catch (ignored) {
+        if (practiceEngine === candidate && practiceEngineOwner === owner) {
+          destroyPracticeEngine();
+        } else if (owner.active) {
+          owner.active = false;
+          destroyCandidate(candidate);
+        }
+        return degradePracticeEngine(revision, session, handle) ? 'degraded' : 'stale';
+      }
     }
 
     function handlePracticeEvent(owner, event) {
@@ -522,7 +580,7 @@
       renderCurrentPracticeState(owner.revision, true);
     }
 
-    function renderCurrentPracticeState(revision, syncHash) {
+    function renderCurrentPracticeState(revision, replaceCharacterHash) {
       if (!ownsTransition(revision) || !practiceSession || !practiceContext) return false;
       var ownedSession = practiceSession;
       var state = ownedSession.getState();
@@ -530,7 +588,7 @@
       var resolved = resolvedPractice(character);
       if (!resolved) return false;
       practiceContext.lastCharacter = character;
-      if (syncHash && state.character) syncPracticeCharacter(state.character);
+      if (state.character) syncPracticeCharacter(state.character, replaceCharacterHash);
 
       destroyPracticeEngine();
       viewEpoch += 1;
@@ -550,30 +608,7 @@
       announcePracticeStorageWarning();
 
       if (state.status !== 'active') return true;
-      var owner = {
-        active: true,
-        revision: revision,
-        session: ownedSession,
-        engine: null
-      };
-      var candidate = api.createPracticeEngine({
-        target: handle.board,
-        HanziWriter: HanziWriter,
-        character: state.character,
-        geometry: resolved.geometry,
-        reducedMotion: reducedMotion,
-        onEvent: function (event) { handlePracticeEvent(owner, event); }
-      });
-      if (!ownsTransition(revision) || practiceSession !== ownedSession || currentHandle !== handle) {
-        owner.active = false;
-        destroyCandidate(candidate);
-        return false;
-      }
-      owner.engine = candidate;
-      practiceEngineOwner = owner;
-      practiceEngine = candidate;
-      candidate.start({ phase: state.phase, strokeIndex: 0 });
-      return isCurrentPracticeOwner(owner);
+      return startPracticeEngine(revision, state, resolved, handle, ownedSession) !== 'stale';
     }
 
     function createPracticeSessionFor(entries, startCharacter, resume) {
@@ -612,7 +647,7 @@
         lastCharacter: info.route.character
       };
       createPracticeSessionFor(entries, info.route.character, true);
-      return renderCurrentPracticeState(revision, true);
+      return renderCurrentPracticeState(revision, false);
     }
 
     function degradeBoard(revision, session, handle) {
@@ -812,10 +847,8 @@
       var currentHash = safeLocationHash();
       if (!ownsTransition(result.revision)) return false;
       if (currentHash !== winningKey) {
-        var practiceCharacterAdjusted = info.route.view === 'practice' && winningKey !== info.key;
-        if (typeof candidate === 'string' || practiceCharacterAdjusted) {
-          replaceHash(winningKey);
-        } else assignHash(winningKey);
+        if (typeof candidate === 'string') replaceHash(winningKey);
+        else assignHash(winningKey);
       }
       return ownsTransition(result.revision) ? result.changed : false;
     }
@@ -990,7 +1023,35 @@
         }
       }
       if (action === 'practice-restart') {
-        if (!practiceEngine) return false;
+        if (!practiceEngine) {
+          var inactiveSession = practiceSession;
+          var inactiveHandle = currentHandle;
+          var inactiveState;
+          var inactiveResolved;
+          try {
+            inactiveState = inactiveSession.getState();
+            if (inactiveState.status !== 'active') return false;
+            inactiveResolved = resolvedPractice(inactiveState.character);
+          } catch (ignored) {
+            return false;
+          }
+          if (!inactiveResolved || !ownsPracticeView(
+            transitionRevision, inactiveSession, inactiveHandle
+          )) return false;
+          var startOutcome = startPracticeEngine(
+            transitionRevision, inactiveState, inactiveResolved, inactiveHandle, inactiveSession
+          );
+          if (startOutcome === 'stale') return false;
+          if (startOutcome === 'degraded') return true;
+          var recoveredOwner = practiceEngineOwner;
+          try {
+            if (!isCurrentPracticeOwner(recoveredOwner) || currentHandle !== inactiveHandle) return false;
+            inactiveHandle.setFeedback('已经重新开始', 'neutral');
+            return isCurrentPracticeOwner(recoveredOwner) && currentHandle === inactiveHandle;
+          } catch (ignored) {
+            return false;
+          }
+        }
         var restartEngine = practiceEngine;
         var restartOwner = practiceEngineOwner;
         var restartHandle = currentHandle;
@@ -1149,6 +1210,27 @@
       if (hash !== routeKey) replaceHash(routeKey);
     }
 
+    function handleResize() {
+      var owner = practiceEngineOwner;
+      var engine = practiceEngine;
+      var handle = currentHandle;
+      if (!owner || !engine || !isCurrentPracticeOwner(owner)) return;
+      try {
+        engine.resize();
+      } catch (ignored) {
+        if (!isCurrentPracticeOwner(owner) || currentHandle !== handle) return;
+        try {
+          handle.setFeedback('练习画板尺寸暂时无法更新', 'error');
+        } catch (feedbackError) {
+          // The global announcement still reports the recoverable resize failure.
+        }
+        if (!isCurrentPracticeOwner(owner) || currentHandle !== handle) return;
+        announce('练习画板尺寸暂时无法更新');
+        return;
+      }
+      if (!isCurrentPracticeOwner(owner) || currentHandle !== handle) return;
+    }
+
     function handleVisibilityChange() {
       if (!animation || destroyed) return;
       try {
@@ -1202,6 +1284,7 @@
     try {
       installListener(root, 'click', handleRootClick);
       installListener(windowObject, 'hashchange', handleHashChange);
+      installListener(windowObject, 'resize', handleResize);
       installListener(documentObject, 'visibilitychange', handleVisibilityChange);
     } catch (error) {
       removeInstalledListeners();
