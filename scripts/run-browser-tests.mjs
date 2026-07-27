@@ -13,7 +13,8 @@ const repoRoot = path.resolve(path.dirname(scriptPath), '..');
 const indexUrl = pathToFileURL(path.join(repoRoot, 'index.html')).href;
 const suitePaths = [
   path.join(repoRoot, 'tests/browser/app.spec.mjs'),
-  path.join(repoRoot, 'tests/browser/offline.spec.mjs')
+  path.join(repoRoot, 'tests/browser/offline.spec.mjs'),
+  path.join(repoRoot, 'tests/browser/practice.spec.mjs')
 ];
 
 function offlineStartupMessage(reason) {
@@ -365,7 +366,11 @@ async function loadTests() {
     }
     await suite.registerBrowserTests({ test });
   }
-  return tests;
+  const filter = process.env.BROWSER_TEST_FILTER?.trim();
+  if (!filter) return tests;
+  const selected = tests.filter((record) => record.name.includes(filter));
+  if (selected.length === 0) throw new Error(`No browser tests matched BROWSER_TEST_FILTER=${filter}`);
+  return selected;
 }
 
 async function runOneTest({ browser, artifactRoot, artifactPath, record, index, total }) {
