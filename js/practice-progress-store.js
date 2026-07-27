@@ -20,6 +20,7 @@
     'remainingCharacters',
     'needsPracticeCharacters',
     'roundInitialMasteredCharacters',
+    'roundNewlyMasteredCharacters',
     'currentCharacter',
     'currentPhase'
   ]);
@@ -192,18 +193,33 @@
       ownValue(value, 'roundInitialMasteredCharacters', path),
       path + '.roundInitialMasteredCharacters'
     );
+    var roundNewlyMasteredCharacters = cloneCharacterList(
+      ownValue(value, 'roundNewlyMasteredCharacters', path),
+      path + '.roundNewlyMasteredCharacters'
+    );
     var currentCharacter = ownValue(value, 'currentCharacter', path);
     var currentPhase = ownValue(value, 'currentPhase', path);
     [
       ['roundCompletedCharacters', roundCompletedCharacters],
       ['remainingCharacters', remainingCharacters],
       ['needsPracticeCharacters', needsPracticeCharacters],
-      ['roundInitialMasteredCharacters', roundInitialMasteredCharacters]
+      ['roundInitialMasteredCharacters', roundInitialMasteredCharacters],
+      ['roundNewlyMasteredCharacters', roundNewlyMasteredCharacters]
     ].forEach(function (entry) {
       if (!isOrderedSubset(entry[1], roundCharacters)) {
         reject(path + '.' + entry[0], 'must be an ordered subset of roundCharacters');
       }
     });
+    if (!isOrderedSubset(roundNewlyMasteredCharacters, roundCompletedCharacters)) {
+      reject(path + '.roundNewlyMasteredCharacters',
+        'must be an ordered subset of roundCompletedCharacters');
+    }
+    if (roundNewlyMasteredCharacters.some(function (character) {
+      return roundInitialMasteredCharacters.indexOf(character) !== -1;
+    })) {
+      reject(path + '.roundNewlyMasteredCharacters',
+        'must not overlap roundInitialMasteredCharacters');
+    }
     roundCharacters.forEach(function (character) {
       if (roundCompletedCharacters.indexOf(character) === -1
           && remainingCharacters.indexOf(character) === -1
@@ -248,6 +264,7 @@
       remainingCharacters: remainingCharacters,
       needsPracticeCharacters: needsPracticeCharacters,
       roundInitialMasteredCharacters: roundInitialMasteredCharacters,
+      roundNewlyMasteredCharacters: roundNewlyMasteredCharacters,
       currentCharacter: currentCharacter,
       currentPhase: currentPhase
     };
@@ -386,11 +403,13 @@
       return Object.hasOwn(state.characters, character) ? state.characters[character] : DEFAULT_CHARACTER;
     }
 
-    function recordCharacterOutcome(character, outcome) {
-      requireCharacter(character, 'character');
+    function requireOutcome(outcome) {
       if (outcome !== 'mastered' && outcome !== 'needs-practice') {
         reject('outcome', 'must be mastered or needs-practice');
       }
+    }
+
+    function characterOutcome(character, outcome) {
       var prior = getCharacter(character);
       if (prior.attemptCount >= Number.MAX_SAFE_INTEGER) {
         reject('character.attemptCount', 'must not exceed the safe integer limit');
@@ -402,6 +421,14 @@
       };
       var characters = Object.assign({}, state.characters);
       characters[character] = record;
+      return { characters: characters, record: record };
+    }
+
+    function recordCharacterOutcome(character, outcome) {
+      requireCharacter(character, 'character');
+      requireOutcome(outcome);
+      var result = characterOutcome(character, outcome);
+      var characters = result.characters;
       commit({ schemaVersion: SCHEMA_VERSION, characters: characters, groups: state.groups });
       return state.characters[character];
     }
@@ -413,29 +440,53 @@
       return Object.hasOwn(state.groups, key) ? state.groups[key] : null;
     }
 
-    function saveGroup(lessonId, group, progress) {
-      requireLessonId(lessonId, 'lessonId');
-      requireGroup(group, 'group');
-      var key = groupKey(lessonId, group);
-      var existing = Object.hasOwn(state.groups, key) ? state.groups[key] : null;
-      var copied = cloneGroupProgress(progress, 'progress', state.characters);
+    function mergedGroup(existing, progress, characters) {
+      var copied = cloneGroupProgress(progress, 'progress', characters);
       copied.completedCharacters = unionCharacters(
         existing ? existing.completedCharacters : [],
         copied.completedCharacters,
         copied.roundCompletedCharacters
       );
+      return copied;
+    }
+
+    function outcomeGroup(existing, progress, characters, character, outcome) {
+      var copied = cloneGroupProgress(progress, 'progress', characters);
+      if (copied.roundCharacters.indexOf(character) === -1
+          || copied.roundCompletedCharacters.indexOf(character) === -1) {
+        reject('progress', 'must record the outcome character as completed in this round');
+      }
+      if (outcome === 'mastered') {
+        if (copied.remainingCharacters.indexOf(character) !== -1
+            || copied.needsPracticeCharacters.indexOf(character) !== -1) {
+          reject('progress', 'must remove a mastered character from pending queues');
+        }
+      } else if (copied.remainingCharacters.indexOf(character) === -1
+          || copied.needsPracticeCharacters.indexOf(character) !== -1
+          || copied.currentCharacter !== character
+          || copied.currentPhase !== 'independent') {
+        reject('progress', 'must retain a failed character as the current independent retry');
+      }
+      copied.completedCharacters = unionCharacters(
+        existing ? existing.completedCharacters : [],
+        copied.completedCharacters,
+        copied.roundCompletedCharacters
+      );
+      return copied;
+    }
+
+    function saveGroup(lessonId, group, progress) {
+      requireLessonId(lessonId, 'lessonId');
+      requireGroup(group, 'group');
+      var key = groupKey(lessonId, group);
+      var existing = Object.hasOwn(state.groups, key) ? state.groups[key] : null;
       var groups = Object.assign({}, state.groups);
-      groups[key] = copied;
+      groups[key] = mergedGroup(existing, progress, state.characters);
       commit({ schemaVersion: SCHEMA_VERSION, characters: state.characters, groups: groups });
       return state.groups[key];
     }
 
-    function markGroupCharacterCompleted(lessonId, group, character) {
-      requireLessonId(lessonId, 'lessonId');
-      requireGroup(group, 'group');
-      requireCharacter(character, 'character');
-      var key = groupKey(lessonId, group);
-      var existing = Object.hasOwn(state.groups, key) ? state.groups[key] : null;
+    function reconciledGroup(existing, character, outcome, characters) {
       var completed = unionCharacters(existing ? existing.completedCharacters : [], [character]);
       var progress = existing
         ? {
@@ -445,6 +496,7 @@
           remainingCharacters: existing.remainingCharacters.slice(),
           needsPracticeCharacters: existing.needsPracticeCharacters.slice(),
           roundInitialMasteredCharacters: existing.roundInitialMasteredCharacters.slice(),
+          roundNewlyMasteredCharacters: existing.roundNewlyMasteredCharacters.slice(),
           currentCharacter: existing.currentCharacter,
           currentPhase: existing.currentPhase
         }
@@ -455,35 +507,89 @@
           remainingCharacters: [],
           needsPracticeCharacters: [],
           roundInitialMasteredCharacters: [],
+          roundNewlyMasteredCharacters: [],
           currentCharacter: null,
           currentPhase: null
         };
+      if (outcome === 'needs-practice') {
+        progress.roundNewlyMasteredCharacters = progress.roundNewlyMasteredCharacters.filter(
+          function (item) { return item !== character; }
+        );
+      }
       if (existing && existing.remainingCharacters.length !== 0
           && existing.roundCharacters.indexOf(character) !== -1) {
         progress.roundCompletedCharacters = existing.roundCharacters.filter(function (item) {
           return item === character || existing.roundCompletedCharacters.indexOf(item) !== -1;
         });
-        progress.remainingCharacters = existing.remainingCharacters.filter(function (item) {
-          return item !== character;
-        });
-        progress.needsPracticeCharacters = existing.needsPracticeCharacters.filter(function (item) {
-          return item !== character;
-        });
-        if (progress.remainingCharacters.length === 0) {
-          progress.currentCharacter = null;
-          progress.currentPhase = null;
-        } else if (existing.currentCharacter === character) {
-          progress.currentCharacter = progress.remainingCharacters[0];
-          progress.currentPhase = Object.hasOwn(state.characters, progress.currentCharacter)
-              && state.characters[progress.currentCharacter].mastered
-            ? 'independent'
-            : 'guided';
+        if (outcome === 'needs-practice' && existing.currentCharacter === character) {
+          progress.needsPracticeCharacters = existing.needsPracticeCharacters.filter(function (item) {
+            return item !== character;
+          });
+          progress.currentPhase = 'independent';
+        } else {
+          progress.remainingCharacters = existing.remainingCharacters.filter(function (item) {
+            return item !== character;
+          });
+          progress.needsPracticeCharacters = outcome === 'mastered'
+            ? existing.needsPracticeCharacters.filter(function (item) { return item !== character; })
+            : existing.roundCharacters.filter(function (item) {
+              return item === character || existing.needsPracticeCharacters.indexOf(item) !== -1;
+            });
+          if (progress.remainingCharacters.length === 0) {
+            progress.currentCharacter = null;
+            progress.currentPhase = null;
+          } else if (existing.currentCharacter === character) {
+            progress.currentCharacter = progress.remainingCharacters[0];
+            progress.currentPhase = Object.hasOwn(characters, progress.currentCharacter)
+                && characters[progress.currentCharacter].mastered
+              ? 'independent'
+              : 'guided';
+          }
         }
       }
+      return cloneGroupProgress(progress, 'progress', characters);
+    }
+
+    function markGroupCharacterCompleted(lessonId, group, character, outcome) {
+      requireLessonId(lessonId, 'lessonId');
+      requireGroup(group, 'group');
+      requireCharacter(character, 'character');
+      requireOutcome(outcome);
+      var key = groupKey(lessonId, group);
+      var existing = Object.hasOwn(state.groups, key) ? state.groups[key] : null;
       var groups = Object.assign({}, state.groups);
-      groups[key] = cloneGroupProgress(progress, 'progress', state.characters);
+      groups[key] = reconciledGroup(existing, character, outcome, state.characters);
       commit({ schemaVersion: SCHEMA_VERSION, characters: state.characters, groups: groups });
       return state.groups[key];
+    }
+
+    function recordPracticeOutcome(lessonId, group, scope, character, outcome, progress) {
+      requireLessonId(lessonId, 'lessonId');
+      requireGroup(group, 'group');
+      if (scope !== 'group' && scope !== 'single') {
+        reject('scope', 'must be group or single');
+      }
+      requireCharacter(character, 'character');
+      requireOutcome(outcome);
+      if ((scope === 'single') !== (progress === null)) {
+        reject('progress', scope === 'single' ? 'must be null' : 'must be a group snapshot');
+      }
+      var key = groupKey(lessonId, group);
+      var existing = Object.hasOwn(state.groups, key) ? state.groups[key] : null;
+      var outcomeResult = characterOutcome(character, outcome);
+      var groups = Object.assign({}, state.groups);
+      groups[key] = scope === 'group'
+        ? outcomeGroup(existing, progress, outcomeResult.characters, character, outcome)
+        : reconciledGroup(existing, character, outcome, outcomeResult.characters);
+      commit({
+        schemaVersion: SCHEMA_VERSION,
+        characters: outcomeResult.characters,
+        groups: groups
+      });
+      return Object.freeze({
+        character: state.characters[character],
+        group: state.groups[key]
+      });
     }
 
     function clearGroup(lessonId, group) {
@@ -499,6 +605,7 @@
     return Object.freeze({
       getCharacter: getCharacter,
       recordCharacterOutcome: recordCharacterOutcome,
+      recordPracticeOutcome: recordPracticeOutcome,
       getGroup: getGroup,
       saveGroup: saveGroup,
       markGroupCharacterCompleted: markGroupCharacterCompleted,

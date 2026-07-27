@@ -18,15 +18,15 @@
     'remainingCharacters',
     'needsPracticeCharacters',
     'roundInitialMasteredCharacters',
+    'roundNewlyMasteredCharacters',
     'currentCharacter',
     'currentPhase'
   ]);
   var PROGRESS_METHODS = Object.freeze([
     'getCharacter',
     'getGroup',
-    'recordCharacterOutcome',
     'saveGroup',
-    'markGroupCharacterCompleted'
+    'recordPracticeOutcome'
   ]);
 
   function reject(path, requirement) {
@@ -208,10 +208,18 @@
         ownDataValue(value, 'roundInitialMasteredCharacters', 'stored group'),
         'stored group.roundInitialMasteredCharacters', roundCharacters
       );
+      var newlyMastered = cloneCharacterList(
+        ownDataValue(value, 'roundNewlyMasteredCharacters', 'stored group'),
+        'stored group.roundNewlyMasteredCharacters', roundCharacters
+      );
       if (!isOrderedSubset(completed, roundCharacters)
           || !isOrderedSubset(remaining, roundCharacters)
           || !isOrderedSubset(needsPractice, roundCharacters)
-          || !isOrderedSubset(initialMastered, roundCharacters)) return null;
+          || !isOrderedSubset(initialMastered, roundCharacters)
+          || !isOrderedSubset(newlyMastered, completed)) return null;
+      if (newlyMastered.some(function (character) {
+        return initialMastered.indexOf(character) !== -1;
+      })) return null;
       if (!coversSource(completed, remaining, needsPractice, roundCharacters)) return null;
       if (remaining.some(function (character) {
         return needsPractice.indexOf(character) !== -1;
@@ -244,6 +252,7 @@
         remainingCharacters: remaining,
         needsPracticeCharacters: needsPractice,
         roundInitialMasteredCharacters: initialMastered,
+        roundNewlyMasteredCharacters: newlyMastered,
         currentCharacter: currentCharacter,
         currentPhase: currentPhase
       };
@@ -313,10 +322,9 @@
       : Object.freeze(orderedCharacters.filter(function (character) {
         return phaseFor(character) === 'independent';
       }));
-    var newlyMasteredCharacters = orderedCharacters.filter(function (character) {
-      return roundInitialMasteredCharacters.indexOf(character) === -1
-        && phaseFor(character) === 'independent';
-    });
+    var newlyMasteredCharacters = restored !== null
+      ? restored.roundNewlyMasteredCharacters.slice()
+      : [];
     var state = restored === null
       ? {
         status: 'active',
@@ -336,7 +344,6 @@
         remainingCharacters: restored.remainingCharacters,
         needsPracticeCharacters: restored.needsPracticeCharacters
       };
-    var singleMarked = false;
     var destroyed = false;
     var mutating = false;
 
@@ -374,7 +381,8 @@
       });
     }
 
-    function groupSnapshot(nextState) {
+    function groupSnapshot(nextState, nextNewlyMasteredCharacters) {
+      var roundNewly = nextNewlyMasteredCharacters || newlyMasteredCharacters;
       return deepFreeze({
         completedCharacters: [],
         roundCharacters: orderedCharacters.slice(),
@@ -382,6 +390,7 @@
         remainingCharacters: nextState.remainingCharacters.slice(),
         needsPracticeCharacters: nextState.needsPracticeCharacters.slice(),
         roundInitialMasteredCharacters: roundInitialMasteredCharacters.slice(),
+        roundNewlyMasteredCharacters: roundNewly.slice(),
         currentCharacter: nextState.character,
         currentPhase: nextState.phase
       });
@@ -432,46 +441,54 @@
         }
         var completed = addInSourceOrder(state.completedCharacters, character, orderedCharacters);
         var outcome = totalMistakes > 0 ? 'needs-practice' : 'mastered';
-        progress.recordCharacterOutcome(character, outcome);
+        var nextNewlyMasteredCharacters = newlyMasteredCharacters.slice();
         if (outcome === 'mastered'
             && roundInitialMasteredCharacters.indexOf(character) === -1
-            && newlyMasteredCharacters.indexOf(character) === -1) {
-          newlyMasteredCharacters = addInSourceOrder(
-            newlyMasteredCharacters, character, orderedCharacters
+            && nextNewlyMasteredCharacters.indexOf(character) === -1) {
+          nextNewlyMasteredCharacters = addInSourceOrder(
+            nextNewlyMasteredCharacters, character, orderedCharacters
           );
         } else if (outcome === 'needs-practice') {
-          newlyMasteredCharacters = newlyMasteredCharacters.filter(function (item) {
+          nextNewlyMasteredCharacters = nextNewlyMasteredCharacters.filter(function (item) {
             return item !== character;
           });
         }
-        if (scope === 'single' && !singleMarked) {
-          progress.markGroupCharacterCompleted(lessonId, group, character);
-          singleMarked = true;
-        }
+        var nextState;
         if (totalMistakes > 0) {
-          commit({
+          nextState = {
             status: 'needs-retry', phase: 'independent', character: character, mistakes: totalMistakes,
             completedCharacters: completed, remainingCharacters: state.remainingCharacters.slice(),
             needsPracticeCharacters: state.needsPracticeCharacters.slice()
-          }, true);
-          return;
+          };
+        } else {
+          var remaining = state.remainingCharacters.filter(function (item) {
+            return item !== character;
+          });
+          if (remaining.length === 0) {
+            nextState = {
+              status: 'complete', phase: null, character: null, mistakes: 0,
+              completedCharacters: completed, remainingCharacters: [],
+              needsPracticeCharacters: state.needsPracticeCharacters.slice()
+            };
+          } else {
+            var nextCharacter = remaining[0];
+            nextState = {
+              status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
+              completedCharacters: completed, remainingCharacters: remaining,
+              needsPracticeCharacters: state.needsPracticeCharacters.slice()
+            };
+          }
         }
-
-        var remaining = state.remainingCharacters.filter(function (item) { return item !== character; });
-        if (remaining.length === 0) {
-          commit({
-            status: 'complete', phase: null, character: null, mistakes: 0,
-            completedCharacters: completed, remainingCharacters: [],
-            needsPracticeCharacters: state.needsPracticeCharacters.slice()
-          }, true);
-          return;
-        }
-        var nextCharacter = remaining[0];
-        commit({
-          status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
-          completedCharacters: completed, remainingCharacters: remaining,
-          needsPracticeCharacters: state.needsPracticeCharacters.slice()
-        }, true);
+        progress.recordPracticeOutcome(
+          lessonId,
+          group,
+          scope,
+          character,
+          outcome,
+          scope === 'group' ? groupSnapshot(nextState, nextNewlyMasteredCharacters) : null
+        );
+        newlyMasteredCharacters = nextNewlyMasteredCharacters;
+        state = nextState;
       });
     }
 

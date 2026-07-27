@@ -15,6 +15,7 @@ function groupProgress(overrides = {}) {
     remainingCharacters: [],
     needsPracticeCharacters: [],
     roundInitialMasteredCharacters: [],
+    roundNewlyMasteredCharacters: [],
     currentCharacter: null,
     currentPhase: null,
     ...overrides
@@ -104,8 +105,8 @@ test('marking completion reconciles an active round and leaves outside character
   }));
   store.recordCharacterOutcome('潮', 'mastered');
 
-  store.markGroupCharacterCompleted('lesson-1', 'write', '潮');
-  store.markGroupCharacterCompleted('lesson-1', 'write', '熟');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '潮', 'mastered');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '熟', 'mastered');
 
   assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
     completedCharacters: ['潮', '熟'],
@@ -115,6 +116,144 @@ test('marking completion reconciles an active round and leaves outside character
     currentCharacter: '据',
     currentPhase: 'guided'
   }));
+});
+
+test('cross-scope outcomes reconcile current retries and future needs without losing cumulative completion', () => {
+  const currentStore = createPracticeProgressStore(createStorage());
+  currentStore.saveGroup('lesson-1', 'write', groupProgress({
+    roundCharacters: ['潮', '据'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  }));
+  currentStore.recordCharacterOutcome('潮', 'needs-practice');
+  currentStore.markGroupCharacterCompleted('lesson-1', 'write', '潮', 'needs-practice');
+
+  assert.deepEqual(currentStore.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['潮'],
+    roundCharacters: ['潮', '据'],
+    roundCompletedCharacters: ['潮'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'independent'
+  }));
+
+  const futureStore = createPracticeProgressStore(createStorage());
+  futureStore.saveGroup('lesson-1', 'write', groupProgress({
+    roundCharacters: ['潮', '据'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  }));
+  futureStore.recordCharacterOutcome('据', 'needs-practice');
+  futureStore.markGroupCharacterCompleted('lesson-1', 'write', '据', 'needs-practice');
+
+  assert.deepEqual(futureStore.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['据'],
+    roundCharacters: ['潮', '据'],
+    roundCompletedCharacters: ['据'],
+    remainingCharacters: ['潮'],
+    needsPracticeCharacters: ['据'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  }));
+});
+
+test('round newly-mastered progress is explicit, validated, and not credited to cross-scope success', () => {
+  const store = createPracticeProgressStore(createStorage());
+  store.recordCharacterOutcome('潮', 'mastered');
+  store.saveGroup('lesson-1', 'write', groupProgress({
+    completedCharacters: ['潮'],
+    roundCharacters: ['潮', '据'],
+    roundCompletedCharacters: ['潮'],
+    remainingCharacters: ['据'],
+    roundNewlyMasteredCharacters: ['潮'],
+    currentCharacter: '据',
+    currentPhase: 'guided'
+  }));
+
+  store.recordCharacterOutcome('据', 'mastered');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '据', 'mastered');
+  assert.deepEqual(
+    store.getGroup('lesson-1', 'write').roundNewlyMasteredCharacters,
+    ['潮']
+  );
+
+  store.recordCharacterOutcome('潮', 'needs-practice');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '潮', 'needs-practice');
+  assert.deepEqual(store.getGroup('lesson-1', 'write').roundNewlyMasteredCharacters, []);
+
+  assert.throws(() => store.saveGroup('lesson-2', 'write', groupProgress({
+    roundCharacters: ['潮'],
+    remainingCharacters: ['潮'],
+    roundNewlyMasteredCharacters: ['潮'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  })), TypeError);
+  assert.throws(() => store.saveGroup('lesson-2', 'write', groupProgress({
+    completedCharacters: ['潮'],
+    roundCharacters: ['潮'],
+    roundCompletedCharacters: ['潮'],
+    roundInitialMasteredCharacters: ['潮'],
+    roundNewlyMasteredCharacters: ['潮']
+  })), TypeError);
+});
+
+test('recordPracticeOutcome commits character and group reconciliation in one write', () => {
+  const storage = createStorage();
+  const store = createPracticeProgressStore(storage);
+  store.saveGroup('lesson-1', 'write', groupProgress({
+    roundCharacters: ['潮', '据'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  }));
+  storage.calls.length = 0;
+
+  store.recordPracticeOutcome(
+    'lesson-1', 'write', 'single', '潮', 'needs-practice', null
+  );
+
+  assert.equal(storage.calls.filter(([name]) => name === 'setItem').length, 1);
+  assert.deepEqual(store.getCharacter('潮'), {
+    attemptCount: 1, lastOutcome: 'needs-practice', mastered: false
+  });
+  assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['潮'],
+    roundCharacters: ['潮', '据'],
+    roundCompletedCharacters: ['潮'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'independent'
+  }));
+});
+
+test('recordPracticeOutcome atomically rejects group snapshots that contradict the outcome', () => {
+  const storage = createStorage();
+  const store = createPracticeProgressStore(storage);
+  storage.calls.length = 0;
+
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'group', '潮', 'mastered', groupProgress({
+      roundCharacters: ['潮'],
+      remainingCharacters: ['潮'],
+      currentCharacter: '潮',
+      currentPhase: 'guided'
+    })
+  ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'group', '潮', 'needs-practice', groupProgress({
+      completedCharacters: ['潮'],
+      roundCharacters: ['潮'],
+      roundCompletedCharacters: ['潮']
+    })
+  ), TypeError);
+
+  assert.equal(storage.calls.filter(([name]) => name === 'setItem').length, 0);
+  assert.deepEqual(store.getCharacter('潮'), {
+    attemptCount: 0, lastOutcome: null, mastered: false
+  });
+  assert.equal(store.getGroup('lesson-1', 'write'), null);
 });
 
 test('schema v1 stored under the v2 key resets without disabling persistence', () => {
@@ -178,7 +317,7 @@ test('single character completion outside the active round preserves its queue f
   });
   store.saveGroup('lesson-1', 'write', active);
 
-  store.markGroupCharacterCompleted('lesson-1', 'write', '熟');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '熟', 'mastered');
 
   assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
     completedCharacters: ['熟'],
@@ -248,6 +387,19 @@ test('validates group arrays and current state rules plus IDs groups characters 
   assert.throws(() => store.recordCharacterOutcome('两个', 'mastered'), TypeError);
   assert.throws(() => store.recordCharacterOutcome('A', 'mastered'), TypeError);
   assert.throws(() => store.recordCharacterOutcome('潮', 'passed'), TypeError);
+  assert.throws(() => store.markGroupCharacterCompleted('lesson-1', 'write', '潮'), TypeError);
+  assert.throws(() => store.markGroupCharacterCompleted(
+    'lesson-1', 'write', '潮', 'passed'
+  ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'other', '潮', 'mastered', null
+  ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'single', '潮', 'mastered', active
+  ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'group', '潮', 'mastered', null
+  ), TypeError);
   assert.throws(() => store.getCharacter('A'), TypeError);
   assert.throws(() => store.getGroup('lesson-1', 'other'), TypeError);
 });
@@ -399,7 +551,7 @@ test('a storage read failure falls back to a functional in-memory store', () => 
   };
   const store = createPracticeProgressStore(storage);
 
-  store.markGroupCharacterCompleted('lesson-1', 'recognize', '潮');
+  store.markGroupCharacterCompleted('lesson-1', 'recognize', '潮', 'mastered');
 
   assert.equal(store.isPersistent(), false);
   assert.deepEqual(store.getGroup('lesson-1', 'recognize'), groupProgress({ completedCharacters: ['潮'] }));

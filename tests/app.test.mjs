@@ -645,6 +645,7 @@ test('resumed group practice pushes its canonical current character after the le
         remainingCharacters: ['城'],
         needsPracticeCharacters: [],
         roundInitialMasteredCharacters: ['郭'],
+        roundNewlyMasteredCharacters: [],
         currentCharacter: '城',
         currentPhase: 'guided'
       }
@@ -686,6 +687,7 @@ test('group start resumes incomplete filtered rounds but starts completed rounds
           remainingCharacters: ['城'],
           needsPracticeCharacters: [],
           roundInitialMasteredCharacters: [],
+          roundNewlyMasteredCharacters: [],
           currentCharacter: '城',
           currentPhase: 'guided'
         }
@@ -721,6 +723,7 @@ test('group start resumes incomplete filtered rounds but starts completed rounds
         remainingCharacters: [],
         needsPracticeCharacters: [],
         roundInitialMasteredCharacters: [],
+        roundNewlyMasteredCharacters: ['郭', '城'],
         currentCharacter: null,
         currentPhase: null
       }
@@ -761,6 +764,7 @@ test('group start resumes incomplete filtered rounds but starts completed rounds
         remainingCharacters: [],
         needsPracticeCharacters: [],
         roundInitialMasteredCharacters: [],
+        roundNewlyMasteredCharacters: ['城'],
         currentCharacter: null,
         currentPhase: null
       }
@@ -1045,7 +1049,7 @@ test('injects current practice snapshots into lesson and character models', () =
   });
   const app = loadApp().createApp(harness.createOptions);
   harness.state.practiceProgress.recordCharacterOutcome('郭', 'mastered');
-  harness.state.practiceProgress.markGroupCharacterCompleted('lesson-1', 'write', '城');
+  harness.state.practiceProgress.markGroupCharacterCompleted('lesson-1', 'write', '城', 'mastered');
   app.navigate({ view: 'directory' });
   app.navigate({ view: 'lesson', lessonId: 'lesson-1', group: 'write' });
 
