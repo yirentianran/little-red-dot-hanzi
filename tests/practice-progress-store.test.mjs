@@ -248,6 +248,22 @@ test('recordPracticeOutcome atomically rejects group snapshots that contradict t
       roundCompletedCharacters: ['潮']
     })
   ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'group', '潮', 'needs-practice', groupProgress({
+      roundCharacters: ['潮'],
+      roundCompletedCharacters: ['潮'],
+      remainingCharacters: ['潮'],
+      roundNewlyMasteredCharacters: ['潮'],
+      currentCharacter: '潮',
+      currentPhase: 'independent'
+    })
+  ), TypeError);
+  assert.throws(() => store.recordPracticeOutcome(
+    'lesson-1', 'write', 'group', '潮', 'mastered', groupProgress({
+      roundCharacters: ['潮'],
+      roundCompletedCharacters: ['潮']
+    })
+  ), TypeError);
 
   assert.equal(storage.calls.filter(([name]) => name === 'setItem').length, 0);
   assert.deepEqual(store.getCharacter('潮'), {

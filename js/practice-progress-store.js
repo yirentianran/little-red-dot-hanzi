@@ -456,15 +456,21 @@
           || copied.roundCompletedCharacters.indexOf(character) === -1) {
         reject('progress', 'must record the outcome character as completed in this round');
       }
+      var initiallyMastered = copied.roundInitialMasteredCharacters.indexOf(character) !== -1;
+      var newlyMastered = copied.roundNewlyMasteredCharacters.indexOf(character) !== -1;
       if (outcome === 'mastered') {
         if (copied.remainingCharacters.indexOf(character) !== -1
             || copied.needsPracticeCharacters.indexOf(character) !== -1) {
           reject('progress', 'must remove a mastered character from pending queues');
         }
+        if (!initiallyMastered && !newlyMastered) {
+          reject('progress', 'must record newly mastered characters outside the round baseline');
+        }
       } else if (copied.remainingCharacters.indexOf(character) === -1
           || copied.needsPracticeCharacters.indexOf(character) !== -1
           || copied.currentCharacter !== character
-          || copied.currentPhase !== 'independent') {
+          || copied.currentPhase !== 'independent'
+          || newlyMastered) {
         reject('progress', 'must retain a failed character as the current independent retry');
       }
       copied.completedCharacters = unionCharacters(
