@@ -587,7 +587,8 @@
   function copyPracticeState(state) {
     var fields = [
       'status', 'phase', 'character', 'index', 'total', 'mistakes',
-      'completedCharacters', 'remainingCharacters', 'needsPracticeCharacters', 'masteredCount'
+      'newlyMasteredCount', 'completedCharacters', 'remainingCharacters',
+      'needsPracticeCharacters', 'masteredCount'
     ];
     requireExactOwnFields(state, fields, 'state');
     return {
@@ -600,6 +601,9 @@
       total: requireSafeInteger(ownDataValue(state, 'total', 'state'), 'state.total', 1),
       mistakes: requireSafeInteger(
         ownDataValue(state, 'mistakes', 'state'), 'state.mistakes', 0
+      ),
+      newlyMasteredCount: requireSafeInteger(
+        ownDataValue(state, 'newlyMasteredCount', 'state'), 'state.newlyMasteredCount', 0
       ),
       completedCharacters: cloneCharacterList(
         ownDataValue(state, 'completedCharacters', 'state'), 'state.completedCharacters'
@@ -629,6 +633,9 @@
       reject('state.needsPracticeCharacters', 'must not exceed state.total');
     }
     if (state.masteredCount > state.total) reject('state.masteredCount', 'must not exceed state.total');
+    if (state.newlyMasteredCount > state.masteredCount) {
+      reject('state.newlyMasteredCount', 'must not exceed state.masteredCount');
+    }
     if (resolved.scope === 'group' && state.total > resolved.total) {
       reject('state.total', 'must not exceed resolved.total for group practice');
     }
@@ -653,11 +660,6 @@
     var completed = new Set(state.completedCharacters);
     var remaining = new Set(state.remainingCharacters);
     if (state.needsPracticeCharacters.some(function (character) {
-      return !completed.has(character);
-    })) {
-      reject('state.needsPracticeCharacters', 'must be a subset of state.completedCharacters');
-    }
-    if (state.needsPracticeCharacters.some(function (character) {
       return remaining.has(character);
     })) {
       reject('state.needsPracticeCharacters', 'must not occur in state.remainingCharacters');
@@ -672,18 +674,20 @@
     if (overlaps.length > 0 && !allowsCurrentOverlap) {
       reject('state', 'only the current retry character may be completed and remaining');
     }
-    var covered = new Set(state.completedCharacters.concat(state.remainingCharacters));
+    var covered = new Set(state.completedCharacters.concat(
+      state.remainingCharacters, state.needsPracticeCharacters
+    ));
     if (covered.size !== state.total) {
-      reject('state', 'completed and remaining characters must cover state.total');
+      reject('state', 'completed, remaining, and needs-practice characters must cover state.total');
     }
     if (state.status === 'complete') {
       if (state.phase !== null || state.character !== null || state.index !== state.total
-          || state.mistakes !== 0 || state.remainingCharacters.length !== 0
-          || state.completedCharacters.length !== state.total) {
+          || state.mistakes !== 0 || state.remainingCharacters.length !== 0) {
         reject('state', 'complete state must use null current fields and final counts');
       }
-      if (!completed.has(resolved.character)) {
-        reject('resolved.entry.character', 'must occur in completed practice characters');
+      if (!completed.has(resolved.character)
+          && state.needsPracticeCharacters.indexOf(resolved.character) === -1) {
+        reject('resolved.entry.character', 'must occur in completed or needs-practice characters');
       }
       return;
     }
@@ -695,11 +699,6 @@
     if (state.remainingCharacters.length === 0
         || state.remainingCharacters[0] !== state.character) {
       reject('state.remainingCharacters', 'must start with state.character');
-    }
-    var completedBeforeCurrent = state.completedCharacters.length
-      - (allowsCurrentOverlap ? 1 : 0);
-    if (state.index !== completedBeforeCurrent) {
-      reject('state.index', 'must match completed practice progress');
     }
     if (state.index !== state.total - state.remainingCharacters.length) {
       reject('state.index', 'must match completed practice queue progress');
@@ -732,6 +731,7 @@
       mistakes: stateCopy.mistakes,
       completedCount: stateCopy.completedCharacters.length,
       masteredCount: stateCopy.masteredCount,
+      newlyMasteredCount: stateCopy.newlyMasteredCount,
       needsPracticeCharacters: stateCopy.needsPracticeCharacters.slice(),
       persistent: persistent
     });
@@ -1268,7 +1268,7 @@
     var fields = [
       'unit', 'lesson', 'group', 'scope', 'character', 'pinyin', 'strokeCount',
       'status', 'phase', 'index', 'total', 'mistakes', 'completedCount',
-      'masteredCount', 'needsPracticeCharacters', 'persistent'
+      'masteredCount', 'newlyMasteredCount', 'needsPracticeCharacters', 'persistent'
     ];
     requireExactOwnFields(model, fields, 'model');
     var copy = {
@@ -1300,6 +1300,9 @@
       masteredCount: requireSafeInteger(
         ownDataValue(model, 'masteredCount', 'model'), 'model.masteredCount', 0
       ),
+      newlyMasteredCount: requireSafeInteger(
+        ownDataValue(model, 'newlyMasteredCount', 'model'), 'model.newlyMasteredCount', 0
+      ),
       needsPracticeCharacters: cloneCharacterList(
         ownDataValue(model, 'needsPracticeCharacters', 'model'),
         'model.needsPracticeCharacters'
@@ -1310,6 +1313,9 @@
     if (copy.index > copy.total) reject('model.index', 'must not exceed model.total');
     if (copy.completedCount > copy.total) reject('model.completedCount', 'must not exceed model.total');
     if (copy.masteredCount > copy.total) reject('model.masteredCount', 'must not exceed model.total');
+    if (copy.newlyMasteredCount > copy.masteredCount) {
+      reject('model.newlyMasteredCount', 'must not exceed model.masteredCount');
+    }
     if (copy.needsPracticeCharacters.length > copy.total) {
       reject('model.needsPracticeCharacters', 'must not exceed model.total');
     }
@@ -1396,6 +1402,8 @@
     var feedback = null;
     var strokePosition = null;
     var progress = null;
+    var hint = null;
+    var skipUnavailable = null;
     var content = [];
     if (viewModel.status === 'active') {
       board = node(documentObject, 'div', {
@@ -1422,12 +1430,20 @@
         'value': 0,
         'aria-label': viewModel.character + '书写进度'
       }, '');
-      var hint = actionIconButton(
+      hint = actionIconButton(
         documentObject, 'practice-hint', '?', '提示当前笔', '提示当前笔'
       );
       var restartAttributes = practiceContextAttributes(viewModel, 'practice-restart');
       restartAttributes['class'] = 'button practice-restart';
       var restart = node(documentObject, 'button', restartAttributes, '重写这个字');
+      var activeActions = [hint, restart];
+      if (viewModel.scope === 'group') {
+        var skipAttributes = practiceContextAttributes(viewModel, 'practice-skip-unavailable');
+        skipAttributes['class'] = 'button';
+        skipAttributes.hidden = '';
+        skipUnavailable = node(documentObject, 'button', skipAttributes, '跳过这个字');
+        activeActions.push(skipUnavailable);
+      }
       var tools = node(documentObject, 'section', {
         'class': 'practice-tools',
         'aria-label': viewModel.character + '的书写练习工具'
@@ -1442,7 +1458,7 @@
           'class': 'practice-actions',
           'role': 'group',
           'aria-label': '练习操作'
-        }, undefined, [hint, restart])
+        }, undefined, activeActions)
       ]);
       content = [board, tools];
     } else if (viewModel.status === 'needs-retry') {
@@ -1467,6 +1483,7 @@
         node(documentObject, 'h2', { 'id': 'practice-result-heading' }, '本轮练习完成'),
         node(documentObject, 'p', {}, '本轮完成 ' + viewModel.completedCount + ' 个'),
         node(documentObject, 'p', {}, '当前掌握 ' + viewModel.masteredCount + ' 个'),
+        node(documentObject, 'p', {}, '本次新掌握 ' + viewModel.newlyMasteredCount + ' 个'),
         node(documentObject, 'p', {}, '需要再练 '
           + viewModel.needsPracticeCharacters.length + ' 个')
       ];
@@ -1517,12 +1534,20 @@
       board.setAttribute('aria-label', practiceBoardLabel(viewModel, current));
     }
 
+    function setUnavailable() {
+      requireActiveHandle();
+      setFeedback('这个字暂时无法练习', 'error');
+      setDisabled(hint, true);
+      if (skipUnavailable) setHidden(skipUnavailable, false);
+    }
+
     return Object.freeze({
       root: root,
       heading: heading,
       board: board,
       setFeedback: setFeedback,
-      setStrokePosition: setStrokePosition
+      setStrokePosition: setStrokePosition,
+      setUnavailable: setUnavailable
     });
   }
 

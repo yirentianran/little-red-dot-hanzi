@@ -8,14 +8,25 @@ import practiceProgressModule from '../js/practice-progress-store.js';
 const { PRACTICE_STORAGE_KEY, createPracticeProgressStore } = practiceProgressModule;
 
 function groupProgress(overrides = {}) {
-  return {
+  const result = {
     completedCharacters: [],
+    roundCharacters: [],
+    roundCompletedCharacters: [],
     remainingCharacters: [],
     needsPracticeCharacters: [],
+    roundInitialMasteredCharacters: [],
     currentCharacter: null,
     currentPhase: null,
     ...overrides
   };
+  if (!Object.hasOwn(overrides, 'roundCharacters')) {
+    result.roundCharacters = [...new Set([
+      ...result.roundCompletedCharacters,
+      ...result.remainingCharacters,
+      ...result.needsPracticeCharacters
+    ])];
+  }
+  return result;
 }
 
 function createStorage(initial = {}) {
@@ -53,6 +64,69 @@ test('records global outcomes separately from lesson group completion', () => {
   assert.deepEqual(store.getCharacter('潮'), character);
   assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({ completedCharacters: ['据'] }));
   assert.deepEqual(store.getCharacter('据'), { attemptCount: 0, lastOutcome: null, mastered: false });
+});
+
+test('v2 filtered round saves preserve monotonic cumulative completion', () => {
+  const store = createPracticeProgressStore(createStorage());
+  store.saveGroup('lesson-1', 'write', groupProgress({
+    completedCharacters: ['潮', '据', '熟'],
+    roundCharacters: ['潮', '据', '熟'],
+    roundCompletedCharacters: ['潮', '据', '熟']
+  }));
+
+  store.saveGroup('lesson-1', 'write', groupProgress({
+    completedCharacters: [],
+    roundCharacters: ['据'],
+    remainingCharacters: ['据'],
+    needsPracticeCharacters: [],
+    roundInitialMasteredCharacters: ['据'],
+    currentCharacter: '据',
+    currentPhase: 'independent'
+  }));
+
+  assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['潮', '据', '熟'],
+    roundCharacters: ['据'],
+    remainingCharacters: ['据'],
+    roundInitialMasteredCharacters: ['据'],
+    currentCharacter: '据',
+    currentPhase: 'independent'
+  }));
+});
+
+test('marking completion reconciles an active round and leaves outside characters cumulative only', () => {
+  const store = createPracticeProgressStore(createStorage());
+  store.saveGroup('lesson-1', 'write', groupProgress({
+    roundCharacters: ['潮', '据'],
+    remainingCharacters: ['潮', '据'],
+    currentCharacter: '潮',
+    currentPhase: 'guided'
+  }));
+  store.recordCharacterOutcome('潮', 'mastered');
+
+  store.markGroupCharacterCompleted('lesson-1', 'write', '潮');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '熟');
+
+  assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['潮', '熟'],
+    roundCharacters: ['潮', '据'],
+    roundCompletedCharacters: ['潮'],
+    remainingCharacters: ['据'],
+    currentCharacter: '据',
+    currentPhase: 'guided'
+  }));
+});
+
+test('schema v1 stored under the v2 key resets without disabling persistence', () => {
+  const storage = createStorage({
+    [PRACTICE_STORAGE_KEY]: JSON.stringify({ schemaVersion: 1, characters: {}, groups: {} })
+  });
+  const store = createPracticeProgressStore(storage);
+
+  assert.deepEqual(store.getSnapshot(), { schemaVersion: 2, characters: {}, groups: {} });
+  assert.equal(store.isPersistent(), true);
+  store.recordCharacterOutcome('潮', 'mastered');
+  assert.equal(JSON.parse(storage.value(PRACTICE_STORAGE_KEY)).schemaVersion, 2);
 });
 
 test('persists global and group progress for a subsequent frozen store instance', () => {
@@ -95,25 +169,23 @@ test('accepts a completed group with no queue and null current state', () => {
   assert.deepEqual(store.getGroup('lesson-1', 'write'), completed);
 });
 
-test('single character completion preserves active group queue fields', () => {
+test('single character completion outside the active round preserves its queue fields', () => {
   const store = createPracticeProgressStore();
   const active = groupProgress({
     remainingCharacters: ['潮', '据'],
-    needsPracticeCharacters: ['潮'],
     currentCharacter: '潮',
     currentPhase: 'guided'
   });
   store.saveGroup('lesson-1', 'write', active);
 
-  store.markGroupCharacterCompleted('lesson-1', 'write', '据');
+  store.markGroupCharacterCompleted('lesson-1', 'write', '熟');
 
-  assert.deepEqual(store.getGroup('lesson-1', 'write'), {
-    completedCharacters: ['据'],
+  assert.deepEqual(store.getGroup('lesson-1', 'write'), groupProgress({
+    completedCharacters: ['熟'],
     remainingCharacters: ['潮', '据'],
-    needsPracticeCharacters: ['潮'],
     currentCharacter: '潮',
     currentPhase: 'guided'
-  });
+  }));
 });
 
 test('a later failed independent outcome downgrades global mastery', () => {
@@ -133,7 +205,7 @@ test('invalid JSON loads an empty schema but leaves readable storage persistent 
 
   const store = createPracticeProgressStore(storage);
 
-  assert.deepEqual(store.getSnapshot(), { schemaVersion: 1, characters: {}, groups: {} });
+  assert.deepEqual(store.getSnapshot(), { schemaVersion: 2, characters: {}, groups: {} });
   assert.equal(store.isPersistent(), true);
   assert.equal(storage.value('unrelated'), 'retain me');
   assert.deepEqual(storage.calls, [['getItem', PRACTICE_STORAGE_KEY]]);
@@ -246,10 +318,10 @@ test('freezes returned values recursively and never mutates caller input', () =>
 
 test('corrupt, wrong-version, and nested-invalid stored state all fall back to the empty schema', () => {
   const invalidValues = [
-    JSON.stringify({ schemaVersion: 2, characters: {}, groups: {} }),
-    JSON.stringify({ schemaVersion: 1, characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: false } }, groups: {} }),
-    JSON.stringify({ schemaVersion: 1, characters: { 潮: { attemptCount: 0, lastOutcome: 'mastered', mastered: true } }, groups: {} }),
-    JSON.stringify({ schemaVersion: 1, characters: {}, groups: {
+    JSON.stringify({ schemaVersion: 3, characters: {}, groups: {} }),
+    JSON.stringify({ schemaVersion: 2, characters: { 潮: { attemptCount: 1, lastOutcome: 'mastered', mastered: false } }, groups: {} }),
+    JSON.stringify({ schemaVersion: 2, characters: { 潮: { attemptCount: 0, lastOutcome: 'mastered', mastered: true } }, groups: {} }),
+    JSON.stringify({ schemaVersion: 2, characters: {}, groups: {
       'lesson-1:write': groupProgress({ remainingCharacters: ['据'], currentCharacter: '潮', currentPhase: 'guided' })
     } })
   ];
@@ -257,7 +329,7 @@ test('corrupt, wrong-version, and nested-invalid stored state all fall back to t
   invalidValues.forEach((value) => {
     const storage = createStorage({ [PRACTICE_STORAGE_KEY]: value });
     const store = createPracticeProgressStore(storage);
-    assert.deepEqual(store.getSnapshot(), { schemaVersion: 1, characters: {}, groups: {} });
+    assert.deepEqual(store.getSnapshot(), { schemaVersion: 2, characters: {}, groups: {} });
     assert.equal(store.isPersistent(), true);
   });
 });
@@ -265,10 +337,10 @@ test('corrupt, wrong-version, and nested-invalid stored state all fall back to t
 test('rejects hostile persisted state dictionaries and unsafe character counts', () => {
   const validRecord = { attemptCount: 1, lastOutcome: 'mastered', mastered: true };
   const invalidValues = [
-    ['prototype-shaped character key', `{"schemaVersion":1,"characters":{"__proto__":${JSON.stringify(validRecord)}},"groups":{}}`],
-    ['prototype-shaped group key', `{"schemaVersion":1,"characters":{},"groups":{"constructor":${JSON.stringify(groupProgress())}}}`],
+    ['prototype-shaped character key', `{"schemaVersion":2,"characters":{"__proto__":${JSON.stringify(validRecord)}},"groups":{}}`],
+    ['prototype-shaped group key', `{"schemaVersion":2,"characters":{},"groups":{"constructor":${JSON.stringify(groupProgress())}}}`],
     ['unsafe count', JSON.stringify({
-      schemaVersion: 1,
+      schemaVersion: 2,
       characters: { 潮: { attemptCount: Number.MAX_SAFE_INTEGER + 1, lastOutcome: 'mastered', mastered: true } },
       groups: {}
     })]
@@ -277,7 +349,7 @@ test('rejects hostile persisted state dictionaries and unsafe character counts',
   invalidValues.forEach(([, value]) => {
     const storage = createStorage({ [PRACTICE_STORAGE_KEY]: value });
     const store = createPracticeProgressStore(storage);
-    assert.deepEqual(store.getSnapshot(), { schemaVersion: 1, characters: {}, groups: {} });
+    assert.deepEqual(store.getSnapshot(), { schemaVersion: 2, characters: {}, groups: {} });
     assertFrozen(store.getSnapshot());
     assert.equal(store.isPersistent(), true);
     assert.deepEqual(storage.calls, [['getItem', PRACTICE_STORAGE_KEY]]);
@@ -287,7 +359,7 @@ test('rejects hostile persisted state dictionaries and unsafe character counts',
 test('rejects an independent attempt that would overflow a safe attempt count without writing', () => {
   const storage = createStorage({
     [PRACTICE_STORAGE_KEY]: JSON.stringify({
-      schemaVersion: 1,
+      schemaVersion: 2,
       characters: {
         潮: { attemptCount: Number.MAX_SAFE_INTEGER, lastOutcome: 'mastered', mastered: true }
       },
@@ -380,7 +452,7 @@ test('non-string non-null storage reads immediately disable persistence', () => 
     });
 
     assert.equal(store.isPersistent(), false);
-    assert.deepEqual(store.getSnapshot(), { schemaVersion: 1, characters: {}, groups: {} });
+    assert.deepEqual(store.getSnapshot(), { schemaVersion: 2, characters: {}, groups: {} });
     assert.deepEqual(store.recordCharacterOutcome('潮', 'mastered'), {
       attemptCount: 1,
       lastOutcome: 'mastered',
@@ -399,6 +471,6 @@ test('classic browser scripts merge the API without DOM or fetch and preserve Ha
   vm.runInNewContext(source, context, { filename: 'js/practice-progress-store.js' });
 
   assert.equal(context.window.HanziApp.sentinel, sentinel);
-  assert.equal(context.window.HanziApp.PRACTICE_STORAGE_KEY, 'hanzi-tracking:practice-progress:v1');
+  assert.equal(context.window.HanziApp.PRACTICE_STORAGE_KEY, 'hanzi-tracking:practice-progress:v2');
   assert.equal(typeof context.window.HanziApp.createPracticeProgressStore, 'function');
 });

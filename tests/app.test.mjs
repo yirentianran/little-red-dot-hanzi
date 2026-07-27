@@ -366,12 +366,16 @@ function createHarness(options = {}) {
     },
     renderPractice(_root, model) {
       const status = model.state ? model.state.status : model.status;
+      let unavailableCalls = 0;
       const handle = {
         heading: heading('practice'),
         board: status === 'active' ? new FakeElement('practice-board') : null,
         model,
         feedback: [],
         strokePositions: [],
+        get unavailableCalls() {
+          return unavailableCalls;
+        },
         setFeedback(message, kind) {
           this.feedback.push([message, kind]);
           log.push('practice.feedback=' + kind + ':' + message);
@@ -379,6 +383,11 @@ function createHarness(options = {}) {
         setStrokePosition(current, total) {
           this.strokePositions.push([current, total]);
           log.push('practice.stroke=' + current + '/' + total);
+        },
+        setUnavailable() {
+          unavailableCalls += 1;
+          this.setFeedback('这个字暂时无法练习', 'error');
+          log.push('practice.unavailable');
         }
       };
       return installView('practice', handle);
@@ -386,6 +395,7 @@ function createHarness(options = {}) {
     createPracticeEngine(engineOptions) {
       log.push('practice-engine.create');
       if (state.onPracticeEngineCreate) state.onPracticeEngineCreate(engineOptions);
+      if (engineOptions.HanziWriter === null) throw new Error('Hanzi Writer unavailable');
       if (options.throwPracticeEngineCreate) throw new Error('practice engine create failed');
       const engine = {
         options: engineOptions,
@@ -522,7 +532,9 @@ function createHarness(options = {}) {
     documentObject,
     location,
     storage,
-    HanziWriter: options.HanziWriter || Object.freeze({ create() {} }),
+    HanziWriter: Object.hasOwn(options, 'HanziWriter')
+      ? options.HanziWriter
+      : Object.freeze({ create() {} }),
     createAudio,
     reducedMotion: options.reducedMotion === true
   };
@@ -621,15 +633,18 @@ test('starts group practice from both lesson groups and replaces hashes between 
 
 test('resumed group practice pushes its canonical current character after the lesson entry', () => {
   const savedProgress = JSON.stringify({
-    schemaVersion: 1,
+    schemaVersion: 2,
     characters: {
       郭: { attemptCount: 1, lastOutcome: 'mastered', mastered: true }
     },
     groups: {
       'lesson-1:write': {
         completedCharacters: ['郭'],
+        roundCharacters: ['郭', '城'],
+        roundCompletedCharacters: ['郭'],
         remainingCharacters: ['城'],
         needsPracticeCharacters: [],
+        roundInitialMasteredCharacters: ['郭'],
         currentCharacter: '城',
         currentPhase: 'guided'
       }
@@ -654,6 +669,158 @@ test('resumed group practice pushes its canonical current character after the le
     harness.state.log.includes('location.replace=' + practiceHash('城', 'write', 'group')),
     false
   );
+});
+
+test('group start resumes incomplete filtered rounds but starts completed rounds fresh', () => {
+  const incompleteStorage = createStorage({
+    [practiceProgressModule.PRACTICE_STORAGE_KEY]: JSON.stringify({
+      schemaVersion: 2,
+      characters: {
+        '郭': { attemptCount: 1, lastOutcome: 'mastered', mastered: true }
+      },
+      groups: {
+        'lesson-1:write': {
+          completedCharacters: ['郭'],
+          roundCharacters: ['城'],
+          roundCompletedCharacters: [],
+          remainingCharacters: ['城'],
+          needsPracticeCharacters: [],
+          roundInitialMasteredCharacters: [],
+          currentCharacter: '城',
+          currentPhase: 'guided'
+        }
+      }
+    })
+  });
+  const incomplete = createHarness({
+    hash: '#/lesson?lesson=lesson-1&group=write', storage: incompleteStorage
+  });
+  const incompleteApp = loadApp().createApp(incomplete.createOptions);
+  incomplete.click('start-group-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'write'
+  });
+  assert.equal(incomplete.state.practiceSessions.at(-1).options.resume, true);
+  assert.deepEqual(incompleteApp.debugControllers().practiceSession.getState(), {
+    status: 'active', phase: 'guided', character: '城', index: 0, total: 1,
+    mistakes: 0, newlyMasteredCount: 0,
+    completedCharacters: [], remainingCharacters: ['城'], needsPracticeCharacters: []
+  });
+  assert.equal(incomplete.state.practiceModelCalls.at(-1).state.masteredCount, 0);
+
+  const completeState = JSON.stringify({
+    schemaVersion: 2,
+    characters: {
+      '郭': { attemptCount: 1, lastOutcome: 'mastered', mastered: true },
+      '城': { attemptCount: 1, lastOutcome: 'mastered', mastered: true }
+    },
+    groups: {
+      'lesson-1:write': {
+        completedCharacters: ['郭', '城'],
+        roundCharacters: ['郭', '城'],
+        roundCompletedCharacters: ['郭', '城'],
+        remainingCharacters: [],
+        needsPracticeCharacters: [],
+        roundInitialMasteredCharacters: [],
+        currentCharacter: null,
+        currentPhase: null
+      }
+    }
+  });
+  const fresh = createHarness({
+    hash: '#/lesson?lesson=lesson-1&group=write',
+    storage: createStorage({ [practiceProgressModule.PRACTICE_STORAGE_KEY]: completeState })
+  });
+  const freshApp = loadApp().createApp(fresh.createOptions);
+  fresh.click('start-group-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'write'
+  });
+  assert.equal(fresh.state.practiceSessions.at(-1).options.resume, false);
+  assert.equal(freshApp.debugControllers().practiceSession.getState().status, 'active');
+  assert.deepEqual(freshApp.debugControllers().practiceSession.getState().remainingCharacters, ['郭', '城']);
+  assert.deepEqual(fresh.state.practiceProgress.getGroup('lesson-1', 'write').completedCharacters, ['郭', '城']);
+
+  const direct = createHarness({
+    hash: practiceHash(),
+    storage: createStorage({ [practiceProgressModule.PRACTICE_STORAGE_KEY]: completeState })
+  });
+  const directApp = loadApp().createApp(direct.createOptions);
+  assert.equal(direct.state.practiceSessions.at(-1).options.resume, true);
+  assert.equal(directApp.debugControllers().practiceSession.getState().status, 'complete');
+
+  const filteredCompleteState = JSON.stringify({
+    schemaVersion: 2,
+    characters: {
+      '郭': { attemptCount: 1, lastOutcome: 'mastered', mastered: true },
+      '城': { attemptCount: 1, lastOutcome: 'mastered', mastered: true }
+    },
+    groups: {
+      'lesson-1:write': {
+        completedCharacters: ['郭', '城'],
+        roundCharacters: ['城'],
+        roundCompletedCharacters: ['城'],
+        remainingCharacters: [],
+        needsPracticeCharacters: [],
+        roundInitialMasteredCharacters: [],
+        currentCharacter: null,
+        currentPhase: null
+      }
+    }
+  });
+  const filteredDirect = createHarness({
+    hash: practiceHash('郭'),
+    realViewModels: true,
+    storage: createStorage({
+      [practiceProgressModule.PRACTICE_STORAGE_KEY]: filteredCompleteState
+    })
+  });
+  const filteredDirectApp = loadApp().createApp(filteredDirect.createOptions);
+  assert.equal(filteredDirectApp.debugControllers().practiceSession.getState().status, 'complete');
+  assert.equal(filteredDirect.state.practiceModelCalls.at(-1).character, '城');
+});
+
+test('missing Hanzi Writer boots learning views and degrades only practice', () => {
+  const harness = createHarness({ HanziWriter: null });
+  let app;
+
+  assert.doesNotThrow(() => { app = loadApp().createApp(harness.createOptions); });
+  assert.equal(app.getRoute().view, 'directory');
+  assert.equal(app.navigate(characterRoute()), true);
+  assert.equal(app.getRoute().view, 'character');
+  assert.equal(app.navigate(practiceRoute()), true);
+  assert.equal(app.getRoute().view, 'practice');
+  assert.equal(currentHandle(harness).unavailableCalls, 1);
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['这个字暂时无法练习', 'error']);
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.equal(app.dispatch('practice-back'), true);
+  assert.equal(app.getRoute().view, 'lesson');
+});
+
+test('group unavailable skip advances and completes without attempts or cumulative completion', () => {
+  const harness = createHarness({ hash: practiceHash(), HanziWriter: null });
+  const app = loadApp().createApp(harness.createOptions);
+
+  assert.equal(currentHandle(harness).unavailableCalls, 1);
+  assert.equal(app.dispatch('practice-skip-unavailable'), true);
+  assert.equal(app.debugControllers().practiceSession.getState().character, '城');
+  assert.deepEqual(app.debugControllers().practiceSession.getState().needsPracticeCharacters, ['郭']);
+  assert.deepEqual(harness.state.practiceProgress.getCharacter('郭'), {
+    attemptCount: 0, lastOutcome: null, mastered: false
+  });
+
+  assert.equal(app.dispatch('practice-skip-unavailable'), true);
+  const result = app.debugControllers().practiceSession.getState();
+  assert.equal(result.status, 'complete');
+  assert.deepEqual(result.needsPracticeCharacters, ['郭', '城']);
+  assert.deepEqual(
+    harness.state.practiceProgress.getGroup('lesson-1', 'write').completedCharacters,
+    []
+  );
+
+  const single = createHarness({
+    hash: practiceHash('字', 'recognize', 'single'), HanziWriter: null
+  });
+  const singleApp = loadApp().createApp(single.createOptions);
+  assert.equal(singleApp.dispatch('practice-skip-unavailable'), false);
 });
 
 test('quiz events drive guided, independent, retry and exactly-once progress updates', () => {
@@ -783,8 +950,12 @@ test('practice engine constructor failure keeps a direct group practice route re
   assert.equal(harness.root.listenerCount('click'), 1);
   assert.equal(harness.windowObject.listenerCount('resize'), 1);
 
+  const unavailableHandle = currentHandle(harness);
+  const renderCount = harness.state.renderCounts.practice;
   config.throwPracticeEngineCreate = false;
   assert.equal(app.dispatch('practice-restart'), true);
+  assert.equal(harness.state.renderCounts.practice, renderCount + 1);
+  assert.notEqual(currentHandle(harness), unavailableHandle);
   assert.equal(harness.state.practiceEngines.length, 1);
   assert.equal(app.debugControllers().practiceEngine, harness.state.practiceEngines[0]);
   assert.deepEqual(currentHandle(harness).feedback.at(-1), ['已经重新开始', 'neutral']);
@@ -817,6 +988,7 @@ test('practice engine start failure destroys its candidate and can retry without
   assert.equal(app.debugControllers().practiceSession, session);
   assert.deepEqual(session.getState(), {
     status: 'active', phase: 'guided', character: '字', index: 0, total: 1, mistakes: 0,
+    newlyMasteredCount: 0,
     completedCharacters: [], remainingCharacters: ['字'], needsPracticeCharacters: []
   });
 

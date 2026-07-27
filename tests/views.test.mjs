@@ -150,6 +150,7 @@ function sessionState(overrides = {}) {
     index: 0,
     total: 15,
     mistakes: 0,
+    newlyMasteredCount: 0,
     completedCharacters: [],
     remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     needsPracticeCharacters: [],
@@ -433,6 +434,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     mistakes: 0,
     completedCount: 0,
     masteredCount: 0,
+    newlyMasteredCount: 0,
     needsPracticeCharacters: [],
     persistent: true
   });
@@ -455,6 +457,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     mistakes: 0,
     completedCount: 15,
     masteredCount: 1,
+    newlyMasteredCount: 0,
     needsPracticeCharacters: ['据'],
     persistent: false
   });
@@ -595,7 +598,10 @@ test('practice models accept real session snapshots across retry, defer, complet
       }),
       scope: 'group'
     };
-    const model = createPracticeModel(resolved, { ...state, masteredCount: 0 }, false);
+    const masteredCount = entries.filter((entry) => (
+      progress.getCharacter(entry.character).mastered
+    )).length;
+    const model = createPracticeModel(resolved, { ...state, masteredCount }, false);
     models.push(model);
     return model;
   };
@@ -1004,7 +1010,10 @@ test('renders active practice as an unframed board with stable live handles and 
 
   assert.equal(byAttribute(container, 'data-view', 'practice').length, 1);
   assert.equal(handle.root.getAttribute('class'), 'view view--practice');
-  assert.equal(Object.keys(handle).join(','), 'root,heading,board,setFeedback,setStrokePosition');
+  assert.equal(
+    Object.keys(handle).join(','),
+    'root,heading,board,setFeedback,setStrokePosition,setUnavailable'
+  );
   assert.ok(Object.isFrozen(handle));
   assert.equal(byAction(container, 'practice-back').length, 1);
   assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-lesson-id'), 'lesson-1');
@@ -1093,6 +1102,37 @@ test('renders retry controls by scope and rejects inactive handle mutations with
   assert.equal(groupDom.container.textContent, before);
 });
 
+test('active practice unavailable state disables hints and offers skipping only for groups', async () => {
+  const { createPracticeModel, renderPractice } = loadViews();
+  const store = await createRuntimeStore();
+  const resolved = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  const groupDom = createDom();
+  const singleDom = createDom();
+  const groupHandle = renderPractice(groupDom.container, createPracticeModel(
+    { ...resolved, scope: 'group' }, sessionState(), true
+  ));
+  const singleHandle = renderPractice(singleDom.container, createPracticeModel(
+    { ...resolved, scope: 'single' }, sessionState({
+      total: 1, remainingCharacters: ['潮']
+    }), true
+  ));
+
+  groupHandle.setUnavailable();
+  singleHandle.setUnavailable();
+
+  assert.equal(
+    byAttribute(groupDom.container, 'data-slot', 'practice-feedback')[0].textContent,
+    '这个字暂时无法练习'
+  );
+  assert.equal(byAction(groupDom.container, 'practice-hint')[0].getAttribute('disabled'), '');
+  assert.equal(byAction(groupDom.container, 'practice-skip-unavailable')[0].textContent, '跳过这个字');
+  assert.equal(byAction(groupDom.container, 'practice-skip-unavailable')[0].getAttribute('hidden'), null);
+  assert.equal(byAction(singleDom.container, 'practice-hint')[0].getAttribute('disabled'), '');
+  assert.equal(byAction(singleDom.container, 'practice-skip-unavailable').length, 0);
+  assert.equal(byAction(singleDom.container, 'practice-restart').length, 1);
+  assert.equal(byAction(singleDom.container, 'practice-back').length, 1);
+});
+
 test('renders complete summaries, conditional review actions, return action, and persistence warning', async () => {
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
@@ -1109,7 +1149,8 @@ test('renders complete summaries, conditional review actions, return action, and
     completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     remainingCharacters: [],
     needsPracticeCharacters: ['据'],
-    masteredCount: 1
+    masteredCount: 1,
+    newlyMasteredCount: 1
   }), false);
   const withoutNeeds = createPracticeModel(resolved, sessionState({
     status: 'complete',
@@ -1130,6 +1171,7 @@ test('renders complete summaries, conditional review actions, return action, and
   assert.equal(byAttribute(needsDom.container, 'data-slot', 'practice-board').length, 0);
   assert.match(needsDom.container.textContent, /本轮完成 15 个/);
   assert.match(needsDom.container.textContent, /当前掌握 1 个/);
+  assert.match(needsDom.container.textContent, /本次新掌握 1 个/);
   assert.match(needsDom.container.textContent, /需要再练 1 个/);
   assert.match(needsDom.container.textContent, /本次进度不会保存/);
   assert.equal(byAction(needsDom.container, 'practice-review-needs').length, 1);

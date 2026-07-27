@@ -13,8 +13,11 @@
   var LESSON_ID = /^[a-z][a-z0-9-]*$/;
   var GROUP_FIELDS = Object.freeze([
     'completedCharacters',
+    'roundCharacters',
+    'roundCompletedCharacters',
     'remainingCharacters',
     'needsPracticeCharacters',
+    'roundInitialMasteredCharacters',
     'currentCharacter',
     'currentPhase'
   ]);
@@ -158,9 +161,11 @@
     return true;
   }
 
-  function coversSource(completed, remaining, source) {
+  function coversSource(completed, remaining, needsPractice, source) {
     return source.every(function (character) {
-      return completed.indexOf(character) !== -1 || remaining.indexOf(character) !== -1;
+      return completed.indexOf(character) !== -1
+        || remaining.indexOf(character) !== -1
+        || needsPractice.indexOf(character) !== -1;
     });
   }
 
@@ -178,26 +183,39 @@
       GROUP_FIELDS.forEach(function (field) {
         if (names.indexOf(field) === -1) throw new TypeError('missing field');
       });
-      var completed = orderBySource(cloneCharacterList(
+      cloneCharacterList(
         ownDataValue(value, 'completedCharacters', 'stored group'),
         'stored group.completedCharacters', orderedCharacters
-      ), orderedCharacters);
+      );
+      var roundCharacters = cloneCharacterList(
+        ownDataValue(value, 'roundCharacters', 'stored group'),
+        'stored group.roundCharacters', orderedCharacters
+      );
+      if (roundCharacters.length === 0 || !isOrderedSubset(roundCharacters, orderedCharacters)) return null;
+      var completed = cloneCharacterList(
+        ownDataValue(value, 'roundCompletedCharacters', 'stored group'),
+        'stored group.roundCompletedCharacters', roundCharacters
+      );
       var remaining = cloneCharacterList(
         ownDataValue(value, 'remainingCharacters', 'stored group'),
-        'stored group.remainingCharacters', orderedCharacters
+        'stored group.remainingCharacters', roundCharacters
       );
       var needsPractice = cloneCharacterList(
         ownDataValue(value, 'needsPracticeCharacters', 'stored group'),
-        'stored group.needsPracticeCharacters', orderedCharacters
+        'stored group.needsPracticeCharacters', roundCharacters
       );
-      if (!isOrderedSubset(remaining, orderedCharacters)
-          || !isOrderedSubset(needsPractice, orderedCharacters)) return null;
-      if (!coversSource(completed, remaining, orderedCharacters)) return null;
-      for (var needIndex = 0; needIndex < needsPractice.length; needIndex += 1) {
-        var neededCharacter = needsPractice[needIndex];
-        if (completed.indexOf(neededCharacter) === -1
-            || remaining.indexOf(neededCharacter) !== -1) return null;
-      }
+      var initialMastered = cloneCharacterList(
+        ownDataValue(value, 'roundInitialMasteredCharacters', 'stored group'),
+        'stored group.roundInitialMasteredCharacters', roundCharacters
+      );
+      if (!isOrderedSubset(completed, roundCharacters)
+          || !isOrderedSubset(remaining, roundCharacters)
+          || !isOrderedSubset(needsPractice, roundCharacters)
+          || !isOrderedSubset(initialMastered, roundCharacters)) return null;
+      if (!coversSource(completed, remaining, needsPractice, roundCharacters)) return null;
+      if (remaining.some(function (character) {
+        return needsPractice.indexOf(character) !== -1;
+      })) return null;
       var currentCharacter = ownDataValue(value, 'currentCharacter', 'stored group');
       var currentPhase = ownDataValue(value, 'currentPhase', 'stored group');
       if (remaining.length === 0) {
@@ -207,25 +225,25 @@
           || (currentPhase !== 'guided' && currentPhase !== 'independent')) {
         return null;
       }
-      var preserveCurrentRetry = currentPhase === 'independent'
-        && completed.indexOf(currentCharacter) !== -1
-        && phaseFor(currentCharacter) !== 'independent';
-      var normalizedRemaining = remaining.filter(function (character) {
-        if (completed.indexOf(character) === -1) return true;
-        return character === currentCharacter && preserveCurrentRetry;
+      if (currentPhase === 'guided' && phaseFor(currentCharacter) === 'independent') {
+        currentPhase = 'independent';
+      }
+      var retryOverlap = completed.filter(function (character) {
+        return remaining.indexOf(character) !== -1;
       });
-      if (!coversSource(completed, normalizedRemaining, orderedCharacters)) return null;
-      if (normalizedRemaining.length === 0) {
-        currentCharacter = null;
-        currentPhase = null;
-      } else if (normalizedRemaining[0] !== currentCharacter) {
-        currentCharacter = normalizedRemaining[0];
-        currentPhase = phaseFor(currentCharacter);
+      if (retryOverlap.length !== 0
+          && (retryOverlap.length !== 1
+            || retryOverlap[0] !== currentCharacter
+            || currentPhase !== 'independent'
+            || phaseFor(currentCharacter) === 'independent')) {
+        return null;
       }
       return {
+        roundCharacters: roundCharacters,
         completedCharacters: completed,
-        remainingCharacters: normalizedRemaining,
+        remainingCharacters: remaining,
         needsPracticeCharacters: needsPractice,
+        roundInitialMasteredCharacters: initialMastered,
         currentCharacter: currentCharacter,
         currentPhase: currentPhase
       };
@@ -270,47 +288,57 @@
     var resume = Object.hasOwn(options, 'resume') ? ownDataValue(options, 'resume', 'options') : true;
     if (typeof resume !== 'boolean') reject('options.resume', 'must be a boolean');
 
-    var orderedCharacters = entries.map(function (entry) { return entry.character; });
-    if (orderedCharacters.indexOf(startCharacter) === -1) {
+    var availableCharacters = entries.map(function (entry) { return entry.character; });
+    if (availableCharacters.indexOf(startCharacter) === -1) {
       reject('options.startCharacter', 'must occur in options.entries');
     }
-    if (scope === 'single') orderedCharacters = [startCharacter];
-    orderedCharacters = Object.freeze(orderedCharacters.slice());
+    if (scope === 'single') availableCharacters = [startCharacter];
+    availableCharacters = Object.freeze(availableCharacters.slice());
+    var orderedCharacters = availableCharacters;
 
     function phaseFor(character) {
       var record = progress.getCharacter(character);
       return record && typeof record === 'object' && record.mastered === true ? 'independent' : 'guided';
     }
 
-    var state = {
-      status: 'active',
-      phase: phaseFor(orderedCharacters[0]),
-      character: orderedCharacters[0],
-      mistakes: 0,
-      completedCharacters: [],
-      remainingCharacters: orderedCharacters.slice(),
-      needsPracticeCharacters: []
-    };
+    var restored = null;
+    if (scope === 'group' && resume) {
+      restored = cloneCompatibleGroup(
+        progress.getGroup(lessonId, group), availableCharacters, phaseFor
+      );
+    }
+    if (restored !== null) orderedCharacters = Object.freeze(restored.roundCharacters.slice());
+    var roundInitialMasteredCharacters = restored !== null
+      ? Object.freeze(restored.roundInitialMasteredCharacters.slice())
+      : Object.freeze(orderedCharacters.filter(function (character) {
+        return phaseFor(character) === 'independent';
+      }));
+    var newlyMasteredCharacters = orderedCharacters.filter(function (character) {
+      return roundInitialMasteredCharacters.indexOf(character) === -1
+        && phaseFor(character) === 'independent';
+    });
+    var state = restored === null
+      ? {
+        status: 'active',
+        phase: phaseFor(orderedCharacters[0]),
+        character: orderedCharacters[0],
+        mistakes: 0,
+        completedCharacters: [],
+        remainingCharacters: orderedCharacters.slice(),
+        needsPracticeCharacters: []
+      }
+      : {
+        status: restored.remainingCharacters.length === 0 ? 'complete' : 'active',
+        phase: restored.currentPhase,
+        character: restored.currentCharacter,
+        mistakes: 0,
+        completedCharacters: restored.completedCharacters,
+        remainingCharacters: restored.remainingCharacters,
+        needsPracticeCharacters: restored.needsPracticeCharacters
+      };
     var singleMarked = false;
     var destroyed = false;
     var mutating = false;
-
-    if (scope === 'group' && resume) {
-      var restored = cloneCompatibleGroup(
-        progress.getGroup(lessonId, group), orderedCharacters, phaseFor
-      );
-      if (restored !== null) {
-        state = {
-          status: restored.remainingCharacters.length === 0 ? 'complete' : 'active',
-          phase: restored.currentPhase,
-          character: restored.currentCharacter,
-          mistakes: 0,
-          completedCharacters: restored.completedCharacters,
-          remainingCharacters: restored.remainingCharacters,
-          needsPracticeCharacters: restored.needsPracticeCharacters
-        };
-      }
-    }
 
     function assertAlive() {
       if (destroyed) throw new Error('Practice session has been destroyed');
@@ -339,6 +367,7 @@
         index: currentIndex(nextState),
         total: orderedCharacters.length,
         mistakes: nextState.mistakes,
+        newlyMasteredCount: newlyMasteredCharacters.length,
         completedCharacters: nextState.completedCharacters.slice(),
         remainingCharacters: nextState.remainingCharacters.slice(),
         needsPracticeCharacters: nextState.needsPracticeCharacters.slice()
@@ -347,9 +376,12 @@
 
     function groupSnapshot(nextState) {
       return deepFreeze({
-        completedCharacters: nextState.completedCharacters.slice(),
+        completedCharacters: [],
+        roundCharacters: orderedCharacters.slice(),
+        roundCompletedCharacters: nextState.completedCharacters.slice(),
         remainingCharacters: nextState.remainingCharacters.slice(),
         needsPracticeCharacters: nextState.needsPracticeCharacters.slice(),
+        roundInitialMasteredCharacters: roundInitialMasteredCharacters.slice(),
         currentCharacter: nextState.character,
         currentPhase: nextState.phase
       });
@@ -401,6 +433,17 @@
         var completed = addInSourceOrder(state.completedCharacters, character, orderedCharacters);
         var outcome = totalMistakes > 0 ? 'needs-practice' : 'mastered';
         progress.recordCharacterOutcome(character, outcome);
+        if (outcome === 'mastered'
+            && roundInitialMasteredCharacters.indexOf(character) === -1
+            && newlyMasteredCharacters.indexOf(character) === -1) {
+          newlyMasteredCharacters = addInSourceOrder(
+            newlyMasteredCharacters, character, orderedCharacters
+          );
+        } else if (outcome === 'needs-practice') {
+          newlyMasteredCharacters = newlyMasteredCharacters.filter(function (item) {
+            return item !== character;
+          });
+        }
         if (scope === 'single' && !singleMarked) {
           progress.markGroupCharacterCompleted(lessonId, group, character);
           singleMarked = true;
@@ -467,6 +510,35 @@
       });
     }
 
+    function skipCurrent() {
+      assertAlive();
+      return runMutation(function () {
+        if (scope !== 'group') throw new Error('Only group practice sessions can skip a character');
+        if (state.status !== 'active') throw new Error('Practice session is not active');
+        var skippedCharacter = state.character;
+        var remaining = state.remainingCharacters.filter(function (item) {
+          return item !== skippedCharacter;
+        });
+        var needsPractice = addInSourceOrder(
+          state.needsPracticeCharacters, skippedCharacter, orderedCharacters
+        );
+        if (remaining.length === 0) {
+          commit({
+            status: 'complete', phase: null, character: null, mistakes: 0,
+            completedCharacters: state.completedCharacters.slice(), remainingCharacters: [],
+            needsPracticeCharacters: needsPractice
+          }, true);
+          return;
+        }
+        var nextCharacter = remaining[0];
+        commit({
+          status: 'active', phase: phaseFor(nextCharacter), character: nextCharacter, mistakes: 0,
+          completedCharacters: state.completedCharacters.slice(), remainingCharacters: remaining,
+          needsPracticeCharacters: needsPractice
+        }, true);
+      });
+    }
+
     function restart() {
       assertAlive();
       return runMutation(function () {
@@ -489,6 +561,7 @@
       completeCharacter: completeCharacter,
       retry: retry,
       defer: defer,
+      skipCurrent: skipCurrent,
       restart: restart,
       destroy: destroy
     });

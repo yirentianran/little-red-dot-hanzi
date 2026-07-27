@@ -100,9 +100,9 @@
     var location = requireRecord(options.location, 'options.location');
     var createAudio = requireFunction(options.createAudio, 'options.createAudio');
     var HanziWriter = Object.hasOwn(options, 'HanziWriter') ? options.HanziWriter : null;
-    if (HanziWriter === null
-        || (typeof HanziWriter !== 'object' && typeof HanziWriter !== 'function')) {
-      reject('options.HanziWriter', 'must be an object');
+    if (HanziWriter !== null
+        && typeof HanziWriter !== 'object' && typeof HanziWriter !== 'function') {
+      reject('options.HanziWriter', 'must be null or an object');
     }
     var storage = Object.hasOwn(options, 'storage') ? options.storage : null;
     var reducedMotion = Object.hasOwn(options, 'reducedMotion')
@@ -123,6 +123,7 @@
     var practiceEngineOwner = null;
     var practiceContext = null;
     var practiceOrigin = null;
+    var pendingPracticeResume = null;
     var currentAnimationSession = null;
     var viewEpoch = 0;
     var transitionRevision = 0;
@@ -501,7 +502,7 @@
     function degradePracticeEngine(revision, session, handle) {
       if (!ownsPracticeView(revision, session, handle)) return false;
       try {
-        handle.setFeedback('这个字暂时无法练习', 'error');
+        handle.setUnavailable();
       } catch (ignored) {
         // The announcement still exposes the recoverable engine failure.
       }
@@ -621,8 +622,18 @@
         progress: practiceProgress,
         resume: resume
       });
-      practiceContext.entries = entries.slice();
-      practiceContext.lastCharacter = startCharacter;
+      var sessionState = session.getState();
+      var activeCharacters = new Set(sessionState.completedCharacters.concat(
+        sessionState.remainingCharacters, sessionState.needsPracticeCharacters
+      ));
+      var activeEntries = entries.filter(function (entry) {
+        return activeCharacters.has(entry.character);
+      });
+      practiceContext.entries = activeEntries;
+      practiceContext.lastCharacter = sessionState.character
+        || (activeEntries.length === 0
+          ? startCharacter
+          : activeEntries[activeEntries.length - 1].character);
       practiceSession = session;
       return session;
     }
@@ -646,7 +657,15 @@
         entries: entries.slice(),
         lastCharacter: info.route.character
       };
-      createPracticeSessionFor(entries, info.route.character, true);
+      var resume = true;
+      if (pendingPracticeResume
+          && pendingPracticeResume.lessonId === info.route.lessonId
+          && pendingPracticeResume.group === info.route.group
+          && pendingPracticeResume.scope === info.route.scope) {
+        resume = pendingPracticeResume.resume;
+      }
+      pendingPracticeResume = null;
+      createPracticeSessionFor(entries, info.route.character, resume);
       return renderCurrentPracticeState(revision, false);
     }
 
@@ -989,11 +1008,26 @@
           group: data.group, character: character
         })
         : Object.freeze({ view: 'lesson', lessonId: data.lessonId, group: data.group });
+      var savedGroup = scope === 'group'
+        ? practiceProgress.getGroup(data.lessonId, data.group)
+        : null;
+      pendingPracticeResume = {
+        lessonId: data.lessonId,
+        group: data.group,
+        scope: scope,
+        resume: scope !== 'group' || Boolean(
+          savedGroup && savedGroup.roundCharacters.length !== 0
+            && savedGroup.remainingCharacters.length !== 0
+        )
+      };
       var changed = navigate({
         view: 'practice', lessonId: data.lessonId, group: data.group,
         scope: scope, character: character
       });
-      if (!route || route.view !== 'practice') practiceOrigin = null;
+      if (!route || route.view !== 'practice') {
+        practiceOrigin = null;
+        pendingPracticeResume = null;
+      }
       return changed;
     }
 
@@ -1027,27 +1061,25 @@
           var inactiveSession = practiceSession;
           var inactiveHandle = currentHandle;
           var inactiveState;
-          var inactiveResolved;
           try {
             inactiveState = inactiveSession.getState();
             if (inactiveState.status !== 'active') return false;
-            inactiveResolved = resolvedPractice(inactiveState.character);
           } catch (ignored) {
             return false;
           }
-          if (!inactiveResolved || !ownsPracticeView(
+          if (!ownsPracticeView(
             transitionRevision, inactiveSession, inactiveHandle
           )) return false;
-          var startOutcome = startPracticeEngine(
-            transitionRevision, inactiveState, inactiveResolved, inactiveHandle, inactiveSession
+          if (!renderCurrentPracticeState(transitionRevision, false)) return false;
+          if (!practiceEngine) return ownsPracticeView(
+            transitionRevision, inactiveSession, currentHandle
           );
-          if (startOutcome === 'stale') return false;
-          if (startOutcome === 'degraded') return true;
           var recoveredOwner = practiceEngineOwner;
+          var recoveredHandle = currentHandle;
           try {
-            if (!isCurrentPracticeOwner(recoveredOwner) || currentHandle !== inactiveHandle) return false;
-            inactiveHandle.setFeedback('已经重新开始', 'neutral');
-            return isCurrentPracticeOwner(recoveredOwner) && currentHandle === inactiveHandle;
+            if (!isCurrentPracticeOwner(recoveredOwner)) return false;
+            recoveredHandle.setFeedback('已经重新开始', 'neutral');
+            return isCurrentPracticeOwner(recoveredOwner) && currentHandle === recoveredHandle;
           } catch (ignored) {
             return false;
           }
@@ -1085,6 +1117,20 @@
           deferSession.defer();
           if (practiceSession !== deferSession) {
             destroyCandidate(deferSession);
+            return false;
+          }
+          announcePracticeStorageWarning();
+          return renderCurrentPracticeState(transitionRevision, true);
+        } catch (ignored) {
+          return false;
+        }
+      }
+      if (action === 'practice-skip-unavailable') {
+        var skipSession = practiceSession;
+        try {
+          skipSession.skipCurrent();
+          if (practiceSession !== skipSession) {
+            destroyCandidate(skipSession);
             return false;
           }
           announcePracticeStorageWarning();
