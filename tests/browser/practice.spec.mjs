@@ -391,6 +391,14 @@ export async function registerBrowserTests({ test }) {
     await waitForPractice(page, '盐', '引导描写');
     assert.ok(await page.evaluate(() => window.__documentListenerCount()) > baselineListeners);
 
+    const busyPointerEvents = await page.locator('[data-slot="practice-board"]').evaluate((board) => {
+      board.setAttribute('aria-busy', 'true');
+      const pointerEvents = getComputedStyle(board).pointerEvents;
+      board.setAttribute('aria-busy', 'false');
+      return pointerEvents;
+    });
+    assert.equal(busyPointerEvents, 'none');
+
     await page.locator('.practice-writer-host').evaluate((host) => { host.dataset.resizeProbe = 'same'; });
     const before = await page.locator('[data-slot="practice-board"]').boundingBox();
     await page.setViewportSize({ width: 620, height: 860 });

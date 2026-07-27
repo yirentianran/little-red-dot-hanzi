@@ -429,6 +429,9 @@ function createHarness(options = {}) {
         emit(event) {
           engineOptions.onEvent(event);
         },
+        fail(error = new Error('practice engine activation failed')) {
+          engineOptions.onError(error);
+        },
         destroy() {
           this.destroyed = true;
           log.push('practice-engine.destroy');
@@ -998,6 +1001,65 @@ test('practice engine start failure destroys its candidate and can retry without
 
   harness.click('practice-back');
   assert.deepEqual(app.getRoute(), characterRoute('字', 'recognize'));
+});
+
+test('synchronous activation failure during start degrades the owned route and remains restartable', () => {
+  const harness = createHarness({ hash: practiceHash('字', 'recognize', 'single') });
+  let callbackReturned = false;
+  harness.state.onPracticeEngineStart = (engine) => {
+    harness.state.onPracticeEngineStart = null;
+    assert.equal(typeof engine.options.onError, 'function');
+    engine.fail(new Error('synchronous activation failure'));
+    callbackReturned = true;
+  };
+
+  const app = loadApp().createApp(harness.createOptions);
+  const failedEngine = harness.state.practiceEngines[0];
+  const failedHandle = currentHandle(harness);
+  assert.equal(callbackReturned, true);
+  assert.deepEqual(app.getRoute(), practiceRoute('字', 'recognize', 'single'));
+  assert.equal(failedEngine.destroyed, true);
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.equal(failedHandle.unavailableCalls, 1);
+  assert.equal(harness.announcer.textContent, '这个字暂时无法练习');
+
+  assert.equal(app.dispatch('practice-restart'), true);
+  assert.notEqual(harness.state.practiceEngines.at(-1), failedEngine);
+  assert.equal(app.debugControllers().practiceEngine, harness.state.practiceEngines.at(-1));
+  assert.deepEqual(currentHandle(harness).feedback.at(-1), ['已经重新开始', 'neutral']);
+});
+
+test('asynchronous activation failure degrades only its owned engine and remains restartable', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const failedEngine = harness.state.practiceEngines[0];
+  const failedHandle = currentHandle(harness);
+
+  assert.doesNotThrow(() => failedEngine.fail(new Error('asynchronous activation failure')));
+  assert.equal(failedEngine.destroyed, true);
+  assert.equal(app.debugControllers().practiceEngine, null);
+  assert.equal(failedHandle.unavailableCalls, 1);
+  assert.equal(harness.announcer.textContent, '这个字暂时无法练习');
+
+  assert.equal(app.dispatch('practice-restart'), true);
+  assert.equal(app.debugControllers().practiceEngine, harness.state.practiceEngines.at(-1));
+});
+
+test('activation failure from a stale engine cannot degrade its replacement', () => {
+  const harness = createHarness({ hash: practiceHash() });
+  const app = loadApp().createApp(harness.createOptions);
+  const staleEngine = harness.state.practiceEngines[0];
+  app.navigate(practiceRoute('城'));
+  const replacementEngine = harness.state.practiceEngines.at(-1);
+  const replacementHandle = currentHandle(harness);
+  const announcements = harness.state.announcements.length;
+
+  assert.equal(staleEngine.destroyed, true);
+  assert.doesNotThrow(() => staleEngine.fail(new Error('late stale failure')));
+  assert.equal(app.debugControllers().practiceEngine, replacementEngine);
+  assert.equal(replacementEngine.destroyed, false);
+  assert.equal(replacementHandle.unavailableCalls, 0);
+  assert.equal(harness.state.announcements.length, announcements);
 });
 
 test('reentrant practice engine start failure cannot degrade a replacement view', () => {

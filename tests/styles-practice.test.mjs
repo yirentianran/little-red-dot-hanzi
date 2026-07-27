@@ -71,12 +71,14 @@ test('media helper isolates one nested media block', () => {
 test('practice board keeps a stable square drawing surface', async () => {
   const css = await readStyles();
   const board = ruleBody(css, '.practice-board');
+  const busyBoard = ruleBody(css, '.practice-board[aria-busy="true"]');
 
   assert.match(board, /position:\s*relative/i);
   assert.match(board, /width:\s*min\(100%,\s*620px\)/i);
   assert.match(board, /aspect-ratio:\s*1(?:\s*\/\s*1)?/i);
   assert.match(board, /overflow:\s*hidden/i);
   assert.match(board, /touch-action:\s*none/i);
+  assert.match(busyBoard, /pointer-events:\s*none/i);
 });
 
 test('writer and feedback layers cannot resize the board', async () => {

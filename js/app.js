@@ -511,12 +511,20 @@
       return ownsPracticeView(revision, session, handle);
     }
 
+    function handlePracticeEngineError(owner, handle) {
+      if (!isCurrentPracticeOwner(owner) || currentHandle !== handle) return false;
+      destroyPracticeEngine();
+      owner.degraded = degradePracticeEngine(owner.revision, owner.session, handle);
+      return owner.degraded;
+    }
+
     function startPracticeEngine(revision, state, resolved, handle, session) {
       var owner = {
         active: true,
         revision: revision,
         session: session,
-        engine: null
+        engine: null,
+        degraded: false
       };
       var candidate = null;
       try {
@@ -526,7 +534,8 @@
           character: state.character,
           geometry: resolved.geometry,
           reducedMotion: reducedMotion,
-          onEvent: function (event) { handlePracticeEvent(owner, event); }
+          onEvent: function (event) { handlePracticeEvent(owner, event); },
+          onError: function () { handlePracticeEngineError(owner, handle); }
         });
         if (!ownsPracticeView(revision, session, handle)) {
           owner.active = false;
@@ -537,8 +546,10 @@
         practiceEngineOwner = owner;
         practiceEngine = candidate;
         candidate.start({ phase: state.phase, strokeIndex: 0 });
+        if (owner.degraded) return 'degraded';
         return isCurrentPracticeOwner(owner) && currentHandle === handle ? 'started' : 'stale';
       } catch (ignored) {
+        if (owner.degraded) return 'degraded';
         if (practiceEngine === candidate && practiceEngineOwner === owner) {
           destroyPracticeEngine();
         } else if (owner.active) {

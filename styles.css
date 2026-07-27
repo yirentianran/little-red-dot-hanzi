@@ -675,6 +675,10 @@ a:focus-visible,
   touch-action: none;
 }
 
+.practice-board[aria-busy="true"] {
+  pointer-events: none;
+}
+
 .practice-writer-host,
 .practice-overlay,
 .practice-board > svg,

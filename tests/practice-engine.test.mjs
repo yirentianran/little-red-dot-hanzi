@@ -168,8 +168,9 @@ async function flushMicrotasks(turns = 12) {
 
 function deferred() {
   let resolve;
-  const promise = new Promise((settle) => { resolve = settle; });
-  return { promise, resolve };
+  let reject;
+  const promise = new Promise((settle, fail) => { resolve = settle; reject = fail; });
+  return { promise, resolve, reject };
 }
 
 function dot(target) { return target.queryByClass('practice-start-dot')[0]; }
@@ -355,16 +356,111 @@ test('destroy removes busy state and stale activation cannot restore it', async 
   assert.equal(target.getAttribute('aria-busy'), null);
 });
 
-test('rejected public activation promises are contained and do not start quiz', async () => {
+test('owned activation failures deactivate the board and notify onError exactly once', async (t) => {
+  function throwingThen(error) {
+    return Object.defineProperty({}, 'then', { get() { throw error; } });
+  }
+
+  const cases = [
+    ['showOutline synchronous throw', 'guided', 'outline', (error) => { throw error; }],
+    ['hideOutline synchronous throw', 'independent', 'outline', (error) => { throw error; }],
+    ['outline then getter throw', 'guided', 'outline', (error) => throwingThen(error)],
+    ['outline promise rejection', 'guided', 'outline', (error) => Promise.reject(error)],
+    ['quiz synchronous throw', 'guided', 'quiz', (error) => { throw error; }],
+    ['quiz then getter throw', 'guided', 'quiz', (error) => throwingThen(error)],
+    ['quiz promise rejection', 'guided', 'quiz', (error) => Promise.reject(error)]
+  ];
+
+  for (const [name, phase, operation, fail] of cases) {
+    await t.test(name, async () => {
+      const failure = new Error(name);
+      const errors = [];
+      const writer = operation === 'outline'
+        ? { [phase === 'guided' ? 'showOutline' : 'hideOutline']() { return fail(failure); } }
+        : { quiz() { return fail(failure); } };
+      const harness = createHarness({
+        writer,
+        options: { onError(error) { errors.push(error); } }
+      });
+
+      assert.doesNotThrow(() => harness.engine.start({ phase, strokeIndex: 0 }));
+      await flushMicrotasks();
+
+      assert.deepEqual(errors, [failure]);
+      assert.equal(harness.target.getAttribute('aria-busy'), 'false');
+      assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
+      assert.throws(() => harness.engine.restart(), /must be active/);
+      if (operation === 'outline') assert.equal(harness.calls.quiz.length, 0);
+    });
+  }
+});
+
+test('onError is optional, validated, and observer exceptions are contained', async () => {
+  const withoutObserver = createHarness({
+    writer: { showOutline() { throw new Error('outline failed'); } }
+  });
+  assert.doesNotThrow(() => withoutObserver.engine.start({ phase: 'guided', strokeIndex: 0 }));
+  assert.equal(withoutObserver.target.getAttribute('aria-busy'), 'false');
+
+  const throwingObserver = createHarness({
+    writer: { showOutline() { return Promise.reject(new Error('outline rejected')); } },
+    options: { onError() { throw new Error('observer failed'); } }
+  });
+  throwingObserver.engine.start({ phase: 'guided', strokeIndex: 0 });
+  await flushMicrotasks();
+  assert.equal(throwingObserver.target.getAttribute('aria-busy'), 'false');
+  assert.throws(() => createPracticeEngine({ ...throwingObserver.options, onError: true }), /options\.onError/);
+});
+
+test('stale activation failure cannot notify or clear replacement busy state', async () => {
+  const firstQuiz = deferred();
+  const replacementOutline = deferred();
+  let outlineCalls = 0;
+  const errors = [];
   const harness = createHarness({
     writer: {
-      showOutline() { return Promise.reject(new Error('outline rejected')); }
-    }
+      showOutline() {
+        outlineCalls += 1;
+        return outlineCalls === 1 ? undefined : replacementOutline.promise;
+      },
+      quiz() { return firstQuiz.promise; }
+    },
+    options: { onError(error) { errors.push(error); } }
+  });
+  harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+  harness.engine.restart();
+  const staleFailure = new Error('stale quiz rejected');
+  firstQuiz.reject(staleFailure);
+  await flushMicrotasks();
+
+  assert.equal(harness.target.getAttribute('aria-busy'), 'true');
+  assert.deepEqual(errors, []);
+  assert.equal(outlineCalls, 2);
+});
+
+test('owned failure becomes inactive before cancelQuiz can invoke writer callbacks', async () => {
+  const failure = new Error('quiz rejected');
+  const errors = [];
+  let quizOptions;
+  const harness = createHarness({
+    writer: {
+      quiz(options) {
+        quizOptions = options;
+        return Promise.reject(failure);
+      },
+      cancelQuiz() {
+        quizOptions.onComplete({ totalMistakes: 0 });
+      }
+    },
+    options: { onError(error) { errors.push(error); } }
   });
   harness.engine.start({ phase: 'guided', strokeIndex: 0 });
   await flushMicrotasks();
-  assert.equal(harness.calls.quiz.length, 0);
-  harness.engine.cancel();
+
+  assert.deepEqual(harness.events, []);
+  assert.deepEqual(errors, [failure]);
+  assert.equal(harness.target.getAttribute('aria-busy'), 'false');
+  assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
 });
 
 test('owns writer host and known 3.7.3 document listeners until destroy; browser runtime rechecks in Task 9', () => {
@@ -529,6 +625,21 @@ test('second pointer and abnormal primary termination restart the same stroke wi
   target.dispatch('pointercancel', { pointerId: 7 });
   assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);
   assert.equal(calls.cancelQuiz, 2);
+  assert.deepEqual(events, []);
+});
+
+test('pointerleave only restarts when the active pointer leaves the board itself', () => {
+  const { calls, engine, events, target } = createHarness();
+  const writerSvg = target.children[0].children[0];
+  engine.start({ phase: 'independent', strokeIndex: 1 });
+  target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+
+  target.dispatch('pointerleave', { pointerId: 4, target: writerSvg });
+  assert.equal(calls.cancelQuiz, 0);
+
+  target.dispatch('pointerleave', { pointerId: 4, target });
+  assert.equal(calls.cancelQuiz, 1);
+  assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);
   assert.deepEqual(events, []);
 });
 

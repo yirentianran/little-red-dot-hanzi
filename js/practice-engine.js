@@ -17,7 +17,7 @@
   var BRAND_RED = '#d92d20';
   var HAN_CHARACTER = /^\p{Script=Han}$/u;
   var OPTION_FIELDS = Object.freeze([
-    'target', 'HanziWriter', 'character', 'geometry', 'onEvent',
+    'target', 'HanziWriter', 'character', 'geometry', 'onEvent', 'onError',
     'reducedMotion', 'setTimeout', 'clearTimeout'
   ]);
   var REQUIRED_OPTION_FIELDS = Object.freeze([
@@ -307,6 +307,9 @@
     var character = requireCharacter(ownDataValue(options, 'character', 'options'));
     var geometry = cloneGeometry(ownDataValue(options, 'geometry', 'options'));
     var onEvent = requireFunction(ownDataValue(options, 'onEvent', 'options'), 'options.onEvent');
+    var onError = Object.hasOwn(options, 'onError')
+      ? requireFunction(ownDataValue(options, 'onError', 'options'), 'options.onError')
+      : function () {};
     var reducedMotion = Object.hasOwn(options, 'reducedMotion')
       ? ownDataValue(options, 'reducedMotion', 'options') : false;
     if (typeof reducedMotion !== 'boolean') reject('options.reducedMotion', 'must be a boolean');
@@ -466,6 +469,24 @@
       }
     }
 
+    function failActivation(task, error) {
+      if (!ownsActivation(task.revision)) {
+        safeCancelQuiz();
+        return;
+      }
+      active = false;
+      activePointerId = null;
+      clearError();
+      setActivationBusy(false);
+      updateDot();
+      safeCancelQuiz();
+      try {
+        onError(error);
+      } catch (_error) {
+        // Failure observers cannot interrupt activation cleanup.
+      }
+    }
+
     function finishActivation() {
       activationRunning = false;
       drainActivations();
@@ -475,8 +496,8 @@
       var then;
       try {
         then = result && result.then;
-      } catch (_error) {
-        onRejected();
+      } catch (error) {
+        onRejected(error);
         return;
       }
       if (typeof then !== 'function') {
@@ -497,8 +518,8 @@
           outlineResult = task.phase === 'guided'
             ? writer.showOutline({ duration: 0 })
             : writer.hideOutline({ duration: 0 });
-        } catch (_error) {
-          safeCancelQuiz();
+        } catch (error) {
+          failActivation(task, error);
           finishActivation();
           return;
         }
@@ -511,8 +532,8 @@
           var quizResult;
           try {
             quizResult = writer.quiz(task.quizOptions);
-          } catch (_error) {
-            safeCancelQuiz();
+          } catch (error) {
+            failActivation(task, error);
             finishActivation();
             return;
           }
@@ -520,12 +541,12 @@
             if (!ownsActivation(task.revision)) safeCancelQuiz();
             else setActivationBusy(false);
             finishActivation();
-          }, function () {
-            safeCancelQuiz();
+          }, function (error) {
+            failActivation(task, error);
             finishActivation();
           });
-        }, function () {
-          safeCancelQuiz();
+        }, function (error) {
+          failActivation(task, error);
           finishActivation();
         });
         return;
