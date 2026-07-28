@@ -389,6 +389,23 @@ async function assertTextIsNotClipped(page, selectors, label) {
   assert.deepEqual(clipped, [], `${label}: clipped text ${JSON.stringify(clipped)}`);
 }
 
+async function assertInlineContentInset(page, selector, minimum, label) {
+  const insets = await page.locator(selector).evaluate((container) => {
+    const containerBox = container.getBoundingClientRect();
+    const childBoxes = [...container.children]
+      .filter((child) => getComputedStyle(child).display !== 'none')
+      .map((child) => child.getBoundingClientRect());
+    return {
+      left: Math.min(...childBoxes.map((box) => box.left)) - containerBox.left,
+      right: containerBox.right - Math.max(...childBoxes.map((box) => box.right))
+    };
+  });
+  assert.ok(
+    insets.left >= minimum && insets.right >= minimum,
+    `${label}: content touches an inline edge ${JSON.stringify(insets)}`
+  );
+}
+
 async function assertPracticeCommon(page, label) {
   await assertNoHorizontalOverflow(page, label);
   await assertVisibleTargetsAreLargeEnough(page, label);
@@ -630,6 +647,12 @@ export async function registerBrowserTests({ test }) {
         '.lesson-practice-summary',
         '[data-action="start-group-practice"]'
       ], `${viewport.label} practice entrance`);
+      await assertInlineContentInset(
+        page,
+        '.lesson-practice-summary',
+        12,
+        `${viewport.label} practice entrance summary`
+      );
       await assertSelectorsDoNotOverlap(page, [
         '[data-view="lesson"] .back-button',
         '[data-view="lesson"] .view-eyebrow',
