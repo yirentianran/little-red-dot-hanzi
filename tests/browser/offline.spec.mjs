@@ -412,6 +412,16 @@ async function assertInlineContentInset(page, selector, minimum, label) {
   );
 }
 
+async function assertVerticalGap(page, upperSelector, lowerSelector, minimum, label) {
+  const [upper, lower] = await Promise.all([
+    page.locator(upperSelector).boundingBox(),
+    page.locator(lowerSelector).boundingBox()
+  ]);
+  assert.ok(upper && lower, `${label}: missing element geometry`);
+  const gap = lower.y - (upper.y + upper.height);
+  assert.ok(gap >= minimum, `${label}: vertical gap is ${gap}px`);
+}
+
 async function assertPracticeCommon(page, label) {
   await assertNoHorizontalOverflow(page, label);
   await assertVisibleTargetsAreLargeEnough(page, label);
@@ -658,6 +668,13 @@ export async function registerBrowserTests({ test }) {
         '.lesson-practice-summary',
         12,
         `${viewport.label} practice entrance summary`
+      );
+      await assertVerticalGap(
+        page,
+        '[data-view="lesson"] .segmented-control',
+        '.lesson-practice-summary',
+        12,
+        `${viewport.label} practice entrance controls`
       );
       await assertSelectorsDoNotOverlap(page, [
         '[data-view="lesson"] .back-button',

@@ -564,7 +564,7 @@ a:focus-visible,
   gap: 10px 16px;
   width: 100%;
   padding: 12px 16px;
-  margin: 0 0 18px;
+  margin: 12px 0 18px;
   background: var(--sunny-yellow-soft);
   border-block: 1px solid #e1c94e;
 }
