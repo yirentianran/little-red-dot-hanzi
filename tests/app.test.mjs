@@ -1105,6 +1105,34 @@ test('practice preserves the last learning route and returns to remembered or di
   assert.deepEqual(groupApp.getRoute(), { view: 'lesson', lessonId: 'lesson-1', group: 'write' });
 });
 
+test('practice hash navigation rebuilds the origin when its group and scope change', () => {
+  const harness = createHarness({ hash: '#/lesson?lesson=lesson-1&group=write' });
+  const app = loadApp().createApp(harness.createOptions);
+  harness.click('start-group-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'write'
+  });
+
+  harness.location.setRaw(practiceHash('字', 'recognize', 'single'));
+  harness.windowObject.emit('hashchange');
+  harness.click('practice-back');
+
+  assert.deepEqual(app.getRoute(), characterRoute('字', 'recognize'));
+});
+
+test('practice character navigation preserves the origin within the same context', () => {
+  const harness = createHarness({ hash: characterHash('郭', 'write') });
+  const app = loadApp().createApp(harness.createOptions);
+  harness.click('start-character-practice', {
+    'data-lesson-id': 'lesson-1', 'data-group': 'write', 'data-character': '郭'
+  });
+
+  harness.location.setRaw(practiceHash('城', 'write', 'single'));
+  harness.windowObject.emit('hashchange');
+  harness.click('practice-back');
+
+  assert.deepEqual(app.getRoute(), characterRoute('郭', 'write'));
+});
+
 test('injects current practice snapshots into lesson and character models', () => {
   const harness = createHarness({
     hash: '#/lesson?lesson=lesson-1&group=write', realViewModels: true

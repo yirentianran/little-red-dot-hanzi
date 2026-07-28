@@ -26,7 +26,8 @@
   var GEOMETRY_FIELDS = Object.freeze(['strokeCount', 'strokes', 'medians']);
   var START_FIELDS = Object.freeze(['phase', 'strokeIndex']);
   var LISTENER_TYPES = Object.freeze([
-    'pointerdown', 'pointerup', 'pointercancel', 'lostpointercapture', 'pointerleave'
+    'pointerdown', 'pointerup', 'pointercancel', 'lostpointercapture', 'pointerleave',
+    'touchstart', 'touchend', 'touchcancel'
   ]);
 
   function reject(path, requirement) {
@@ -369,6 +370,10 @@
     var currentStroke = 0;
     var revision = 0;
     var activePointerId = null;
+    var trackedPointerIds = [];
+    var activeTouchCount = 0;
+    var inputSuppressed = false;
+    var suppressionTimer = null;
     var errorTimer = null;
     var errorPath = null;
     var errorRevision = 0;
@@ -469,6 +474,20 @@
       }
     }
 
+    function cancelSuppressionTimer() {
+      if (suppressionTimer === null) return;
+      cancelTimeout(suppressionTimer);
+      suppressionTimer = null;
+    }
+
+    function resetPointerState() {
+      cancelSuppressionTimer();
+      activePointerId = null;
+      trackedPointerIds = [];
+      activeTouchCount = 0;
+      inputSuppressed = false;
+    }
+
     function failActivation(task, error) {
       if (!ownsActivation(task.revision)) {
         safeCancelQuiz();
@@ -484,6 +503,22 @@
         onError(error);
       } catch (_error) {
         // Failure observers cannot interrupt activation cleanup.
+      }
+    }
+
+    function failHint(ownerRevision, error) {
+      if (!ownsActivation(ownerRevision)) return;
+      active = false;
+      activePointerId = null;
+      if (!inputSuppressed) trackedPointerIds = [];
+      clearError();
+      setActivationBusy(false);
+      updateDot();
+      safeCancelQuiz();
+      try {
+        onError(error);
+      } catch (_error) {
+        // Failure observers cannot interrupt hint cleanup.
       }
     }
 
@@ -560,7 +595,7 @@
 
     function invalidateActiveQuiz() {
       revision += 1;
-      activePointerId = null;
+      resetPointerState();
       if (active) safeCancelQuiz();
       active = false;
       clearError();
@@ -569,10 +604,20 @@
     }
 
     function begin(nextPhase, nextStroke) {
+      if (inputSuppressed) {
+        revision += 1;
+        phase = nextPhase;
+        currentStroke = nextStroke;
+        active = true;
+        clearError();
+        setActivationBusy(true);
+        updateDot();
+        return;
+      }
       if (active) invalidateActiveQuiz();
       else {
         revision += 1;
-        activePointerId = null;
+        resetPointerState();
         clearError();
       }
       phase = nextPhase;
@@ -640,7 +685,17 @@
       assertAlive();
       requireActive('show a hint');
       if (currentStroke >= geometry.strokeCount) return;
-      writer.highlightStroke(currentStroke);
+      var ownerRevision = revision;
+      var hintResult;
+      try {
+        hintResult = writer.highlightStroke(currentStroke);
+      } catch (error) {
+        failHint(ownerRevision, error);
+        return;
+      }
+      settleOperation(hintResult, function () {}, function (error) {
+        failHint(ownerRevision, error);
+      });
     }
 
     function resize() {
@@ -654,9 +709,18 @@
 
     function cancel() {
       assertAlive();
+      if (inputSuppressed) {
+        revision += 1;
+        active = false;
+        activePointerId = null;
+        clearError();
+        setActivationBusy(false);
+        updateDot();
+        return;
+      }
       if (!active) {
         revision += 1;
-        activePointerId = null;
+        resetPointerState();
         clearError();
         updateDot();
         return;
@@ -664,32 +728,88 @@
       invalidateActiveQuiz();
     }
 
-    function restartInterruptedStroke() {
-      if (destroyed || !active) return;
-      var savedPhase = phase;
-      var savedStroke = currentStroke;
-      begin(savedPhase, savedStroke);
+    function rememberPointer(pointerId) {
+      if (trackedPointerIds.indexOf(pointerId) === -1) trackedPointerIds.push(pointerId);
+    }
+
+    function forgetPointer(pointerId) {
+      var index = trackedPointerIds.indexOf(pointerId);
+      if (index !== -1) trackedPointerIds.splice(index, 1);
+    }
+
+    function enterInputSuppression() {
+      if (destroyed || !active || inputSuppressed) return;
+      inputSuppressed = true;
+      revision += 1;
       activePointerId = null;
+      safeCancelQuiz();
+      clearError();
+      setActivationBusy(true);
+      updateDot();
+    }
+
+    function scheduleSuppressedRestart() {
+      if (!inputSuppressed || trackedPointerIds.length !== 0
+          || activeTouchCount !== 0 || suppressionTimer !== null) return;
+      suppressionTimer = scheduleTimeout(function () {
+        suppressionTimer = null;
+        if (destroyed || !inputSuppressed
+            || trackedPointerIds.length !== 0 || activeTouchCount !== 0) return;
+        inputSuppressed = false;
+        activePointerId = null;
+        if (!active) return;
+        var savedPhase = phase;
+        var savedStroke = currentStroke;
+        active = false;
+        begin(savedPhase, savedStroke);
+      }, 0);
+    }
+
+    function abortPointer(pointerId) {
+      if (!inputSuppressed) enterInputSuppression();
+      if (!inputSuppressed) return;
+      forgetPointer(pointerId);
+      scheduleSuppressedRestart();
     }
 
     function onPointerDown(event) {
       if (destroyed || !active || !Number.isFinite(event.pointerId)) return;
+      if (inputSuppressed) {
+        cancelSuppressionTimer();
+        rememberPointer(event.pointerId);
+        return;
+      }
       if (activePointerId === null) {
         if (event.isPrimary === false) return;
         activePointerId = event.pointerId;
+        rememberPointer(event.pointerId);
       } else if (activePointerId !== event.pointerId) {
-        restartInterruptedStroke();
+        rememberPointer(event.pointerId);
+        enterInputSuppression();
       }
     }
 
     function onPointerUp(event) {
-      if (destroyed || !active || event.pointerId !== activePointerId) return;
+      if (destroyed || !Number.isFinite(event.pointerId)) return;
+      if (inputSuppressed) {
+        forgetPointer(event.pointerId);
+        scheduleSuppressedRestart();
+        return;
+      }
+      if (!active || event.pointerId !== activePointerId) return;
+      forgetPointer(event.pointerId);
       activePointerId = null;
     }
 
     function onPointerAborted(event) {
-      if (destroyed || !active || event.pointerId !== activePointerId) return;
-      restartInterruptedStroke();
+      if (destroyed || !Number.isFinite(event.pointerId)) return;
+      if (inputSuppressed) {
+        forgetPointer(event.pointerId);
+        scheduleSuppressedRestart();
+        return;
+      }
+      if (!active || event.pointerId !== activePointerId) return;
+      abortPointer(event.pointerId);
     }
 
     function onPointerLeave(event) {
@@ -697,12 +817,36 @@
       onPointerAborted(event);
     }
 
+    function updateActiveTouches(event) {
+      var count = event.touches && event.touches.length;
+      if (!Number.isSafeInteger(count) || count < 0) return false;
+      activeTouchCount = count;
+      return true;
+    }
+
+    function onTouchStart(event) {
+      if (destroyed || !updateActiveTouches(event)) return;
+      if (inputSuppressed) {
+        cancelSuppressionTimer();
+        return;
+      }
+      if (active && activeTouchCount > 1) enterInputSuppression();
+    }
+
+    function onTouchEnd(event) {
+      if (destroyed || !updateActiveTouches(event) || !inputSuppressed) return;
+      scheduleSuppressedRestart();
+    }
+
     var listenerByType = {
       pointerdown: onPointerDown,
       pointerup: onPointerUp,
       pointercancel: onPointerAborted,
       lostpointercapture: onPointerAborted,
-      pointerleave: onPointerLeave
+      pointerleave: onPointerLeave,
+      touchstart: onTouchStart,
+      touchend: onTouchEnd,
+      touchcancel: onTouchEnd
     };
 
     function installListeners() {
@@ -848,7 +992,7 @@
       revision += 1;
       destroyed = true;
       active = false;
-      activePointerId = null;
+      resetPointerState();
       activationTasks = [];
       safeCancelQuiz();
       clearError();

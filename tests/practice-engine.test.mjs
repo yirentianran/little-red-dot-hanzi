@@ -173,6 +173,10 @@ function deferred() {
   return { promise, resolve, reject };
 }
 
+function throwingThen(error) {
+  return Object.defineProperty({}, 'then', { get() { throw error; } });
+}
+
 function dot(target) { return target.queryByClass('practice-start-dot')[0]; }
 function errorPath(target) { return target.queryByClass('practice-error-path')[0]; }
 function validStrokeData(overrides = {}) {
@@ -357,10 +361,6 @@ test('destroy removes busy state and stale activation cannot restore it', async 
 });
 
 test('owned activation failures deactivate the board and notify onError exactly once', async (t) => {
-  function throwingThen(error) {
-    return Object.defineProperty({}, 'then', { get() { throw error; } });
-  }
-
   const cases = [
     ['showOutline synchronous throw', 'guided', 'outline', (error) => { throw error; }],
     ['hideOutline synchronous throw', 'independent', 'outline', (error) => { throw error; }],
@@ -569,6 +569,112 @@ test('showHint is a no-op during the final-correct callback window', () => {
   assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
 });
 
+test('showHint settles writer promises and keeps the owned quiz active on fulfillment', async () => {
+  let fulfillmentCalls = 0;
+  const harness = createHarness({
+    writer: {
+      highlightStroke(strokeNum) {
+        harness.calls.highlight.push(strokeNum);
+        return {
+          then(resolve) {
+            fulfillmentCalls += 1;
+            resolve();
+          }
+        };
+      }
+    }
+  });
+  harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+  assert.doesNotThrow(() => harness.engine.showHint());
+  await flushMicrotasks();
+
+  assert.deepEqual(harness.calls.highlight, [0]);
+  assert.equal(fulfillmentCalls, 1);
+  assert.doesNotThrow(() => harness.engine.restart());
+});
+
+test('owned hint failures deactivate the board and notify onError exactly once', async (t) => {
+  const cases = [
+    ['synchronous throw', (error) => { throw error; }],
+    ['then getter throw', (error) => throwingThen(error)],
+    ['promise rejection', (error) => Promise.reject(error)]
+  ];
+
+  for (const [name, fail] of cases) {
+    await t.test(name, async () => {
+      const failure = new Error(`hint ${name}`);
+      const errors = [];
+      const harness = createHarness({
+        writer: { highlightStroke() { return fail(failure); } },
+        options: { onError(error) { errors.push(error); } }
+      });
+      harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+
+      assert.doesNotThrow(() => harness.engine.showHint());
+      await flushMicrotasks();
+
+      assert.deepEqual(errors, [failure]);
+      assert.equal(harness.target.getAttribute('aria-busy'), 'false');
+      assert.equal(dot(harness.target).getAttribute('visibility'), 'hidden');
+      assert.throws(() => harness.engine.restart(), /must be active/);
+    });
+  }
+});
+
+test('stale hint rejection cannot notify, cancel, or deactivate a replacement quiz', async () => {
+  const firstHint = deferred();
+  const errors = [];
+  let highlightCalls = 0;
+  const harness = createHarness({
+    writer: {
+      highlightStroke(strokeNum) {
+        harness.calls.highlight.push(strokeNum);
+        highlightCalls += 1;
+        return highlightCalls === 1 ? firstHint.promise : Promise.resolve();
+      }
+    },
+    options: { onError(error) { errors.push(error); } }
+  });
+  harness.engine.start({ phase: 'guided', strokeIndex: 0 });
+  harness.engine.showHint();
+  harness.engine.restart();
+  const replacement = harness.calls.quiz.at(-1);
+  const cancelCount = harness.calls.cancelQuiz;
+
+  firstHint.reject(new Error('stale hint rejected'));
+  await flushMicrotasks();
+
+  assert.deepEqual(errors, []);
+  assert.equal(harness.calls.cancelQuiz, cancelCount);
+  assert.equal(harness.calls.installedQuiz, replacement);
+  assert.doesNotThrow(() => harness.engine.showHint());
+  assert.deepEqual(harness.calls.highlight, [0, 0]);
+});
+
+test('hint failure cleanup completes before reentrant onError replacement', async () => {
+  const failure = new Error('hint failed');
+  const errors = [];
+  let engine;
+  const harness = createHarness({
+    writer: { highlightStroke() { return Promise.reject(failure); } },
+    options: {
+      onError(error) {
+        errors.push(error);
+        engine.start({ phase: 'independent', strokeIndex: 1 });
+      }
+    }
+  });
+  engine = harness.engine;
+  engine.start({ phase: 'guided', strokeIndex: 0 });
+  engine.showHint();
+  await flushMicrotasks();
+
+  assert.deepEqual(errors, [failure]);
+  assert.equal(harness.calls.quiz.at(-1).quizStartStrokeNum, 1);
+  assert.equal(harness.calls.installedQuiz, harness.calls.quiz.at(-1));
+  assert.doesNotThrow(() => engine.restart());
+});
+
 test('replacement, hint, restart, and cancel preserve callback ownership and state', () => {
   const { calls, engine, events, target } = createHarness();
   engine.start({ phase: 'independent', strokeIndex: 1 });
@@ -609,23 +715,94 @@ test('resize updates the writer, overlay, and public transform without recreatio
   assert.equal(dot(target).parentNode.getAttribute('transform'), 'translate(640 480) scale(.25 -.25)');
 });
 
-test('second pointer and abnormal primary termination restart the same stroke without events', () => {
-  const { calls, engine, events, target } = createHarness();
-  const writerSvg = target.children[0].children[0];
+test('second pointer suppresses input until every pointer ends, then restarts once', () => {
+  const { calls, engine, events, target, timers } = createHarness();
   engine.start({ phase: 'independent', strokeIndex: 1 });
-  target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
   target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
-  assert.equal(calls.cancelQuiz, 0);
-  target.dispatch('pointerleave', { pointerId: 4, target: writerSvg });
-  assert.equal(calls.cancelQuiz, 0);
   target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
-  assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);
   assert.equal(calls.cancelQuiz, 1);
-  target.dispatch('pointerdown', { pointerId: 7, isPrimary: true });
-  target.dispatch('pointercancel', { pointerId: 7 });
-  assert.equal(calls.quiz.at(-1).quizStartStrokeNum, 1);
-  assert.equal(calls.cancelQuiz, 2);
+  assert.equal(calls.quiz.length, 1);
+
+  calls.quiz[0].onMistake(validStrokeData({ strokeNum: 1 }));
+  calls.quiz[0].onCorrectStroke(validStrokeData({ strokeNum: 1 }));
+  target.dispatch('pointerup', { pointerId: 9 });
+  assert.equal(calls.quiz.length, 1);
+  target.dispatch('pointerup', { pointerId: 4 });
+  assert.equal(calls.quiz.length, 1);
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+  assert.equal(timers.pending.size, 1);
+  timers.run([...timers.pending.keys()][0]);
+  assert.equal(calls.quiz.length, 2);
+  assert.equal(calls.quiz[1].quizStartStrokeNum, 1);
   assert.deepEqual(events, []);
+});
+
+test('suppressed input resumes once after duplicate cancel, lost-capture, and leave lifecycles', async (t) => {
+  const cases = [
+    ['pointercancel', 'pointercancel'],
+    ['lostpointercapture', 'lostpointercapture'],
+    ['pointerleave', 'pointerleave']
+  ];
+  for (const [name, terminalType] of cases) {
+    await t.test(name, () => {
+      const { calls, engine, events, target, timers } = createHarness();
+      engine.start({ phase: 'independent', strokeIndex: 1 });
+      target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+      target.dispatch(terminalType, { pointerId: 4, target });
+      target.dispatch('lostpointercapture', { pointerId: 4, target });
+
+      assert.equal(calls.cancelQuiz, 1);
+      assert.equal(calls.quiz.length, 1);
+      assert.equal(timers.pending.size, 1);
+      timers.run([...timers.pending.keys()][0]);
+      assert.equal(calls.quiz.length, 2);
+      assert.equal(calls.quiz[1].quizStartStrokeNum, 1);
+      assert.deepEqual(events, []);
+    });
+  }
+});
+
+test('pointer cancellation stays suppressed while its backing touch remains active', () => {
+  const { calls, engine, target, timers } = createHarness();
+  engine.start({ phase: 'independent', strokeIndex: 1 });
+  target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+  target.dispatch('touchstart', { touches: [{ identifier: 4 }] });
+  target.dispatch('pointercancel', { pointerId: 4 });
+
+  timers.run([...timers.pending.keys()][0]);
+  assert.equal(calls.quiz.length, 1);
+  assert.equal(target.getAttribute('aria-busy'), 'true');
+
+  target.dispatch('touchend', { touches: [] });
+  assert.equal(timers.pending.size, 1);
+  timers.run([...timers.pending.keys()][0]);
+  assert.equal(calls.quiz.length, 2);
+  assert.equal(calls.quiz[1].quizStartStrokeNum, 1);
+});
+
+test('restart updates a suppressed gesture without exposing a quiz, and destroy prevents resume', () => {
+  const restarted = createHarness();
+  restarted.engine.start({ phase: 'independent', strokeIndex: 1 });
+  restarted.target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+  restarted.target.dispatch('pointerdown', { pointerId: 9, isPrimary: false });
+  restarted.engine.restart();
+  assert.equal(restarted.calls.quiz.length, 1);
+  restarted.target.dispatch('pointerup', { pointerId: 9 });
+  restarted.target.dispatch('pointerup', { pointerId: 4 });
+  const restartTimer = [...restarted.timers.pending.keys()][0];
+  restarted.timers.run(restartTimer);
+  assert.equal(restarted.calls.quiz.length, 2);
+  assert.equal(restarted.calls.quiz[1].quizStartStrokeNum, 0);
+
+  const destroyed = createHarness();
+  destroyed.engine.start({ phase: 'guided', strokeIndex: 1 });
+  destroyed.target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
+  destroyed.target.dispatch('pointercancel', { pointerId: 4 });
+  const destroyedTimer = [...destroyed.timers.pending.keys()][0];
+  destroyed.engine.destroy();
+  destroyed.timers.runCleared(destroyedTimer);
+  assert.equal(destroyed.calls.quiz.length, 1);
+  assert.equal(destroyed.target.children.length, 0);
 });
 
 test('pointerleave only restarts when the active pointer leaves the board itself', () => {

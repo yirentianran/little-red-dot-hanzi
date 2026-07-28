@@ -470,19 +470,22 @@ export async function registerBrowserTests({ test }) {
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
     await page.locator('.practice-writer-host').evaluate((host) => { window.__historyWriterHost = host; });
 
-    const finalHash = practiceHash('lesson-1', 'recognize', 'single', '薄');
+    const finalHash = practiceHash('lesson-22', 'write', 'single', '肃');
     await page.evaluate(({ middle, final }) => {
       window.location.hash = middle;
       window.location.hash = '#/';
       window.location.hash = final;
     }, { middle: lessonHash('lesson-22', 'write'), final: finalHash });
-    await waitForPractice(page, '薄', '引导描写');
+    await waitForPractice(page, '肃', '引导描写');
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     assert.equal(new URL(page.url()).hash, finalHash);
     assert.equal(await page.evaluate(() => window.__historyWriterHost.isConnected), false);
     assert.equal(await page.locator('.practice-writer-host').count(), 1);
     assert.equal(await page.locator('.practice-overlay').count(), 1);
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
+    await page.locator('[data-action="practice-back"]').click();
+    await page.locator('[data-view="character"]').waitFor();
+    assert.equal(new URL(page.url()).hash, characterHash('lesson-22', 'write', '肃'));
   });
 
   test('completes a short character with trusted Chromium touch input', async ({

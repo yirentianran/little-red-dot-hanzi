@@ -802,14 +802,27 @@ export async function registerBrowserTests({ test }) {
     const first = trustedTouchPoint(firstStroke[0], 10);
     const middle = trustedTouchPoint(firstStroke[Math.floor(firstStroke.length / 2)], 10);
     const second = trustedTouchPoint({ x: first.x + 24, y: first.y + 24 }, 11);
+    const continued = trustedTouchPoint(firstStroke.at(-1), 10);
+    const secondMoved = trustedTouchPoint({ x: second.x + 18, y: second.y + 12 }, 11);
     await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [first] });
     await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [middle] });
     await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [middle, second] });
+    await client.send('Input.dispatchTouchEvent', {
+      type: 'touchMove', touchPoints: [continued, secondMoved]
+    });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [continued] });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [continued] });
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.locator('[data-slot="practice-board"][aria-busy="false"]').waitFor();
     assert.equal(await page.locator('[data-slot="practice-stroke-position"]').textContent(), '第 1 / 8 笔');
     assert.notEqual(await page.locator('[data-slot="practice-feedback"]').getAttribute('data-kind'), 'error');
-    await drawPracticeCharacterWithTouch(client, page);
+    await dispatchTouchGesture(client, firstStroke, 12);
+    await waitForPracticeStroke(page, 2, 8);
+    assert.notEqual(await page.locator('[data-slot="practice-feedback"]').getAttribute('data-kind'), 'error');
+    for (let index = 1; index < 8; index += 1) {
+      await dispatchTouchGesture(client, await mappedPracticeMedian(page, index), index + 20);
+      if (index < 7) await waitForPracticeStroke(page, index + 2, 8);
+    }
     await page.locator('.practice-complete-result').waitFor();
     assert.equal(await page.locator('.practice-retry-result').count(), 0,
       'the canceled two-pointer stroke must not count as a mistake');

@@ -802,14 +802,21 @@
       }
       transitionRevision += 1;
       var revision = transitionRevision;
-      var priorView = route && route.view;
+      var priorRoute = route;
+      var priorView = priorRoute && priorRoute.view;
       if (routeKey === null) {
         viewEpoch += 1;
       } else {
         cleanupPage(revision, false);
       }
       if (!ownsTransition(revision)) return null;
-      if (priorView === 'practice' && info.route.view !== 'practice') practiceOrigin = null;
+      if (priorView === 'practice'
+          && (info.route.view !== 'practice'
+            || priorRoute.lessonId !== info.route.lessonId
+            || priorRoute.group !== info.route.group
+            || priorRoute.scope !== info.route.scope)) {
+        practiceOrigin = null;
+      }
 
       route = info.route;
       routeKey = info.key;
