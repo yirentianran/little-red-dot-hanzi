@@ -337,10 +337,16 @@ async function assertCharacterGeometry(page, viewport, label) {
     }
     return {
       board: box('[data-slot="character-board"]'),
-      tools: box('.character-tools')
+      tools: box('.character-tools'),
+      practiceButton: box('[data-action="start-character-practice"]'),
+      audioButton: box('[data-action="play-audio"]')
     };
   });
   assert.equal(intersects(layout.board, layout.tools), false, `${label}: board and tools overlap`);
+  assert.ok(
+    layout.audioButton.top - layout.practiceButton.bottom >= 8,
+    `${label}: practice and audio buttons touch ${JSON.stringify(layout)}`
+  );
   if (viewport.width < 760) {
     assert.ok(
       layout.board.bottom <= layout.tools.top + 1,
