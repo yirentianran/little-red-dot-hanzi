@@ -10,6 +10,22 @@ const IPAD_AIR_LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 1024, height: 768, label: 'iPad-Air-1024x768' }),
   Object.freeze({ width: 1180, height: 820, label: 'iPad-Air-1180x820' })
 ]);
+const ANDROID_TABLET_LANDSCAPE_VIEWPORTS = Object.freeze([
+  Object.freeze({ width: 1024, height: 600, label: 'Android-tablet-1024x600' }),
+  Object.freeze({ width: 1280, height: 800, label: 'Android-tablet-1280x800' })
+]);
+const PHONE_LANDSCAPE_VIEWPORTS = Object.freeze([
+  Object.freeze({ width: 568, height: 320, label: 'phone-568x320' }),
+  Object.freeze({ width: 667, height: 375, label: 'phone-667x375' }),
+  Object.freeze({ width: 844, height: 390, label: 'phone-844x390' })
+]);
+const PRACTICE_LANDSCAPE_VIEWPORTS = Object.freeze([
+  ...IPAD_AIR_LANDSCAPE_VIEWPORTS,
+  ...ANDROID_TABLET_LANDSCAPE_VIEWPORTS,
+  ...PHONE_LANDSCAPE_VIEWPORTS,
+  Object.freeze({ width: 1440, height: 900, label: 'Mac-Chrome-1440x900' }),
+  Object.freeze({ width: 1440, height: 800, label: 'Mac-Chrome-1440x800' })
+]);
 
 const PRACTICE_CHARACTER = '肃';
 const PRACTICE_PADDING = 24;
@@ -480,6 +496,10 @@ async function assertPracticeActiveGeometry(page, viewport, phase, label) {
     return {
       board: box('[data-slot="practice-board"]'),
       tools: box('.practice-tools'),
+      topbar: box('.practice-topbar'),
+      lesson: box('.practice-lesson-title'),
+      group: box('.practice-group-label'),
+      heading: box('[data-view="practice"] > [data-view-heading]'),
       writer: box('.practice-writer-host'),
       overlay: box('.practice-overlay'),
       writerPathCount: writerPaths.filter((path) => (path.getAttribute('d') || '').trim() !== '').length,
@@ -501,7 +521,14 @@ async function assertPracticeActiveGeometry(page, viewport, phase, label) {
     };
   });
   assert.equal(intersects(geometry.board, geometry.tools), false, `${label}: board and tools overlap`);
-  if (viewport.width < 760) {
+  for (const area of ['topbar', 'lesson', 'group', 'heading']) {
+    assert.equal(
+      intersects(geometry.board, geometry[area]),
+      false,
+      `${label}: board and ${area} overlap ${JSON.stringify(geometry)}`
+    );
+  }
+  if (viewport.width < 760 && viewport.width <= viewport.height) {
     assert.ok(geometry.board.bottom <= geometry.tools.top + 1,
       `${label}: mobile practice surface is not stacked ${JSON.stringify(geometry)}`);
   } else {
@@ -685,7 +712,7 @@ export async function registerBrowserTests({ test }) {
     });
   }
 
-  for (const viewport of IPAD_AIR_LANDSCAPE_VIEWPORTS) {
+  for (const viewport of PRACTICE_LANDSCAPE_VIEWPORTS) {
     test(`practice fits ${viewport.label} without vertical scrolling`, async ({
       indexUrl,
       openPage,
