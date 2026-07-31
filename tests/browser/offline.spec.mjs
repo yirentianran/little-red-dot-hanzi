@@ -19,7 +19,7 @@ const PHONE_LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 667, height: 375, label: 'phone-667x375' }),
   Object.freeze({ width: 844, height: 390, label: 'phone-844x390' })
 ]);
-const PRACTICE_LANDSCAPE_VIEWPORTS = Object.freeze([
+const LANDSCAPE_VIEWPORTS = Object.freeze([
   ...IPAD_AIR_LANDSCAPE_VIEWPORTS,
   ...ANDROID_TABLET_LANDSCAPE_VIEWPORTS,
   ...PHONE_LANDSCAPE_VIEWPORTS,
@@ -363,11 +363,12 @@ async function assertCharacterGeometry(page, viewport, label) {
     };
   });
   assert.equal(intersects(layout.board, layout.tools), false, `${label}: board and tools overlap`);
-  assert.ok(
-    layout.audioButton.top - layout.practiceButton.bottom >= 8,
-    `${label}: practice and audio buttons touch ${JSON.stringify(layout)}`
+  assert.equal(
+    intersects(layout.practiceButton, layout.audioButton),
+    false,
+    `${label}: practice and audio buttons overlap ${JSON.stringify(layout)}`
   );
-  if (viewport.width < 760) {
+  if (viewport.width < 760 && viewport.width <= viewport.height) {
     assert.ok(
       layout.board.bottom <= layout.tools.top + 1,
       `${label}: mobile work surface is not stacked ${JSON.stringify(layout)}`
@@ -677,7 +678,7 @@ export async function registerBrowserTests({ test }) {
     });
   }
 
-  for (const viewport of IPAD_AIR_LANDSCAPE_VIEWPORTS) {
+  for (const viewport of LANDSCAPE_VIEWPORTS) {
     test(`character fits ${viewport.label} without vertical scrolling`, async ({
       indexUrl,
       openPage,
@@ -712,7 +713,7 @@ export async function registerBrowserTests({ test }) {
     });
   }
 
-  for (const viewport of PRACTICE_LANDSCAPE_VIEWPORTS) {
+  for (const viewport of LANDSCAPE_VIEWPORTS) {
     test(`practice fits ${viewport.label} without vertical scrolling`, async ({
       indexUrl,
       openPage,

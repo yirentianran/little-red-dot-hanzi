@@ -1345,6 +1345,12 @@ test('styles define the responsive bright-classroom system without unsafe visual
   assert.match(css, /\.visually-hidden\s*\{/i);
   assert.match(css, /\.skip-link:focus-visible/i);
   assert.match(css, /min-width:\s*0/i);
+  for (const inset of [237, 264, 51]) {
+    const fallback = `calc(100vh - ${inset}px)`;
+    const dynamic = `calc(100dvh - ${inset}px)`;
+    assert.ok(css.includes(fallback), `missing legacy WebView viewport fallback: ${fallback}`);
+    assert.ok(css.indexOf(fallback) < css.indexOf(dynamic), `${fallback} must precede ${dynamic}`);
+  }
   assert.doesNotMatch(css, /gradient\s*\(/i);
   assert.doesNotMatch(css, /(?:^|[^a-z-])-?\d*\.?\d+vw\b/im);
   assert.doesNotMatch(css, /letter-spacing:\s*-/i);
