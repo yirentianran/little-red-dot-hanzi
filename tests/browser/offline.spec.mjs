@@ -685,6 +685,46 @@ export async function registerBrowserTests({ test }) {
     });
   }
 
+  for (const viewport of IPAD_AIR_LANDSCAPE_VIEWPORTS) {
+    test(`practice fits ${viewport.label} without vertical scrolling`, async ({
+      indexUrl,
+      openPage,
+      artifactPath
+    }) => {
+      const page = await openPage({ viewport, reducedMotion: true });
+      await page.goto(withHash(
+        indexUrl,
+        practiceHash('lesson-22', 'write', 'single', PRACTICE_CHARACTER)
+      ), { waitUntil: 'load' });
+      await waitForPractice(page, '引导描写');
+      await assertPracticeActiveGeometry(
+        page,
+        viewport,
+        '引导描写',
+        `${viewport.label} practice`
+      );
+      const verticalLayout = await page.evaluate(() => ({
+        clientHeight: document.documentElement.clientHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+        boardBottom: document.querySelector('.practice-board').getBoundingClientRect().bottom,
+        toolsBottom: document.querySelector('.practice-tools').getBoundingClientRect().bottom
+      }));
+      assert.ok(
+        verticalLayout.scrollHeight <= verticalLayout.clientHeight + 1,
+        `${viewport.label}: practice page requires vertical scrolling ${JSON.stringify(verticalLayout)}`
+      );
+      assert.ok(
+        Math.max(verticalLayout.boardBottom, verticalLayout.toolsBottom) <= verticalLayout.clientHeight,
+        `${viewport.label}: practice content is below the viewport ${JSON.stringify(verticalLayout)}`
+      );
+      await saveFullPageScreenshot(
+        page,
+        artifactPath(`${viewport.label}-practice-fit.png`),
+        `${viewport.label} practice fit`
+      );
+    });
+  }
+
   for (const viewport of VIEWPORTS) {
     test(`practice responsive states at ${viewport.label}`, async ({
       indexUrl,

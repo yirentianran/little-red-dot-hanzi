@@ -930,6 +930,10 @@ noscript {
     width: min(100%, 620px, calc(100dvh - 237px));
   }
 
+  .practice-board {
+    width: min(100%, 620px, calc(100dvh - 264px));
+  }
+
   .character-tools {
     padding: 14px 18px;
   }
