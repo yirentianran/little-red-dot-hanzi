@@ -14,6 +14,25 @@
 
 打开过单字后，目录页会显示“继续上次学习”。浏览器不允许本地存储时，其余学习功能仍可使用。
 
+## Android 应用
+
+`android/` 提供 Kotlin 编写的原生 WebView 外壳。构建时会把当前仓库中的网页、字库、Hanzi Writer 和普通话音频同步进 APK；安装后不申请网络权限，学习、描写、发音和进度保存均在设备本地完成。
+
+构建环境需要 JDK 11 和 Android SDK 32。首次构建需要联网解析 Android Gradle Plugin 与 Kotlin Gradle Plugin，APK 运行时不需要联网。
+
+```bash
+cd android
+ANDROID_SDK_ROOT=/absolute/path/to/Android/sdk \
+JAVA_HOME=/absolute/path/to/jdk-11 \
+./gradlew assembleDebug
+```
+
+调试 APK 输出到 `android/app/build/outputs/apk/debug/app-debug.apk`。连接已启用 USB 调试的设备后，可用以下命令安装：
+
+```bash
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ## 项目校验
 
 ```bash

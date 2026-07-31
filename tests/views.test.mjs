@@ -1304,6 +1304,7 @@ test('index is offline-first, accessible, and loads classic scripts in dependenc
   assert.match(html, /<noscript>/);
   assert.match(html, /<link rel="stylesheet" href="styles\.css">/);
   assert.deepEqual(scripts, [
+    'js/compat.js',
     'data/library-data.js',
     'js/data-store.js',
     'js/router.js',

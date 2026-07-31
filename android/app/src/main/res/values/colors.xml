@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="app_background">#EAF2F8</color>
+  <color name="status_bar">#FFFFFF</color>
+  <color name="navigation_bar">#EAF2F8</color>
+  <color name="action_blue">#1769AA</color>
+</resources>
