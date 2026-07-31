@@ -6,6 +6,10 @@ const VIEWPORTS = Object.freeze([
   Object.freeze({ width: 768, height: 1024, label: '768x1024' }),
   Object.freeze({ width: 1440, height: 900, label: '1440x900' })
 ]);
+const IPAD_AIR_LANDSCAPE_VIEWPORTS = Object.freeze([
+  Object.freeze({ width: 1024, height: 768, label: 'iPad-Air-1024x768' }),
+  Object.freeze({ width: 1180, height: 820, label: 'iPad-Air-1180x820' })
+]);
 
 const PRACTICE_CHARACTER = '肃';
 const PRACTICE_PADDING = 24;
@@ -642,6 +646,41 @@ export async function registerBrowserTests({ test }) {
         page,
         artifactPath(`${viewport.label}-lesson-22-write-su.png`),
         `${viewport.label} character`
+      );
+    });
+  }
+
+  for (const viewport of IPAD_AIR_LANDSCAPE_VIEWPORTS) {
+    test(`character fits ${viewport.label} without vertical scrolling`, async ({
+      indexUrl,
+      openPage,
+      artifactPath
+    }) => {
+      const page = await openPage({ viewport, reducedMotion: true });
+      await page.goto(
+        withHash(indexUrl, characterHash('lesson-22', 'write', '肃')),
+        { waitUntil: 'load' }
+      );
+      await waitForView(page, 'character');
+      await assertCharacterGeometry(page, viewport, `${viewport.label} character`);
+      const verticalLayout = await page.evaluate(() => ({
+        clientHeight: document.documentElement.clientHeight,
+        scrollHeight: document.documentElement.scrollHeight,
+        navigationBottom: document.querySelector('.character-navigation')
+          .getBoundingClientRect().bottom
+      }));
+      assert.ok(
+        verticalLayout.scrollHeight <= verticalLayout.clientHeight + 1,
+        `${viewport.label}: character page requires vertical scrolling ${JSON.stringify(verticalLayout)}`
+      );
+      assert.ok(
+        verticalLayout.navigationBottom <= verticalLayout.clientHeight,
+        `${viewport.label}: character navigation is below the viewport ${JSON.stringify(verticalLayout)}`
+      );
+      await saveFullPageScreenshot(
+        page,
+        artifactPath(`${viewport.label}-character-fit.png`),
+        `${viewport.label} character fit`
       );
     });
   }

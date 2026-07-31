@@ -912,6 +912,62 @@ noscript {
   }
 }
 
+@media (min-width: 760px) and (max-width: 1366px) and (max-height: 900px) {
+  #app {
+    padding-block: 14px 20px;
+  }
+
+  .view--character > .view-heading {
+    margin-bottom: 10px;
+    font-size: 28px;
+  }
+
+  .character-work-surface {
+    gap: 20px;
+  }
+
+  .character-board {
+    width: min(100%, 620px, calc(100dvh - 237px));
+  }
+
+  .character-tools {
+    padding: 14px 18px;
+  }
+
+  .character-display {
+    margin-top: 4px;
+    font-size: 60px;
+  }
+
+  .stroke-count {
+    margin: 4px 0 8px;
+  }
+
+  .character-practice-status {
+    margin-top: 8px;
+  }
+
+  .character-practice-start {
+    margin-top: 6px;
+  }
+
+  .control-feedback,
+  .animation-status {
+    min-height: 22px;
+    margin-top: 6px;
+    font-size: 13px;
+  }
+
+  .stroke-controls,
+  .speed-control {
+    margin-top: 8px;
+  }
+
+  .character-navigation {
+    margin-top: 12px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
