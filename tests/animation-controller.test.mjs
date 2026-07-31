@@ -10,7 +10,7 @@ const { createAnimationController } = animationControllerModule;
 const TIMING = Object.freeze({
   minimumStroke: 300,
   maximumStroke: 1200,
-  millisecondsPerLengthUnit: 2,
+  millisecondsPerLengthUnit: 3,
   betweenStrokes: 180,
   completedCharacter: 900
 });
@@ -129,7 +129,7 @@ test('pauses and resumes at the same relative stroke progress', () => {
   const { calls, clock, controller } = createHarness([250]);
 
   controller.play();
-  clock.tick(200);
+  clock.tick(strokeDuration(250) * 0.4);
   closeTo(controller.getState().progress, 0.4);
   controller.pause();
   const paused = controller.getState();
@@ -138,7 +138,7 @@ test('pauses and resumes at the same relative stroke progress', () => {
 
   clock.elapse(5000);
   controller.play();
-  clock.tick(100);
+  clock.tick(strokeDuration(250) * 0.2);
 
   assert.equal(controller.getState().status, 'playing');
   closeTo(controller.getState().progress, 0.6);
@@ -238,7 +238,7 @@ test('carries a late frame across multiple phases without losing elapsed time', 
   const { clock, controller } = createHarness([150, 200]);
 
   controller.play();
-  clock.tick(strokeDuration(150) + TIMING.betweenStrokes + 100);
+  clock.tick(strokeDuration(150) + TIMING.betweenStrokes + (strokeDuration(200) * 0.25));
 
   assert.equal(controller.getState().status, 'playing');
   assert.equal(controller.getState().strokeIndex, 1);
@@ -274,7 +274,7 @@ test('fast-forwards huge continuous overshoot with bounded observable work', asy
       (completeCycle * 50_000)
       + strokeDuration(150, 'slow')
       + (TIMING.betweenStrokes * 1.45)
-      + 145
+      + (strokeDuration(250, 'slow') * 0.2)
     );
 
     assert.equal(controller.getState().status, 'playing');
@@ -296,7 +296,7 @@ test('exact full-cycle fast-forward preserves arbitrary phase positions', async 
   await t.test('halfway through a stroke', () => {
     const { calls, clock, controller, stateChanges } = createHarness([150, 200]);
     controller.play();
-    clock.tick(150);
+    clock.tick(strokeDuration(150) / 2);
     const callCount = calls.length;
     const changeCount = stateChanges.length;
 
@@ -394,7 +394,7 @@ test('a replay command from onStateChange supersedes the old frame remainder', (
   });
   controller.play();
 
-  clock.tick(400);
+  clock.tick(strokeDuration(150) + 100);
 
   assert.equal(replayed, true);
   assert.deepEqual(controller.getState(), {
@@ -426,7 +426,7 @@ test('a step command from onStateChange supersedes the old frame remainder', () 
   });
   controller.play();
 
-  clock.tick(400);
+  clock.tick(strokeDuration(150) + 100);
 
   assert.equal(stepped, true);
   assert.deepEqual(controller.getState(), {
@@ -484,7 +484,7 @@ test('setSpeed from a settling pause supersedes the outer pause command', () => 
     }
   });
   controller.play();
-  clock.elapse(400);
+  clock.elapse(strokeDuration(150) + 100);
 
   controller.pause();
 
@@ -511,7 +511,7 @@ test('pause from a settling speed change supersedes the outer speed command', ()
     }
   });
   controller.play();
-  clock.elapse(400);
+  clock.elapse(strokeDuration(150) + 100);
 
   controller.setSpeed('slow');
 
@@ -538,7 +538,7 @@ test('physical hide remains applied when its settling callback replays', () => {
     }
   });
   controller.play();
-  clock.elapse(400);
+  clock.elapse(strokeDuration(150) + 100);
 
   controller.handleVisibilityChange(true);
 
@@ -550,7 +550,7 @@ test('physical hide remains applied when its settling callback replays', () => {
   clock.elapse(5000);
   assert.equal(controller.handleVisibilityChange(false), true);
   assert.equal(clock.getPending().size, 1);
-  clock.tick(100);
+  clock.tick(strokeDuration(150) / 3);
   closeTo(controller.getState().progress, 1 / 3);
 });
 
@@ -668,11 +668,11 @@ test('replay immediately resets to stroke one and starts continuous playback', (
 
 test('applies exact slow, normal, and fast duration multipliers plus base clamps', async (t) => {
   const cases = [
-    { name: 'slow', length: 250, speed: 'slow', elapsed: 362.5 },
-    { name: 'normal', length: 250, speed: 'normal', elapsed: 250 },
-    { name: 'fast', length: 250, speed: 'fast', elapsed: 175 },
-    { name: 'minimum clamp', length: 1, speed: 'normal', elapsed: 150 },
-    { name: 'maximum clamp', length: 10000, speed: 'normal', elapsed: 600 }
+    { name: 'slow', length: 250, speed: 'slow' },
+    { name: 'normal', length: 250, speed: 'normal' },
+    { name: 'fast', length: 250, speed: 'fast' },
+    { name: 'minimum clamp', length: 1, speed: 'normal' },
+    { name: 'maximum clamp', length: 10000, speed: 'normal' }
   ];
 
   for (const scenario of cases) {
@@ -680,7 +680,7 @@ test('applies exact slow, normal, and fast duration multipliers plus base clamps
       const { clock, controller } = createHarness([scenario.length]);
       controller.setSpeed(scenario.speed);
       controller.play();
-      clock.tick(scenario.elapsed);
+      clock.tick(strokeDuration(scenario.length, scenario.speed) / 2);
       closeTo(controller.getState().progress, 0.5);
       assert.equal(controller.getState().speed, scenario.speed);
     });
@@ -690,17 +690,17 @@ test('applies exact slow, normal, and fast duration multipliers plus base clamps
 test('settles elapsed time under the old speed before changing speed in place', () => {
   const { calls, clock, controller } = createHarness([250]);
   controller.play();
-  clock.tick(100);
-  closeTo(controller.getState().progress, 0.2);
+  clock.tick(strokeDuration(250) / 4);
+  closeTo(controller.getState().progress, 0.25);
 
-  clock.elapse(100);
+  clock.elapse(strokeDuration(250) / 4);
   controller.setSpeed('slow');
-  closeTo(controller.getState().progress, 0.4);
+  closeTo(controller.getState().progress, 0.5);
   assert.equal(controller.getState().speed, 'slow');
-  closeTo(lastProgressCall(calls)[2], 0.4);
+  closeTo(lastProgressCall(calls)[2], 0.5);
 
-  clock.tick(145);
-  closeTo(controller.getState().progress, 0.6);
+  clock.tick(strokeDuration(250, 'slow') / 4);
+  closeTo(controller.getState().progress, 0.75);
 });
 
 test('applies the selected speed multiplier to between and completed delays', async (t) => {
@@ -764,7 +764,7 @@ test('speed changes preserve relative completion of delay phases', async (t) => 
 test('visibility freezes active stroke timing while preserving playback intent', () => {
   const { clock, controller } = createHarness([250]);
   controller.play();
-  clock.tick(100);
+  clock.tick(strokeDuration(250) * 0.2);
   closeTo(controller.getState().progress, 0.2);
 
   controller.handleVisibilityChange(true);
@@ -774,7 +774,7 @@ test('visibility freezes active stroke timing while preserving playback intent',
   controller.handleVisibilityChange(false);
   assert.equal(controller.getState().status, 'playing');
   assert.equal(clock.getPending().size, 1);
-  clock.tick(100);
+  clock.tick(strokeDuration(250) * 0.2);
   closeTo(controller.getState().progress, 0.4);
 });
 
@@ -816,7 +816,7 @@ test('visibility freezes and resumes the remaining completed-character hold', ()
 test('manual pause does not auto-start after a hidden-visible cycle', () => {
   const { clock, controller } = createHarness([250]);
   controller.play();
-  clock.tick(100);
+  clock.tick(strokeDuration(250) * 0.2);
   controller.pause();
 
   controller.handleVisibilityChange(true);
@@ -831,7 +831,7 @@ test('manual pause does not auto-start after a hidden-visible cycle', () => {
 test('pausing while hidden clears playback intent so visibility cannot restart it', () => {
   const { clock, controller } = createHarness([250]);
   controller.play();
-  clock.tick(100);
+  clock.tick(strokeDuration(250) * 0.2);
   controller.handleVisibilityChange(true);
 
   controller.pause();
