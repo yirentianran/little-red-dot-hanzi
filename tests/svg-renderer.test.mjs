@@ -204,7 +204,7 @@ test('builds an unflipped practice grid and flipped Hanzi geometry layers', () =
   assert.equal(ghosts[0].getAttribute('fill'), '#dce7ef');
   assert.equal(completed[0].getAttribute('fill'), '#20252b');
   assert.equal(reveals[0].getAttribute('stroke-width'), '180');
-  assert.equal(reveals[0].getAttribute('stroke-linecap'), 'round');
+  assert.equal(reveals[0].getAttribute('stroke-linecap'), 'butt');
   assert.equal(reveals[0].getAttribute('stroke-linejoin'), 'round');
   assert.equal(reveals[0].getAttribute('stroke-dasharray'), '240');
   assert.equal(reveals[0].getAttribute('stroke-dashoffset'), '240');

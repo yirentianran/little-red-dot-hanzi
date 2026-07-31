@@ -257,7 +257,7 @@
         'fill': 'none',
         'stroke': '#20252b',
         'stroke-width': 180,
-        'stroke-linecap': 'round',
+        'stroke-linecap': 'butt',
         'stroke-linejoin': 'round',
         'clip-path': 'url(#' + clipId + ')',
         'display': 'none'
