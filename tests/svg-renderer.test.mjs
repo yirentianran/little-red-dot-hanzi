@@ -217,7 +217,8 @@ test('builds an unflipped practice grid and flipped Hanzi geometry layers', () =
   assert.equal(outerDot.getAttribute('fill'), '#e5483f');
   assert.equal(outerDot.getAttribute('opacity'), '0.24');
   assert.equal(coreDot.getAttribute('fill'), '#d92d20');
-  assert.equal(coreDot.getAttribute('stroke'), '#ffffff');
+  assert.equal(coreDot.getAttribute('stroke'), null);
+  assert.equal(coreDot.getAttribute('stroke-width'), null);
   assert.equal(coreDot.getAttribute('display'), 'none');
   assert.equal(document.totalLengthCalls.length, 2);
   assert.ok(Object.isFrozen(renderer));

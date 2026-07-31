@@ -281,9 +281,6 @@
       'data-tracking-dot': 'core',
       'r': 13,
       'fill': '#d92d20',
-      'stroke': '#ffffff',
-      'stroke-width': 5,
-      'vector-effect': 'non-scaling-stroke',
       'display': 'none'
     });
     dotLayer.appendChild(outerDot);
