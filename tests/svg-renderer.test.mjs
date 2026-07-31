@@ -216,6 +216,7 @@ test('builds an unflipped practice grid and flipped Hanzi geometry layers', () =
   assert.equal(outerDot.parentNode.parentNode, geometryLayer);
   assert.equal(outerDot.getAttribute('fill'), '#e5483f');
   assert.equal(outerDot.getAttribute('opacity'), '0.24');
+  assert.equal(coreDot.getAttribute('r'), '18');
   assert.equal(coreDot.getAttribute('fill'), '#d92d20');
   assert.equal(coreDot.getAttribute('stroke'), null);
   assert.equal(coreDot.getAttribute('stroke-width'), null);
