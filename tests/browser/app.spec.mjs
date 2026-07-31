@@ -292,6 +292,10 @@ export async function registerBrowserTests({ test }) {
     await waitForCharacter(page, '潮');
 
     await waitForVisibleDot(page);
+    const visibleStartCap = page.locator('.hanzi-stroke-start-cap[display="inline"]');
+    assert.equal(await visibleStartCap.count(), 1);
+    assert.equal(await visibleStartCap.getAttribute('fill'), '#20252b');
+    assert.match(await visibleStartCap.getAttribute('clip-path'), /^url\(#hanzi-stroke-clip-/);
     const movingStart = await dotPosition(page);
     await waitForDotMovement(page, movingStart);
 

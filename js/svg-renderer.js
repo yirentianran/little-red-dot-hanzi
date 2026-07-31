@@ -10,6 +10,7 @@
   'use strict';
 
   var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
+  var REVEAL_STROKE_WIDTH = 180;
   var rendererSerial = 0;
 
   function clampProgress(progress) {
@@ -223,6 +224,7 @@
     var revealLayer = createElement(documentObject, 'g', { 'class': 'hanzi-reveals' });
     var dotLayer = createElement(documentObject, 'g', { 'class': 'hanzi-tracking-dots' });
     var completedPaths = [];
+    var startCaps = [];
     var revealPaths = [];
     var strokeMetrics = [];
 
@@ -256,16 +258,28 @@
         'd': pointsToPath(geometry.medians[strokeIndex]),
         'fill': 'none',
         'stroke': '#20252b',
-        'stroke-width': 180,
+        'stroke-width': REVEAL_STROKE_WIDTH,
         'stroke-linecap': 'butt',
         'stroke-linejoin': 'round',
         'clip-path': 'url(#' + clipId + ')',
         'display': 'none'
       });
+      var medianStart = geometry.medians[strokeIndex][0];
+      var startCap = createElement(documentObject, 'circle', {
+        'class': 'hanzi-stroke-start-cap',
+        'cx': medianStart[0],
+        'cy': medianStart[1],
+        'r': REVEAL_STROKE_WIDTH / 2,
+        'fill': '#20252b',
+        'clip-path': 'url(#' + clipId + ')',
+        'display': 'none'
+      });
       ghostLayer.appendChild(ghostPath);
       completedLayer.appendChild(completedPath);
+      revealLayer.appendChild(startCap);
       revealLayer.appendChild(revealPath);
       completedPaths.push(completedPath);
+      startCaps.push(startCap);
       revealPaths.push(revealPath);
     }
 
@@ -332,6 +346,7 @@
 
     function hideRevealsAndDots() {
       for (var index = 0; index < revealPaths.length; index += 1) {
+        setDisplay(startCaps[index], false);
         setDisplay(revealPaths[index], false);
         revealPaths[index].setAttribute('stroke-dashoffset', strokeMetrics[index].length);
       }
@@ -368,6 +383,7 @@
       var metric = strokeMetrics[index];
       var distance = metric.length * visualProgress;
       revealPaths[index].setAttribute('stroke-dashoffset', metric.length - distance);
+      setDisplay(startCaps[index], true);
       setDisplay(revealPaths[index], true);
       var point = locatePoint(index, distance, visualProgress);
       outerDot.setAttribute('cx', point.x);

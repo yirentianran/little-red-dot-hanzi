@@ -180,6 +180,7 @@ test('builds an unflipped practice grid and flipped Hanzi geometry layers', () =
   const clips = withTag(svg, 'clipPath');
   const ghosts = withClass(svg, 'hanzi-stroke--ghost');
   const completed = withClass(svg, 'hanzi-stroke--completed');
+  const startCaps = withClass(svg, 'hanzi-stroke-start-cap');
   const reveals = withClass(svg, 'hanzi-stroke-reveal');
   const [outerDot] = withClass(svg, 'hanzi-tracking-dot--outer');
   const [coreDot] = withClass(svg, 'hanzi-tracking-dot--core');
@@ -200,9 +201,16 @@ test('builds an unflipped practice grid and flipped Hanzi geometry layers', () =
   assert.equal(clips.length, 2);
   assert.equal(ghosts.length, 2);
   assert.equal(completed.length, 2);
+  assert.equal(startCaps.length, 2);
   assert.equal(reveals.length, 2);
   assert.equal(ghosts[0].getAttribute('fill'), '#dce7ef');
   assert.equal(completed[0].getAttribute('fill'), '#20252b');
+  assert.equal(startCaps[0].getAttribute('cx'), '0');
+  assert.equal(startCaps[0].getAttribute('cy'), '0');
+  assert.equal(startCaps[0].getAttribute('r'), '90');
+  assert.equal(startCaps[0].getAttribute('fill'), '#20252b');
+  assert.equal(startCaps[0].getAttribute('clip-path'), `url(#${clips[0].getAttribute('id')})`);
+  assert.equal(startCaps[0].getAttribute('display'), 'none');
   assert.equal(reveals[0].getAttribute('stroke-width'), '180');
   assert.equal(reveals[0].getAttribute('stroke-linecap'), 'butt');
   assert.equal(reveals[0].getAttribute('stroke-linejoin'), 'round');
@@ -264,6 +272,7 @@ test('reveals one clipped median, completes prior strokes, and tracks native pat
   const renderer = createSvgRenderer(container, fixtureGeometry(3));
   const [svg] = container.childNodes;
   const completed = withClass(svg, 'hanzi-stroke--completed');
+  const startCaps = withClass(svg, 'hanzi-stroke-start-cap');
   const reveals = withClass(svg, 'hanzi-stroke-reveal');
   const [outerDot] = withClass(svg, 'hanzi-tracking-dot--outer');
   const [coreDot] = withClass(svg, 'hanzi-tracking-dot--core');
@@ -272,6 +281,7 @@ test('reveals one clipped median, completes prior strokes, and tracks native pat
   renderer.setStrokeProgress(1, 0.25);
 
   assertDisplay(completed, ['inline', 'none', 'none']);
+  assertDisplay(startCaps, ['none', 'inline', 'none']);
   assertDisplay(reveals, ['none', 'inline', 'none']);
   assert.equal(reveals[1].getAttribute('stroke-dashoffset'), '75');
   assert.equal(outerDot.getAttribute('display'), 'inline');
@@ -346,6 +356,7 @@ test('switches completed and full-character states without rebuilding the SVG', 
   const renderer = createSvgRenderer(container, fixtureGeometry(3));
   const [svg] = container.childNodes;
   const completed = withClass(svg, 'hanzi-stroke--completed');
+  const startCaps = withClass(svg, 'hanzi-stroke-start-cap');
   const reveals = withClass(svg, 'hanzi-stroke-reveal');
   const dots = withClass(svg, 'hanzi-tracking-dot');
   const createdCount = document.created.length;
@@ -353,6 +364,7 @@ test('switches completed and full-character states without rebuilding the SVG', 
   renderer.setStrokeProgress(2, 0.5);
   renderer.showCompletedThrough(1);
   assertDisplay(completed, ['inline', 'inline', 'none']);
+  assertDisplay(startCaps, ['none', 'none', 'none']);
   assertDisplay(reveals, ['none', 'none', 'none']);
   assertDisplay(dots, ['none', 'none']);
 
@@ -361,6 +373,7 @@ test('switches completed and full-character states without rebuilding the SVG', 
 
   renderer.showFullCharacter();
   assertDisplay(completed, ['inline', 'inline', 'inline']);
+  assertDisplay(startCaps, ['none', 'none', 'none']);
   assertDisplay(reveals, ['none', 'none', 'none']);
   assertDisplay(dots, ['none', 'none']);
   assert.equal(document.created.length, createdCount);
@@ -492,6 +505,7 @@ test('renders all 15 strokes from the real frozen 潮 geometry without mutation'
   assert.equal(renderer.getStrokeCount(), 15);
   assert.equal(withClass(svg, 'hanzi-stroke--ghost').length, 15);
   assert.equal(withClass(svg, 'hanzi-stroke--completed').length, 15);
+  assert.equal(withClass(svg, 'hanzi-stroke-start-cap').length, 15);
   assert.equal(withClass(svg, 'hanzi-stroke-reveal').length, 15);
   assert.equal(JSON.stringify(geometry), snapshot);
 });
