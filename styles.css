@@ -974,7 +974,7 @@ noscript {
   }
 }
 
-@media (orientation: landscape) and (max-height: 600px) {
+@media (orientation: landscape) and (max-height: 760px) {
   .site-header__inner {
     padding: 5px 12px;
   }
@@ -1243,6 +1243,23 @@ noscript {
     grid-template-columns: 44px minmax(0, 1fr);
     gap: 6px;
     margin-top: 4px;
+  }
+}
+
+@media (min-width: 760px) and (orientation: landscape) and (max-height: 760px) {
+  .view--character {
+    grid-template-areas:
+      "character-board character-topbar"
+      "character-board character-heading"
+      "character-board character-tools";
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .view--character > .view-heading {
+    display: block;
+    grid-area: character-heading;
+    margin: 0;
+    font-size: 22px;
   }
 }
 

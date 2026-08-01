@@ -12,6 +12,9 @@ const IPAD_AIR_LANDSCAPE_VIEWPORTS = Object.freeze([
 ]);
 const ANDROID_TABLET_LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 1024, height: 600, label: 'Android-tablet-1024x600' }),
+  Object.freeze({ width: 1280, height: 601, label: 'MatePad-1280x601' }),
+  Object.freeze({ width: 1280, height: 700, label: 'MatePad-1280x700' }),
+  Object.freeze({ width: 1280, height: 760, label: 'MatePad-1280x760' }),
   Object.freeze({ width: 1280, height: 800, label: 'Android-tablet-1280x800' })
 ]);
 const PHONE_LANDSCAPE_VIEWPORTS = Object.freeze([
