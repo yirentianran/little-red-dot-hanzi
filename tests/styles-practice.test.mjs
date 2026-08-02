@@ -108,7 +108,10 @@ test('practice surface is one column by default and two columns on wide screens'
 
   assert.match(surface, /display:\s*grid/i);
   assert.match(surface, /grid-template-columns:\s*minmax\(0,\s*1fr\)/i);
-  assert.match(wideSurface, /grid-template-columns:\s*minmax\(0,\s*1fr\)\s+minmax\(240px,\s*320px\)/i);
+  assert.match(
+    wideSurface,
+    /grid-template-columns:\s*minmax\(0,\s*1\.15fr\)\s+minmax\(260px,\s*\.85fr\)/i
+  );
   assert.match(wideCommonRows, /grid-column:\s*1\s*\/\s*-1/i);
   assert.match(
     ruleBody(css, '.practice-retry-result', /grid-column:/i),

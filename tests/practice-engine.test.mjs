@@ -54,7 +54,15 @@ function createDocument() {
   return {
     listeners: new Map(),
     defaultView: {
-      getComputedStyle(target) { return { position: target.computedPosition ?? 'static' }; }
+      getComputedStyle(target) {
+        return {
+          position: target.computedPosition ?? 'static',
+          borderLeftWidth: target.computedBorderWidth ?? '',
+          borderRightWidth: target.computedBorderWidth ?? '',
+          borderTopWidth: target.computedBorderWidth ?? '',
+          borderBottomWidth: target.computedBorderWidth ?? ''
+        };
+      }
     },
     createElementNS(_namespace, name) { return new FakeElement(name, this); },
     addEventListener(type, callback, options) {
@@ -92,6 +100,7 @@ function createHarness(overrides = {}) {
   const document = createDocument();
   const target = new FakeElement('div', document);
   target.computedPosition = overrides.computedPosition ?? 'static';
+  target.computedBorderWidth = overrides.computedBorderWidth;
   const events = [];
   const calls = {
     create: [], quiz: [], cancelQuiz: 0, outline: [], highlight: [], dimensions: [], transforms: [],
@@ -215,9 +224,10 @@ test('creates one writer with exact local data and a separate pointer-transparen
   assert.equal(writerTarget.getAttribute('class'), 'practice-writer-host');
   assert.equal(character, '潮');
   assert.deepEqual({ ...options, charDataLoader: undefined }, {
-    width: 320, height: 280, padding: 24,
+    width: 320, height: 280, padding: 0,
     showCharacter: false, showOutline: true,
-    drawingColor: '#1769aa', strokeColor: '#20252b', highlightColor: '#d92d20',
+    outlineColor: '#dce7ef', drawingColor: '#1769aa',
+    strokeColor: '#20252b', highlightColor: '#d92d20',
     acceptBackwardsStrokes: false, leniency: 1, highlightOnComplete: false,
     charDataLoader: undefined
   });
@@ -234,13 +244,33 @@ test('creates one writer with exact local data and a separate pointer-transparen
   assert.notEqual(loaded.medians, geometry.medians);
   assert.equal(Object.isFrozen(loaded), true);
   assert.notEqual(options.charDataLoader('潮'), loaded);
-  assert.equal(target.children.length, 2);
+  assert.equal(target.children.length, 3);
+  const grid = target.children[0];
+  assert.equal(grid.getAttribute('class'), 'practice-grid');
+  assert.equal(grid.getAttribute('viewBox'), '0 0 1024 1024');
+  assert.equal(grid.getAttribute('preserveAspectRatio'), 'xMidYMid meet');
+  assert.equal(grid.getAttribute('aria-hidden'), 'true');
+  assert.equal(grid.style.pointerEvents, 'none');
+  assert.equal(grid.queryByClass('hanzi-grid__border').length, 1);
+  assert.equal(grid.queryByClass('hanzi-grid__axis').length, 2);
+  assert.equal(grid.queryByClass('hanzi-grid__diagonal').length, 2);
+  assert.equal(target.children[1], writerTarget);
   const overlay = target.children.at(-1);
   assert.equal(overlay.name, 'svg');
   assert.equal(overlay.style.pointerEvents, 'none');
   assert.equal(overlay.style.position, 'absolute');
   assert.equal(target.style.position, 'relative');
   assert.equal(dot(target).getAttribute('visibility'), 'hidden');
+});
+
+test('uses the target content box so the writer matches the learning SVG inside the border', () => {
+  const { calls } = createHarness({ computedBorderWidth: '2px' });
+  const options = calls.create[0][2];
+  assert.deepEqual(
+    { width: options.width, height: options.height, padding: options.padding },
+    { width: 316, height: 276, padding: 0 }
+  );
+  assert.deepEqual(calls.transforms[0], [316, 276, 0]);
 });
 
 test('guided and independent starts use exact outline and quiz options', () => {
@@ -468,7 +498,7 @@ test('owns writer host and known 3.7.3 document listeners until destroy; browser
   assert.equal(document.addEventListener, originalDocumentAdd);
   assert.equal(document.listeners.get('mouseup').length, 1);
   assert.equal(document.listeners.get('touchend').length, 1);
-  assert.equal(target.children.length, 2);
+  assert.equal(target.children.length, 3);
 
   engine.destroy();
 
@@ -705,9 +735,9 @@ test('resize updates the writer, overlay, and public transform without recreatio
   engine.start({ phase: 'guided', strokeIndex: 1 });
   target.rect = { width: 640, height: 480 };
   engine.resize();
-  assert.deepEqual(calls.dimensions, [{ width: 640, height: 480, padding: 24 }]);
+  assert.deepEqual(calls.dimensions, [{ width: 640, height: 480, padding: 0 }]);
   assert.equal(calls.create.length, 1);
-  assert.deepEqual(calls.transforms.at(-1), [640, 480, 24]);
+  assert.deepEqual(calls.transforms.at(-1), [640, 480, 0]);
   const overlay = target.children.at(-1);
   assert.equal(overlay.getAttribute('width'), '640');
   assert.equal(overlay.getAttribute('height'), '480');
@@ -807,7 +837,7 @@ test('restart updates a suppressed gesture without exposing a quiz, and destroy 
 
 test('pointerleave only restarts when the active pointer leaves the board itself', () => {
   const { calls, engine, events, target } = createHarness();
-  const writerSvg = target.children[0].children[0];
+  const writerSvg = target.queryByClass('practice-writer-host')[0].children[0];
   engine.start({ phase: 'independent', strokeIndex: 1 });
   target.dispatch('pointerdown', { pointerId: 4, isPrimary: true });
 

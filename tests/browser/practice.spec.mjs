@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 
 const PRACTICE_STORAGE_KEY = 'hanzi-tracking:practice-progress:v2';
-const PADDING = 24;
+const PADDING = 0;
 
 const LESSON_ONE_RECOGNIZE = Object.freeze([
   '盐', '薄', '屹', '昂', '顿', '鼎', '沸', '贯', '浩', '崩', '震', '霎', '余'
@@ -44,7 +44,7 @@ async function currentCharacter(page) {
 async function mappedMedian(page, character, strokeIndex, options = {}) {
   const { reverse = false, jitter = 0, offsetX = 0, offsetY = 0, short = false } = options;
   const points = await page.evaluate(({ character: hanzi, strokeIndex: index, padding }) => {
-    const board = document.querySelector('[data-slot="practice-board"]');
+    const board = document.querySelector('[data-slot="practice-board"] .practice-writer-host');
     const geometry = window.HANZI_LIBRARY.characters[hanzi];
     if (!board || !geometry) throw new Error(`missing practice geometry for ${hanzi}`);
     const box = board.getBoundingClientRect();
@@ -403,12 +403,12 @@ export async function registerBrowserTests({ test }) {
     const before = await page.locator('[data-slot="practice-board"]').boundingBox();
     await page.setViewportSize({ width: 620, height: 860 });
     await page.waitForFunction((width) => {
-      const board = document.querySelector('[data-slot="practice-board"]');
-      return board && Math.abs(board.getBoundingClientRect().width - width) > 20;
+      const board = document.querySelector('[data-slot="practice-board"] .practice-writer-host');
+      return board && Math.abs(board.getBoundingClientRect().width - width) > 1;
     }, before.width);
     assert.equal(await page.locator('.practice-writer-host').getAttribute('data-resize-probe'), 'same');
     const alignment = await page.evaluate((padding) => {
-      const board = document.querySelector('[data-slot="practice-board"]');
+      const board = document.querySelector('[data-slot="practice-board"] .practice-writer-host');
       const dot = document.querySelector('.practice-start-dot');
       const [x, y] = window.HANZI_LIBRARY.characters['盐'].medians[0][0];
       const box = board.getBoundingClientRect();

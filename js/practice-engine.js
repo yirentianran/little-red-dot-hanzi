@@ -11,7 +11,7 @@
 
   var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
   var HTML_NAMESPACE = 'http://www.w3.org/1999/xhtml';
-  var PADDING = 24;
+  var PADDING = 0;
   var LENIENCY = 1;
   var ERROR_DURATION = 240;
   var BRAND_RED = '#d92d20';
@@ -200,6 +200,18 @@
     if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(height) || height <= 0) {
       throw new RangeError('options.target.getBoundingClientRect(): width and height must be positive finite numbers');
     }
+    var defaultView = target.ownerDocument && target.ownerDocument.defaultView;
+    if (defaultView && typeof defaultView.getComputedStyle === 'function') {
+      var style = defaultView.getComputedStyle(target);
+      var borderLeft = Number.parseFloat(style && style.borderLeftWidth);
+      var borderRight = Number.parseFloat(style && style.borderRightWidth);
+      var borderTop = Number.parseFloat(style && style.borderTopWidth);
+      var borderBottom = Number.parseFloat(style && style.borderBottomWidth);
+      var innerWidth = width - borderLeft - borderRight;
+      var innerHeight = height - borderTop - borderBottom;
+      if (Number.isFinite(innerWidth) && innerWidth > 0) width = innerWidth;
+      if (Number.isFinite(innerHeight) && innerHeight > 0) height = innerHeight;
+    }
     return { width: width, height: height };
   }
 
@@ -212,6 +224,52 @@
     if (!node || !node.parentNode) return;
     if (typeof node.remove === 'function') node.remove();
     else node.parentNode.removeChild(node);
+  }
+
+  function createGridLine(documentObject, className, attributes) {
+    var line = documentObject.createElementNS(SVG_NAMESPACE, 'line');
+    setAttribute(line, 'class', 'hanzi-grid__line ' + className);
+    setAttribute(line, 'stroke', '#b9c8d3');
+    setAttribute(line, 'stroke-width', 2);
+    setAttribute(line, 'vector-effect', 'non-scaling-stroke');
+    Object.keys(attributes).forEach(function (name) {
+      setAttribute(line, name, attributes[name]);
+    });
+    return line;
+  }
+
+  function createPracticeGrid(documentObject) {
+    var grid = documentObject.createElementNS(SVG_NAMESPACE, 'svg');
+    setAttribute(grid, 'class', 'practice-grid');
+    setAttribute(grid, 'viewBox', '0 0 1024 1024');
+    setAttribute(grid, 'preserveAspectRatio', 'xMidYMid meet');
+    setAttribute(grid, 'aria-hidden', 'true');
+    grid.style.pointerEvents = 'none';
+
+    var border = documentObject.createElementNS(SVG_NAMESPACE, 'rect');
+    setAttribute(border, 'class', 'hanzi-grid__line hanzi-grid__border');
+    setAttribute(border, 'x', 12);
+    setAttribute(border, 'y', 12);
+    setAttribute(border, 'width', 1000);
+    setAttribute(border, 'height', 1000);
+    setAttribute(border, 'fill', 'none');
+    setAttribute(border, 'stroke', '#9fb2c0');
+    setAttribute(border, 'stroke-width', 3);
+    setAttribute(border, 'vector-effect', 'non-scaling-stroke');
+    grid.appendChild(border);
+    grid.appendChild(createGridLine(documentObject, 'hanzi-grid__axis', {
+      x1: 12, y1: 512, x2: 1012, y2: 512
+    }));
+    grid.appendChild(createGridLine(documentObject, 'hanzi-grid__axis', {
+      x1: 512, y1: 12, x2: 512, y2: 1012
+    }));
+    grid.appendChild(createGridLine(documentObject, 'hanzi-grid__diagonal', {
+      x1: 12, y1: 12, x2: 1012, y2: 1012, 'stroke-dasharray': '18 18'
+    }));
+    grid.appendChild(createGridLine(documentObject, 'hanzi-grid__diagonal', {
+      x1: 1012, y1: 12, x2: 12, y2: 1012, 'stroke-dasharray': '18 18'
+    }));
+    return grid;
   }
 
   function freezeDrawnPath(value) {
@@ -324,6 +382,7 @@
     var dimensions = readDimensions(target);
 
     var documentObject = target.ownerDocument;
+    var grid = createPracticeGrid(documentObject);
     var writerHost = documentObject.createElementNS(HTML_NAMESPACE, 'div');
     var overlay = documentObject.createElementNS(SVG_NAMESPACE, 'svg');
     var errorLayer = documentObject.createElementNS(SVG_NAMESPACE, 'g');
@@ -361,6 +420,7 @@
       : computedPosition === 'static';
     var installedListenerTypes = [];
     var writerDocumentListeners = [];
+    var gridInstalled = false;
     var writerHostInstalled = false;
     var overlayInstalled = false;
     var writer;
@@ -945,6 +1005,8 @@
       overlayInstalled = false;
       if (writerHostInstalled) removeNode(writerHost);
       writerHostInstalled = false;
+      if (gridInstalled) removeNode(grid);
+      gridInstalled = false;
       restorePosition();
     }
 
@@ -952,6 +1014,8 @@
       if (changedPosition) target.style.position = 'relative';
       updateOverlaySize(dimensions);
       installListeners();
+      target.appendChild(grid);
+      gridInstalled = true;
       target.appendChild(writerHost);
       writerHostInstalled = true;
       var writerOptions = {
@@ -960,6 +1024,7 @@
         padding: PADDING,
         showCharacter: false,
         showOutline: true,
+        outlineColor: '#dce7ef',
         drawingColor: '#1769aa',
         strokeColor: '#20252b',
         highlightColor: BRAND_RED,
@@ -1002,6 +1067,8 @@
       overlayInstalled = false;
       removeNode(writerHost);
       writerHostInstalled = false;
+      removeNode(grid);
+      gridInstalled = false;
       restorePosition();
       clearActivationBusy();
     }
