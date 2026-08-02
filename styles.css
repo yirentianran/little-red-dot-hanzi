@@ -1657,8 +1657,20 @@ noscript {
     justify-content: start;
   }
 
+  .view--character {
+    grid-template-areas:
+      "character-board character-topbar"
+      "character-board character-heading"
+      "character-board character-tools";
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
   .view--character > .view-heading {
-    display: none;
+    display: block;
+    grid-area: character-heading;
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.2;
   }
 
   .view--character,
@@ -1831,9 +1843,37 @@ noscript {
 }
 
 @media (orientation: landscape) and (max-height: 360px) {
+  #app {
+    padding-top: 0;
+  }
+
+  .view--character {
+    row-gap: 2px;
+  }
+
+  .view--character > .view-heading {
+    font-size: 18px;
+  }
+
+  .character-topbar .back-button {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .character-topbar .back-button > span:not(.button-icon) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .character-position {
+    white-space: nowrap;
+  }
+
   .character-tools,
   .practice-tools {
-    padding-block: 4px;
+    padding-block: 0;
   }
 
   .character-words {

@@ -1135,6 +1135,10 @@ export async function registerBrowserTests({ test }) {
         headingDisplay: getComputedStyle(
           document.querySelector('.view--character > .view-heading')
         ).display,
+        headingText: document.querySelector('.view--character > .view-heading').textContent,
+        headingHeight: document.querySelector(
+          '.view--character > .view-heading'
+        ).getBoundingClientRect().height,
         boardBottom: document.querySelector('.character-board').getBoundingClientRect().bottom,
         toolsBottom: document.querySelector('.character-tools').getBoundingClientRect().bottom,
         navigationBottom: document.querySelector('.character-navigation').getBoundingClientRect().bottom,
@@ -1151,7 +1155,9 @@ export async function registerBrowserTests({ test }) {
       );
       if (viewport.height <= 430) {
         assert.equal(verticalLayout.headerDisplay, 'none', `${viewport.label}: phone header remains visible`);
-        assert.equal(verticalLayout.headingDisplay, 'none', `${viewport.label}: duplicate heading remains visible`);
+        assert.notEqual(verticalLayout.headingDisplay, 'none', `${viewport.label}: learning heading is hidden`);
+        assert.equal(verticalLayout.headingText, '学习“肃”', `${viewport.label}: learning heading is incorrect`);
+        assert.ok(verticalLayout.headingHeight > 0, `${viewport.label}: learning heading has no height`);
         assert.ok(
           Math.max(
             verticalLayout.boardBottom,

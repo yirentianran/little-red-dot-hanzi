@@ -24,8 +24,8 @@ test('defines a self-contained Kotlin Android application and Gradle wrapper', a
   assert.match(appBuild, /compileSdk\s+32/);
   assert.match(appBuild, /minSdk\s+23/);
   assert.match(appBuild, /targetSdk\s+32/);
-  assert.match(appBuild, /versionCode\s+2/);
-  assert.match(appBuild, /versionName\s+['"]1\.0\.1['"]/);
+  assert.match(appBuild, /versionCode\s+3/);
+  assert.match(appBuild, /versionName\s+['"]1\.0\.2['"]/);
   assert.match(wrapper, /gradle-7\.4-bin\.zip/);
 });
 
@@ -56,6 +56,7 @@ test('hosts the local app through a persistent and restricted HTTPS asset origin
   assert.doesNotMatch(manifest, /android\.permission\.INTERNET/);
   assert.match(manifest, /android:usesCleartextTraffic="false"/);
   assert.match(manifest, /android:exported="true"/);
+  assert.match(manifest, /android:screenOrientation="sensorLandscape"/);
   assert.match(appBuild, /androidx\.webkit:webkit:1\.5\.0/);
   assert.match(activity, /javaScriptEnabled\s*=\s*true/);
   assert.match(activity, /domStorageEnabled\s*=\s*true/);
