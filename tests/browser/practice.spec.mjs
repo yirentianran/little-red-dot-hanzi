@@ -497,6 +497,12 @@ export async function registerBrowserTests({ test }) {
     await client.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
     await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
     await waitForPractice(page, '丈', '引导描写');
+    assert.match(
+      await page.locator('[data-slot="practice-round-position"]').textContent(),
+      /^第 \d+ 个，共 \d+ 个$/
+    );
+    assert.equal(await page.locator('.practice-navigation__button').count(), 2);
+    assert.equal(await page.locator('[data-action="next-character"]').isDisabled(), true);
     await page.evaluate(() => {
       window.__practiceTouchTrusted = null;
       document.addEventListener('touchstart', (event) => {
@@ -508,6 +514,16 @@ export async function registerBrowserTests({ test }) {
     await drawTouchCharacter(client, page, '丈');
     await page.locator('.practice-complete-result').waitFor();
     assert.equal(await page.evaluate(() => window.__practiceTouchTrusted), true);
+    const nextCharacter = await page.locator('[data-action="next-character"]')
+      .getAttribute('data-character');
+    assert.equal(nextCharacter, '撑');
+    assert.equal(await page.locator('[data-action="next-character"]').isEnabled(), true);
+    await page.locator('[data-action="next-character"]').click();
+    await page.locator('[data-view="character"]').waitFor();
+    assert.equal(
+      new URL(page.url()).hash,
+      characterHash('lesson-12', 'write', nextCharacter)
+    );
     await client.detach();
   });
 

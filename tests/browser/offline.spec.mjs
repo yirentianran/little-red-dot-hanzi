@@ -510,6 +510,128 @@ async function readWorkSurfaceStyle(page, pageType) {
   }, selectors);
 }
 
+async function readPortraitWorkSurfaceSpacing(page, pageType) {
+  const selectors = pageType === 'character'
+    ? {
+      heading: '[data-view="character"] > [data-view-heading]',
+      board: '.character-board',
+      tools: '.character-tools',
+      navigation: '[data-view="character"] > .character-navigation'
+    }
+    : {
+      heading: '[data-view="practice"] > [data-view-heading]',
+      board: '.practice-board',
+      tools: '.practice-tools',
+      navigation: '[data-view="practice"] > .practice-navigation'
+    };
+  return page.evaluate((requestedSelectors) => {
+    const heading = document.querySelector(requestedSelectors.heading).getBoundingClientRect();
+    const board = document.querySelector(requestedSelectors.board).getBoundingClientRect();
+    const tools = document.querySelector(requestedSelectors.tools).getBoundingClientRect();
+    const navigation = document.querySelector(requestedSelectors.navigation).getBoundingClientRect();
+    return {
+      headingToBoard: board.top - heading.bottom,
+      boardToTools: tools.top - board.bottom,
+      toolsToNavigation: navigation.top - tools.bottom
+    };
+  }, selectors);
+}
+
+async function readCompactNavigationAlignment(page, pageType) {
+  const selectors = pageType === 'character'
+    ? {
+      topbar: '.character-topbar',
+      navigation: '[data-view="character"] > .character-navigation'
+    }
+    : {
+      topbar: '.practice-topbar',
+      navigation: '[data-view="practice"] > .practice-navigation'
+    };
+  return page.evaluate((requestedSelectors) => {
+    const topbar = document.querySelector(requestedSelectors.topbar).getBoundingClientRect();
+    const navigation = document.querySelector(requestedSelectors.navigation).getBoundingClientRect();
+    return {
+      navigationTop: navigation.top,
+      centerOffset: (navigation.top + (navigation.height / 2))
+        - (topbar.top + (topbar.height / 2))
+    };
+  }, selectors);
+}
+
+async function readWidePageStructure(page, pageType) {
+  const selectors = pageType === 'character'
+    ? {
+      root: '[data-view="character"]',
+      topbar: '.character-topbar',
+      heading: '[data-view="character"] > [data-view-heading]',
+      board: '.character-board',
+      tools: '.character-tools',
+      navigation: '[data-view="character"] > .character-navigation'
+    }
+    : {
+      root: '[data-view="practice"]',
+      topbar: '.practice-topbar',
+      heading: '[data-view="practice"] > [data-view-heading]',
+      board: '.practice-board',
+      tools: '.practice-tools',
+      navigation: '[data-view="practice"] > .practice-navigation'
+    };
+  return page.evaluate((requestedSelectors) => {
+    function box(selector) {
+      const rectangle = document.querySelector(selector).getBoundingClientRect();
+      return {
+        left: rectangle.left,
+        top: rectangle.top,
+        right: rectangle.right,
+        bottom: rectangle.bottom,
+        width: rectangle.width,
+        height: rectangle.height
+      };
+    }
+    const navigation = document.querySelector(requestedSelectors.navigation);
+    const labels = [...navigation.querySelectorAll('span:not(.button-icon)')];
+    return {
+      root: box(requestedSelectors.root),
+      topbar: box(requestedSelectors.topbar),
+      heading: box(requestedSelectors.heading),
+      board: box(requestedSelectors.board),
+      tools: box(requestedSelectors.tools),
+      navigation: box(requestedSelectors.navigation),
+      navigationLabelsVisible: labels.length === 2 && labels.every((label) => {
+        const rectangle = label.getBoundingClientRect();
+        return getComputedStyle(label).display !== 'none'
+          && rectangle.width > 0
+          && rectangle.height > 0;
+      })
+    };
+  }, selectors);
+}
+
+function assertWidePageStructure(layout, label) {
+  assert.ok(
+    Math.abs(layout.topbar.left - layout.root.left) <= 1
+      && Math.abs(layout.topbar.right - layout.root.right) <= 1,
+    `${label}: topbar does not span the page ${JSON.stringify(layout)}`
+  );
+  assert.ok(
+    layout.topbar.bottom <= layout.heading.top + 1,
+    `${label}: topbar is not above the heading ${JSON.stringify(layout)}`
+  );
+  assert.ok(
+    layout.heading.bottom <= Math.min(layout.board.top, layout.tools.top) + 1,
+    `${label}: heading is not above the work surface ${JSON.stringify(layout)}`
+  );
+  assert.ok(
+    Math.abs(layout.board.top - layout.tools.top) <= 1,
+    `${label}: board and tools do not share a row ${JSON.stringify(layout)}`
+  );
+  assert.ok(
+    layout.navigation.top >= Math.max(layout.board.bottom, layout.tools.bottom) - 1,
+    `${label}: navigation is not below the work surface ${JSON.stringify(layout)}`
+  );
+  assert.equal(layout.navigationLabelsVisible, true, `${label}: navigation labels are hidden`);
+}
+
 async function readRenderedGlyphStyle(page, pageType) {
   const selectors = pageType === 'character'
     ? {
@@ -713,6 +835,26 @@ async function assertPracticeCommon(page, label) {
     '.practice-group-label',
     '[data-view-heading]'
   ], label);
+  const compactTopbar = await page.evaluate(() => {
+    const topbar = document.querySelector('.practice-topbar--single');
+    if (!topbar || innerHeight > 430) return null;
+    const back = topbar.querySelector('.practice-back--single');
+    const position = topbar.querySelector('.practice-round-position');
+    const navigation = document.querySelector('.practice-navigation');
+    return {
+      backHeight: back.getBoundingClientRect().height,
+      positionHeight: position.getBoundingClientRect().height,
+      navigationHeight: navigation.getBoundingClientRect().height
+    };
+  });
+  if (compactTopbar) {
+    assert.ok(compactTopbar.backHeight <= 45,
+      `${label}: practice back label wrapped ${JSON.stringify(compactTopbar)}`);
+    assert.ok(compactTopbar.positionHeight <= 20,
+      `${label}: practice position wrapped ${JSON.stringify(compactTopbar)}`);
+    assert.ok(compactTopbar.navigationHeight <= 45,
+      `${label}: practice navigation wrapped ${JSON.stringify(compactTopbar)}`);
+  }
 }
 
 async function assertPracticeResultActions(page, resultSelector, label) {
@@ -1135,6 +1277,18 @@ export async function registerBrowserTests({ test }) {
       await waitForView(page, 'character');
       const characterStyle = await readWorkSurfaceStyle(page, 'character');
       const characterGlyph = await readRenderedGlyphStyle(page, 'character');
+      const characterHeadingTop = await page.locator(
+        '[data-view="character"] > [data-view-heading]'
+      ).evaluate((heading) => heading.getBoundingClientRect().top);
+      const characterSpacing = viewport.width < 760 && viewport.height > viewport.width
+        ? await readPortraitWorkSurfaceSpacing(page, 'character')
+        : null;
+      const characterNavigation = viewport.width > viewport.height && viewport.height <= 430
+        ? await readCompactNavigationAlignment(page, 'character')
+        : null;
+      const characterWideStructure = viewport.width >= 760 && viewport.height > 430
+        ? await readWidePageStructure(page, 'character')
+        : null;
 
       await page.goto(withHash(
         indexUrl,
@@ -1143,6 +1297,18 @@ export async function registerBrowserTests({ test }) {
       await waitForPractice(page, '引导描写');
       const practiceStyle = await readWorkSurfaceStyle(page, 'practice');
       const practiceGlyph = await readRenderedGlyphStyle(page, 'practice');
+      const practiceHeadingTop = await page.locator(
+        '[data-view="practice"] > [data-view-heading]'
+      ).evaluate((heading) => heading.getBoundingClientRect().top);
+      const practiceSpacing = viewport.width < 760 && viewport.height > viewport.width
+        ? await readPortraitWorkSurfaceSpacing(page, 'practice')
+        : null;
+      const practiceNavigation = viewport.width > viewport.height && viewport.height <= 430
+        ? await readCompactNavigationAlignment(page, 'practice')
+        : null;
+      const practiceWideStructure = viewport.width >= 760 && viewport.height > 430
+        ? await readWidePageStructure(page, 'practice')
+        : null;
 
       assertWorkSurfaceStyleParity(
         characterStyle,
@@ -1154,7 +1320,46 @@ export async function registerBrowserTests({ test }) {
         practiceGlyph,
         `${viewport.label} learning/practice`
       );
+      if (viewport.width < 760 && viewport.height > viewport.width) {
+        assert.ok(
+          Math.abs(characterHeadingTop - practiceHeadingTop) <= 1,
+          `${viewport.label}: learning/practice heading tops differ ${JSON.stringify({
+            characterHeadingTop,
+            practiceHeadingTop
+          })}`
+        );
+        for (const spacing of ['headingToBoard', 'boardToTools', 'toolsToNavigation']) {
+          assert.ok(
+            Math.abs(characterSpacing[spacing] - practiceSpacing[spacing]) <= 1,
+            `${viewport.label}: learning/practice ${spacing} differs ${JSON.stringify({
+              characterSpacing,
+              practiceSpacing
+            })}`
+          );
+        }
+      }
+      if (viewport.width > viewport.height && viewport.height <= 430) {
+        assert.ok(
+          Math.abs(characterNavigation.centerOffset) <= 1
+            && Math.abs(practiceNavigation.centerOffset) <= 1,
+          `${viewport.label}: compact navigation is not centered on its topbar ${JSON.stringify({
+            characterNavigation,
+            practiceNavigation
+          })}`
+        );
+      }
       if (viewport.width >= 760 && viewport.height > 430) {
+        assertWidePageStructure(characterWideStructure, `${viewport.label} learning`);
+        assertWidePageStructure(practiceWideStructure, `${viewport.label} practice`);
+        for (const key of ['topbar', 'heading', 'board']) {
+          assert.ok(
+            Math.abs(characterWideStructure[key].top - practiceWideStructure[key].top) <= 1,
+            `${viewport.label}: learning/practice ${key} tops differ ${JSON.stringify({
+              character: characterWideStructure[key],
+              practice: practiceWideStructure[key]
+            })}`
+          );
+        }
         assertStableWorkSurfaceTransition(
           characterGlyph,
           practiceGlyph,
@@ -1301,22 +1506,50 @@ export async function registerBrowserTests({ test }) {
       const verticalLayout = await page.evaluate(() => ({
         clientHeight: document.documentElement.clientHeight,
         scrollHeight: document.documentElement.scrollHeight,
+        lessonDisplay: getComputedStyle(document.querySelector('.practice-lesson-title')).display,
+        groupDisplay: getComputedStyle(document.querySelector('.practice-group-label')).display,
         boardBottom: document.querySelector('.practice-board').getBoundingClientRect().bottom,
-        toolsBottom: document.querySelector('.practice-tools').getBoundingClientRect().bottom
+        toolsBottom: document.querySelector('.practice-tools').getBoundingClientRect().bottom,
+        navigationTop: document.querySelector('.practice-navigation').getBoundingClientRect().top,
+        navigationBottom: document.querySelector('.practice-navigation').getBoundingClientRect().bottom
       }));
       assert.ok(
         verticalLayout.scrollHeight <= verticalLayout.clientHeight + 1,
         `${viewport.label}: practice page requires vertical scrolling ${JSON.stringify(verticalLayout)}`
       );
       assert.ok(
-        Math.max(verticalLayout.boardBottom, verticalLayout.toolsBottom) <= verticalLayout.clientHeight,
+        Math.max(
+          verticalLayout.boardBottom,
+          verticalLayout.toolsBottom,
+          verticalLayout.navigationBottom
+        ) <= verticalLayout.clientHeight,
         `${viewport.label}: practice content is below the viewport ${JSON.stringify(verticalLayout)}`
       );
       if (viewport.height <= 430) {
+        assert.equal(
+          verticalLayout.lessonDisplay,
+          'none',
+          `${viewport.label}: phone practice lesson label remains visible`
+        );
+        assert.equal(
+          verticalLayout.groupDisplay,
+          'none',
+          `${viewport.label}: phone practice group label remains visible`
+        );
         assert.ok(
-          Math.max(verticalLayout.boardBottom, verticalLayout.toolsBottom)
+          Math.max(
+            verticalLayout.boardBottom,
+            verticalLayout.toolsBottom,
+            verticalLayout.navigationBottom
+          )
             <= verticalLayout.clientHeight - 8,
           `${viewport.label}: practice content enters the bottom safe area ${JSON.stringify(verticalLayout)}`
+        );
+      } else {
+        assert.ok(
+          verticalLayout.navigationTop
+            >= Math.max(verticalLayout.boardBottom, verticalLayout.toolsBottom) - 1,
+          `${viewport.label}: practice character navigation is not below the work surface ${JSON.stringify(verticalLayout)}`
         );
       }
       await saveFullPageScreenshot(
@@ -1378,6 +1611,29 @@ export async function registerBrowserTests({ test }) {
       ), { waitUntil: 'load' });
       await waitForPractice(page, '引导描写');
       await assertPracticeActiveGeometry(page, viewport, '引导描写', `${viewport.label} guided`);
+      if (viewport.width < 760 && viewport.height > viewport.width) {
+        const portraitLayout = await page.evaluate(() => {
+          const board = document.querySelector('.practice-board').getBoundingClientRect();
+          const tools = document.querySelector('.practice-tools').getBoundingClientRect();
+          const navigation = document.querySelector('.practice-navigation').getBoundingClientRect();
+          return {
+            lessonDisplay: getComputedStyle(
+              document.querySelector('.practice-lesson-title')
+            ).display,
+            groupDisplay: getComputedStyle(
+              document.querySelector('.practice-group-label')
+            ).display,
+            workSurfaceBottom: Math.max(board.bottom, tools.bottom),
+            navigationTop: navigation.top
+          };
+        });
+        assert.equal(portraitLayout.lessonDisplay, 'none');
+        assert.equal(portraitLayout.groupDisplay, 'none');
+        assert.ok(
+          portraitLayout.navigationTop >= portraitLayout.workSurfaceBottom - 1,
+          `${viewport.label}: portrait practice navigation is not below the work surface ${JSON.stringify(portraitLayout)}`
+        );
+      }
       await capturePracticeScreenshot(page, artifactPath, viewport, 'guided');
 
       await drawPracticeCharacter(page);
@@ -1494,6 +1750,7 @@ export async function registerBrowserTests({ test }) {
     await page.locator('[data-slot="practice-feedback"]')
       .filter({ hasText: '已经重新开始' }).waitFor();
 
+    await board.scrollIntoViewIfNeeded();
     await drawPracticeMedian(page, 0, { reverse: true });
     const errorFeedback = page.locator('[data-slot="practice-feedback"][data-kind="error"]');
     await errorFeedback.filter({ hasText: '方向反了' }).waitFor();
@@ -1534,6 +1791,7 @@ export async function registerBrowserTests({ test }) {
 
     await page.reload({ waitUntil: 'load' });
     await waitForPractice(page, '引导描写');
+    await page.locator('[data-slot="practice-board"]').scrollIntoViewIfNeeded();
     await drawPracticeCharacterWithTouch(client, page);
     await waitForPractice(page, '独立描写');
     const firstStroke = await mappedPracticeMedian(page, 0);

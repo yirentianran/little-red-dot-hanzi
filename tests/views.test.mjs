@@ -427,6 +427,10 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     character: '潮',
     pinyin: 'cháo',
     strokeCount: 15,
+    groupIndex: 0,
+    groupTotal: 15,
+    previous: null,
+    next: { character: '据', pinyin: 'jù' },
     status: 'active',
     phase: 'guided',
     index: 0,
@@ -450,6 +454,10 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     character: '潮',
     pinyin: 'cháo',
     strokeCount: 15,
+    groupIndex: 0,
+    groupTotal: 15,
+    previous: null,
+    next: { character: '据', pinyin: 'jù' },
     status: 'complete',
     phase: null,
     index: 15,
@@ -1061,6 +1069,48 @@ test('renders active practice as an unframed board with stable live handles and 
   assert.match(singleBack.getAttribute('aria-label'), /返回.*潮.*学习页/);
   assert.doesNotMatch(singleBack.getAttribute('aria-label'), /字表/);
   assert.match(singleBack.textContent, /潮/);
+  assert.equal(
+    byAttribute(singleDom.container, 'data-slot', 'practice-round-position')[0].textContent,
+    '第 1 个，共 15 个'
+  );
+  assert.equal(byAction(singleDom.container, 'previous-character').length, 1);
+  assert.equal(byAction(singleDom.container, 'next-character').length, 1);
+  assert.equal(byAction(singleDom.container, 'previous-character')[0].getAttribute('disabled'), '');
+  assert.equal(byAction(singleDom.container, 'next-character')[0].getAttribute('disabled'), '');
+
+  const secondResolved = {
+    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '据' }),
+    scope: 'single'
+  };
+  const secondComplete = createPracticeModel(secondResolved, sessionState({
+    status: 'complete',
+    phase: null,
+    character: null,
+    index: 1,
+    total: 1,
+    completedCharacters: ['据'],
+    remainingCharacters: [],
+    masteredCount: 1
+  }), true);
+  const secondDom = createDom();
+  renderPractice(secondDom.container, secondComplete);
+  assert.equal(
+    byAttribute(secondDom.container, 'data-slot', 'practice-round-position')[0].textContent,
+    '第 2 个，共 15 个'
+  );
+  assert.equal(
+    byAction(secondDom.container, 'previous-character')[0].getAttribute('data-character'),
+    '潮'
+  );
+  assert.equal(
+    byAction(secondDom.container, 'next-character')[0].getAttribute('data-character'),
+    '堤'
+  );
+  assert.equal(
+    byAction(secondDom.container, 'previous-character')[0].getAttribute('disabled'),
+    null
+  );
+  assert.equal(byAction(secondDom.container, 'next-character')[0].getAttribute('disabled'), null);
 });
 
 test('renders retry controls by scope and rejects inactive handle mutations without DOM changes', async () => {

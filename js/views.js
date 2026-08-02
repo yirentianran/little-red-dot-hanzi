@@ -544,6 +544,10 @@
     var index = requireSafeInteger(ownDataValue(resolved, 'index', 'resolved'), 'resolved.index', 0);
     var total = requireSafeInteger(ownDataValue(resolved, 'total', 'resolved'), 'resolved.total', 1);
     if (index >= total) reject('resolved.index', 'must be less than resolved.total');
+    var previous = copyNeighbor(
+      ownDataValue(resolved, 'previous', 'resolved'), 'resolved.previous'
+    );
+    var next = copyNeighbor(ownDataValue(resolved, 'next', 'resolved'), 'resolved.next');
     var entries = ownDataValue(resolved, 'entries', 'resolved');
     requireRegularArray(entries, 'resolved.entries');
     if (entries.length !== total) reject('resolved.entries', 'must match resolved.total');
@@ -580,6 +584,8 @@
       strokeCount: strokeCount,
       index: index,
       total: total,
+      previous: previous,
+      next: next,
       characters: characters
     };
   }
@@ -724,6 +730,10 @@
       character: resolvedCopy.character,
       pinyin: resolvedCopy.pinyin,
       strokeCount: resolvedCopy.strokeCount,
+      groupIndex: resolvedCopy.index,
+      groupTotal: resolvedCopy.total,
+      previous: resolvedCopy.previous,
+      next: resolvedCopy.next,
       status: stateCopy.status,
       phase: stateCopy.phase,
       index: stateCopy.index,
@@ -1267,6 +1277,7 @@
   function copyPracticeViewModel(model) {
     var fields = [
       'unit', 'lesson', 'group', 'scope', 'character', 'pinyin', 'strokeCount',
+      'groupIndex', 'groupTotal', 'previous', 'next',
       'status', 'phase', 'index', 'total', 'mistakes', 'completedCount',
       'masteredCount', 'newlyMasteredCount', 'needsPracticeCharacters', 'persistent'
     ];
@@ -1285,6 +1296,14 @@
       strokeCount: requireSafeInteger(
         ownDataValue(model, 'strokeCount', 'model'), 'model.strokeCount', 1
       ),
+      groupIndex: requireSafeInteger(
+        ownDataValue(model, 'groupIndex', 'model'), 'model.groupIndex', 0
+      ),
+      groupTotal: requireSafeInteger(
+        ownDataValue(model, 'groupTotal', 'model'), 'model.groupTotal', 1
+      ),
+      previous: copyNeighbor(ownDataValue(model, 'previous', 'model'), 'model.previous'),
+      next: copyNeighbor(ownDataValue(model, 'next', 'model'), 'model.next'),
       status: requireOneOf(
         ownDataValue(model, 'status', 'model'), PRACTICE_STATUSES, 'model.status'
       ),
@@ -1310,6 +1329,15 @@
       persistent: ownDataValue(model, 'persistent', 'model')
     };
     if (typeof copy.persistent !== 'boolean') reject('model.persistent', 'must be a boolean');
+    if (copy.groupIndex >= copy.groupTotal) {
+      reject('model.groupIndex', 'must be less than model.groupTotal');
+    }
+    if ((copy.groupIndex === 0) !== (copy.previous === null)) {
+      reject('model.previous', 'must match the group position');
+    }
+    if ((copy.groupIndex === copy.groupTotal - 1) !== (copy.next === null)) {
+      reject('model.next', 'must match the group position');
+    }
     if (copy.index > copy.total) reject('model.index', 'must not exceed model.total');
     if (copy.completedCount > copy.total) reject('model.completedCount', 'must not exceed model.total');
     if (copy.masteredCount > copy.total) reject('model.masteredCount', 'must not exceed model.total');
@@ -1355,6 +1383,15 @@
       + model.strokeCount + '笔';
   }
 
+  function practiceNavigationButton(documentObject, model, direction) {
+    var button = characterNavigationButton(documentObject, model, direction);
+    button.setAttribute(
+      'class', 'button character-navigation__button practice-navigation__button'
+    );
+    if (model.status !== 'complete') button.setAttribute('disabled', '');
+    return button;
+  }
+
   function renderPractice(container, model) {
     var documentObject = requireContainer(container);
     var viewModel = copyPracticeViewModel(model);
@@ -1367,7 +1404,8 @@
       'data-view': 'practice'
     });
     var backAttributes = practiceContextAttributes(viewModel, 'practice-back');
-    backAttributes['class'] = 'button button--quiet back-button';
+    backAttributes['class'] = 'button button--quiet back-button'
+      + (viewModel.scope === 'single' ? ' practice-back--single' : '');
     var backLabel = viewModel.scope === 'single'
       ? '返回“' + viewModel.character + '”字的学习页'
       : '返回《' + viewModel.lesson.title + '》' + groupLabel + '字表';
@@ -1379,14 +1417,28 @@
       icon(documentObject, '←'),
       node(documentObject, 'span', {}, backText)
     ]);
+    var positionText = viewModel.scope === 'single'
+      ? '第 ' + (viewModel.groupIndex + 1) + ' 个，共 ' + viewModel.groupTotal + ' 个'
+      : '第 ' + Math.min(viewModel.index + 1, viewModel.total) + ' / '
+        + viewModel.total + ' 个';
     var position = node(documentObject, 'p', {
       'class': 'practice-round-position',
       'data-slot': 'practice-round-position'
-    }, '第 ' + Math.min(viewModel.index + 1, viewModel.total) + ' / ' + viewModel.total + ' 个');
-    var topbar = node(documentObject, 'div', { 'class': 'practice-topbar' }, undefined, [
-      back,
-      position
-    ]);
+    }, positionText);
+    var navigation = null;
+    if (viewModel.scope === 'single') {
+      navigation = node(documentObject, 'nav', {
+        'class': 'character-navigation practice-navigation',
+        'aria-label': '前后汉字'
+      }, undefined, [
+        practiceNavigationButton(documentObject, viewModel, 'previous'),
+        practiceNavigationButton(documentObject, viewModel, 'next')
+      ]);
+    }
+    var topbar = node(documentObject, 'div', {
+      'class': 'practice-topbar'
+        + (viewModel.scope === 'single' ? ' practice-topbar--single' : '')
+    }, undefined, [back, position]);
     var lesson = node(documentObject, 'p', { 'class': 'practice-lesson-title' }, lessonTitle);
     var group = node(documentObject, 'p', { 'class': 'practice-group-label' }, groupLabel);
     var heading = viewHeading(documentObject, '练习“' + viewModel.character + '”');
@@ -1505,7 +1557,9 @@
       }, undefined, resultChildren)];
     }
 
-    root.replaceChildren.apply(root, common.concat(content));
+    var pageContent = common.concat(content);
+    if (navigation) pageContent.push(navigation);
+    root.replaceChildren.apply(root, pageContent);
     container.replaceChildren(root);
 
     function requireActiveHandle() {

@@ -838,6 +838,53 @@ noscript {
   }
 }
 
+@media (max-width: 759px) and (orientation: landscape) {
+  .view--practice {
+    position: relative;
+  }
+
+  .practice-topbar--single {
+    min-height: 44px;
+    padding-right: 100px;
+  }
+
+  .view--practice > .practice-navigation {
+    position: absolute;
+    top: 0;
+    right: 0;
+    grid-template-columns: repeat(2, 44px);
+    gap: 4px;
+    width: 92px;
+    margin: 0;
+  }
+
+  .practice-navigation__button {
+    width: 44px;
+    padding: 0;
+  }
+
+  .practice-navigation__button > span:not(.button-icon) {
+    display: none;
+  }
+}
+
+@media (max-width: 759px) and (orientation: portrait) {
+  .practice-lesson-title,
+  .practice-group-label {
+    display: none;
+  }
+
+  .view--practice > .view-heading {
+    margin-top: -12px;
+    margin-bottom: 4px;
+  }
+
+  .view--practice > .practice-tools,
+  .view--practice > .practice-navigation {
+    margin-top: 8px;
+  }
+}
+
 @media (min-width: 760px) {
   .site-header__inner {
     display: flex;
@@ -1302,7 +1349,7 @@ noscript {
     margin: 0;
   }
 
-  .character-navigation {
+  .view--character > .character-navigation {
     grid-area: character-topbar;
     grid-template-columns: repeat(2, 44px);
     align-self: center;
@@ -1312,12 +1359,12 @@ noscript {
     margin: 0;
   }
 
-  .character-navigation__button {
+  .view--character > .character-navigation .character-navigation__button {
     width: 44px;
     padding: 0;
   }
 
-  .character-navigation__button > span:not(.button-icon) {
+  .view--character > .character-navigation .character-navigation__button > span:not(.button-icon) {
     display: none;
   }
 
@@ -1491,15 +1538,41 @@ noscript {
   }
 
   .view--character {
-    grid-template-areas:
-      "character-board character-topbar"
-      "character-board character-heading"
-      "character-board character-tools";
-    grid-template-rows: auto auto minmax(0, 1fr);
+    display: block;
   }
 
   .view--practice {
+    grid-template-areas:
+      "topbar topbar"
+      "heading heading"
+      "board tools"
+      "navigation navigation";
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 0 12px;
+  }
+
+  .character-topbar,
+  .practice-topbar {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .character-work-surface {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 350px;
+    gap: 12px;
+  }
+
+  .board-column,
+  .character-tools {
+    grid-area: auto;
+  }
+
+  .character-board,
+  .practice-board {
+    width: min(100%, 620px, calc(100vh - 184px));
+    width: min(100%, 620px, calc(100dvh - 184px));
   }
 
   .practice-tools {
@@ -1507,11 +1580,59 @@ noscript {
     column-gap: 2px;
   }
 
-  .view--character > .view-heading {
+  .view--character > .view-heading,
+  .view--practice > .view-heading {
     display: block;
-    grid-area: character-heading;
-    margin: 0;
+    margin: 0 0 6px;
     font-size: 22px;
+  }
+
+  [data-view="practice"].view--practice > .practice-topbar {
+    grid-area: topbar;
+    grid-column: 1 / -1;
+  }
+
+  [data-view="practice"].view--practice > .view-heading {
+    grid-area: heading;
+    grid-column: 1 / -1;
+  }
+
+  .practice-lesson-title,
+  .practice-group-label {
+    display: none;
+  }
+
+  .practice-board {
+    grid-area: board;
+  }
+
+  .practice-tools {
+    grid-area: tools;
+  }
+
+  .view--character > .character-navigation,
+  .view--practice > .practice-navigation {
+    position: static;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  [data-view="practice"].view--practice > .practice-navigation {
+    grid-area: navigation;
+    grid-column: 1 / -1;
+  }
+
+  .view--character > .character-navigation .character-navigation__button,
+  .view--practice > .practice-navigation .practice-navigation__button {
+    width: auto;
+    padding: 10px 16px;
+  }
+
+  .view--character > .character-navigation .character-navigation__button > span:not(.button-icon),
+  .view--practice > .practice-navigation .practice-navigation__button > span:not(.button-icon) {
+    display: inline;
   }
 }
 
@@ -1543,6 +1664,61 @@ noscript {
   .view--character,
   .view--practice {
     grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  }
+
+  .practice-topbar--single {
+    min-height: 44px;
+    padding-right: 100px;
+  }
+
+  .practice-topbar--single .practice-round-position {
+    line-height: 1.25;
+    white-space: nowrap;
+  }
+
+  .practice-back--single {
+    min-width: 0;
+    padding-inline: 4px;
+    white-space: nowrap;
+  }
+
+  .practice-back--single > span:not(.button-icon) {
+    white-space: nowrap;
+  }
+
+  .view--practice > .practice-navigation {
+    position: relative;
+    top: 0;
+    right: auto;
+    grid-area: topbar;
+    grid-template-columns: repeat(2, 44px);
+    align-self: center;
+    justify-self: end;
+    gap: 4px;
+    width: 92px;
+    margin: 0;
+  }
+
+  .practice-navigation__button {
+    width: 44px;
+    padding: 0;
+  }
+
+  .practice-navigation__button > span:not(.button-icon) {
+    display: none;
+  }
+
+  .view--practice {
+    grid-template-areas:
+      "board topbar"
+      "board heading"
+      "board tools";
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .practice-lesson-title,
+  .practice-group-label {
+    display: none;
   }
 
   .character-tools,
@@ -1640,6 +1816,15 @@ noscript {
 }
 
 @media (orientation: landscape) and (max-width: 600px) and (max-height: 430px) {
+  .practice-back--single {
+    width: 44px;
+    padding: 0;
+  }
+
+  .practice-back--single > span:not(.button-icon) {
+    display: none;
+  }
+
   .view--lesson .character-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
@@ -1682,18 +1867,6 @@ noscript {
     padding: 0;
   }
 
-  .view--practice {
-    grid-template-areas:
-      "board topbar"
-      "board heading"
-      "board tools";
-    grid-template-rows: auto auto minmax(0, 1fr);
-  }
-
-  .practice-lesson-title,
-  .practice-group-label {
-    display: none;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
