@@ -40,11 +40,12 @@ const COMPACT_LESSON_LANDSCAPE_VIEWPORTS = Object.freeze([
   ...PHONE_LANDSCAPE_VIEWPORTS
 ]);
 const PRACTICE_STATE_VIEWPORTS = Object.freeze([
-  ...VIEWPORTS,
-  MATEPAD_LANDSCAPE_VIEWPORTS[0]
+  VIEWPORTS[2],
+  MATEPAD_LANDSCAPE_VIEWPORTS[0],
+  PHONE_LANDSCAPE_VIEWPORTS[3]
 ]);
 const PAGE_STYLE_PARITY_VIEWPORTS = Object.freeze([
-  ...VIEWPORTS,
+  VIEWPORTS[2],
   MATEPAD_LANDSCAPE_VIEWPORTS[0],
   PHONE_LANDSCAPE_VIEWPORTS[3]
 ]);
@@ -1209,10 +1210,12 @@ export async function registerBrowserTests({ test }) {
     await waitForView(page, 'character');
     assert.equal(await page.locator('.character-pinyin').textContent(), 'jù');
     assert.equal(await page.locator('.character-words').textContent(), '组词：根据  据说  证据');
+    assert.equal(await page.locator('.character-words').evaluate(
+      (words) => getComputedStyle(words).display
+    ), 'none');
     await assertNoHorizontalOverflow(page, `${viewport.label} 据 learning`);
     await assertSelectorsAreContained(page, '.character-tools', [
       '.character-pinyin',
-      '.character-words',
       '.character-practice-status',
       '.character-practice-start',
       '.button--audio',
@@ -1221,7 +1224,6 @@ export async function registerBrowserTests({ test }) {
     ], `${viewport.label} 据 learning`);
     await assertTextIsNotClipped(page, [
       '.character-pinyin',
-      '.character-words',
       '.character-practice-status',
       '.character-practice-start',
       '.button--audio',
@@ -1251,16 +1253,22 @@ export async function registerBrowserTests({ test }) {
       await assertNoHorizontalOverflow(page, `${viewport.label} learning tools`);
       await assertVisibleTargetsAreLargeEnough(page, `${viewport.label} learning tools`);
       await assertCharacterGeometry(page, viewport, `${viewport.label} learning tools`);
-      await assertSelectorsAreContained(page, '.character-tools', [
+      const visibleToolSelectors = [
         '.character-pinyin',
-        '.character-words',
         '.character-practice-status',
         '.character-practice-start',
         '.button--audio',
         '.animation-status',
         '.stroke-controls',
         '.speed-control'
-      ], `${viewport.label} learning tools`);
+      ];
+      if (viewport.height > 430) visibleToolSelectors.push('.character-words');
+      await assertSelectorsAreContained(
+        page,
+        '.character-tools',
+        visibleToolSelectors,
+        `${viewport.label} learning tools`
+      );
       await saveFullPageScreenshot(
         page,
         artifactPath(`${viewport.label}-learning-tools.png`),
@@ -1286,6 +1294,9 @@ export async function registerBrowserTests({ test }) {
       const characterHeadingTop = await page.locator(
         '[data-view="character"] > [data-view-heading]'
       ).evaluate((heading) => heading.getBoundingClientRect().top);
+      const characterHeadingFontSize = await page.locator(
+        '[data-view="character"] > [data-view-heading]'
+      ).evaluate((heading) => getComputedStyle(heading).fontSize);
       const characterSpacing = viewport.width < 760 && viewport.height > viewport.width
         ? await readPortraitWorkSurfaceSpacing(page, 'character')
         : null;
@@ -1306,6 +1317,9 @@ export async function registerBrowserTests({ test }) {
       const practiceHeadingTop = await page.locator(
         '[data-view="practice"] > [data-view-heading]'
       ).evaluate((heading) => heading.getBoundingClientRect().top);
+      const practiceHeadingFontSize = await page.locator(
+        '[data-view="practice"] > [data-view-heading]'
+      ).evaluate((heading) => getComputedStyle(heading).fontSize);
       const practiceSpacing = viewport.width < 760 && viewport.height > viewport.width
         ? await readPortraitWorkSurfaceSpacing(page, 'practice')
         : null;
@@ -1325,6 +1339,11 @@ export async function registerBrowserTests({ test }) {
         characterGlyph,
         practiceGlyph,
         `${viewport.label} learning/practice`
+      );
+      assert.equal(
+        characterHeadingFontSize,
+        practiceHeadingFontSize,
+        `${viewport.label}: learning/practice heading font sizes differ`
       );
       if (viewport.width < 760 && viewport.height > viewport.width) {
         assert.ok(

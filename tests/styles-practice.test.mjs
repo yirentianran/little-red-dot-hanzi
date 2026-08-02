@@ -123,6 +123,34 @@ test('practice surface is one column by default and two columns on wide screens'
   );
 });
 
+test('all routed pages use three landscape height bands without portrait or device sub-splits', async () => {
+  const css = await readStyles();
+  const regular = mediaBody(
+    css,
+    'min-width: 760px) and (orientation: landscape) and (min-height: 761px'
+  );
+  const compactTablet = mediaBody(
+    css,
+    'min-width: 760px) and (orientation: landscape) and (min-height: 431px) and (max-height: 760px'
+  );
+  const compactLandscape = mediaBody(css, 'orientation: landscape) and (max-height: 760px');
+  const phone = mediaBody(css, 'orientation: landscape) and (max-height: 430px');
+
+  assert.match(regular, /\.view--practice/i);
+  assert.match(compactLandscape, /\.view--directory/i);
+  assert.match(compactLandscape, /\.view--lesson/i);
+  assert.match(compactTablet, /\.view--directory/i);
+  assert.match(compactTablet, /\.view--lesson/i);
+  assert.match(compactTablet, /\.view--character/i);
+  assert.match(compactTablet, /\.view--practice/i);
+  assert.match(phone, /\.view--lesson/i);
+  assert.match(phone, /\.view--character/i);
+  assert.match(phone, /\.view--practice/i);
+  assert.doesNotMatch(css, /@media[^\{]*max-width:\s*(?:479|600)px/i);
+  assert.doesNotMatch(css, /@media[^\{]*max-height:\s*360px/i);
+  assert.doesNotMatch(css, /@media[^\{]*orientation:\s*portrait/i);
+});
+
 test('practice tools, actions, and long text remain usable without nested cards', async () => {
   const css = await readStyles();
   const tools = ruleBody(css, '.practice-tools');

@@ -819,72 +819,6 @@ noscript {
   border: 1px solid #e1c94e;
 }
 
-@media (max-width: 479px) {
-  .directory-heading {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .directory-resume {
-    width: 100%;
-  }
-
-  .lesson-row {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .lesson-row__counts {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 759px) and (orientation: landscape) {
-  .view--practice {
-    position: relative;
-  }
-
-  .practice-topbar--single {
-    min-height: 44px;
-    padding-right: 100px;
-  }
-
-  .view--practice > .practice-navigation {
-    position: absolute;
-    top: 0;
-    right: 0;
-    grid-template-columns: repeat(2, 44px);
-    gap: 4px;
-    width: 92px;
-    margin: 0;
-  }
-
-  .practice-navigation__button {
-    width: 44px;
-    padding: 0;
-  }
-
-  .practice-navigation__button > span:not(.button-icon) {
-    display: none;
-  }
-}
-
-@media (max-width: 759px) and (orientation: portrait) {
-  .practice-lesson-title,
-  .practice-group-label {
-    display: none;
-  }
-
-  .view--practice > .view-heading {
-    margin-top: -12px;
-    margin-bottom: 4px;
-  }
-
-  .view--practice > .practice-tools,
-  .view--practice > .practice-navigation {
-    margin-top: 8px;
-  }
-}
-
 @media (min-width: 760px) {
   .site-header__inner {
     display: flex;
@@ -933,7 +867,7 @@ noscript {
   }
 }
 
-@media (min-width: 760px) and (min-height: 761px) {
+@media (min-width: 760px) and (orientation: landscape) and (min-height: 761px) {
   .view--practice {
     grid-template-areas:
       "practice-topbar practice-topbar"
@@ -968,7 +902,7 @@ noscript {
   }
 }
 
-@media (min-width: 760px) and (max-height: 900px) {
+@media (min-width: 760px) and (orientation: landscape) and (min-height: 761px) and (max-height: 900px) {
   #app {
     padding-block: 14px 16px;
   }
@@ -1653,7 +1587,7 @@ noscript {
   }
 
   .view--lesson .character-grid {
-    grid-template-columns: repeat(5, 72px);
+    grid-template-columns: repeat(5, minmax(0, 72px));
     justify-content: start;
   }
 
@@ -1669,8 +1603,12 @@ noscript {
     display: block;
     grid-area: character-heading;
     margin: 0;
-    font-size: 22px;
+    font-size: 18px;
     line-height: 1.2;
+  }
+
+  .view--practice > .view-heading {
+    font-size: 18px;
   }
 
   .view--character,
@@ -1736,7 +1674,7 @@ noscript {
   .character-tools,
   .practice-tools {
     min-width: 0;
-    padding: 6px;
+    padding: 0 6px;
   }
 
   .character-tools {
@@ -1751,11 +1689,29 @@ noscript {
   .character-pinyin {
     grid-column: 2;
     grid-row: 1;
+    align-self: end;
   }
 
   .character-words {
     grid-column: 2;
     grid-row: 2;
+    display: none;
+  }
+
+  .character-topbar .back-button {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .character-topbar .back-button > span:not(.button-icon) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .character-position {
+    white-space: nowrap;
   }
 
   .character-display {
@@ -1769,8 +1725,9 @@ noscript {
   }
 
   .character-practice-status {
+    align-self: start;
     grid-column: 2;
-    grid-row: 3;
+    grid-row: 2;
   }
 
   .character-practice-start,
@@ -1787,9 +1744,15 @@ noscript {
   .animation-status {
     grid-column: 1 / -1;
     grid-row: 6;
-    min-height: 30px;
+    min-height: 18px;
     display: grid;
     place-items: center;
+  }
+
+  .character-tools .control-feedback,
+  .character-tools .animation-status {
+    font-size: 12px;
+    line-height: 1.2;
   }
 
   .stroke-controls {
@@ -1812,6 +1775,10 @@ noscript {
     width: 100%;
   }
 
+  .character-tools .speed-control {
+    padding: 0;
+  }
+
   .practice-tools {
     gap: 2px 4px;
   }
@@ -1825,88 +1792,6 @@ noscript {
     width: min(100%, 620px, calc(100vh - 16px));
     width: min(100%, 620px, calc(100dvh - 16px));
   }
-}
-
-@media (orientation: landscape) and (max-width: 600px) and (max-height: 430px) {
-  .practice-back--single {
-    width: 44px;
-    padding: 0;
-  }
-
-  .practice-back--single > span:not(.button-icon) {
-    display: none;
-  }
-
-  .view--lesson .character-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
-}
-
-@media (orientation: landscape) and (max-height: 360px) {
-  #app {
-    padding-top: 0;
-  }
-
-  .view--character {
-    row-gap: 2px;
-  }
-
-  .view--character > .view-heading {
-    font-size: 18px;
-  }
-
-  .character-topbar .back-button {
-    min-width: 0;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .character-topbar .back-button > span:not(.button-icon) {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .character-position {
-    white-space: nowrap;
-  }
-
-  .character-tools,
-  .practice-tools {
-    padding-block: 0;
-  }
-
-  .character-words {
-    display: none;
-  }
-
-  .character-pinyin {
-    align-self: end;
-  }
-
-  .character-practice-status {
-    align-self: start;
-    grid-row: 2;
-  }
-
-  .stroke-count {
-    grid-row: 3;
-  }
-
-  .character-tools .control-feedback,
-  .character-tools .animation-status {
-    font-size: 12px;
-    line-height: 1.2;
-  }
-
-  .character-tools .animation-status {
-    min-height: 18px;
-  }
-
-  .character-tools .speed-control {
-    padding: 0;
-  }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
