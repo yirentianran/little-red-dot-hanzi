@@ -30,9 +30,12 @@
 - `scripts/lib/library-validator.mjs`: reusable source-data validation.
 - `scripts/validate-library.mjs`: validation CLI.
 - `scripts/build-library.mjs`: deterministic classic-script bundle generator.
+- `scripts/build-single-file.mjs`: standalone HTML bundler that inlines CSS, JS, and audio into one self-contained file.
 - `scripts/extract-characters.mjs`: subset extractor for upstream character data.
 - `scripts/sync-audio.mjs`: reproducible importer for the pinned upstream recording set.
 - `tests/`: Node tests, data assertions, and browser acceptance tests.
+- `dist/hanzi-grade4.html`: standalone single-file output, ready for tablet transfer.
+- `dist/folder/`: multi-file output for desktop debugging.
 
 ### Task 1: Establish the Validation and Test Harness
 
@@ -124,6 +127,9 @@ The CLI reads `data/curriculum.json`, `data/characters.json`, and audio basename
     "test": "node --test tests/*.test.mjs",
     "validate": "node scripts/validate-library.mjs",
     "build:data": "node scripts/build-library.mjs",
+    "build:standalone": "node scripts/build-single-file.mjs",
+    "build": "npm run build:data",
+    "build:all": "npm run build && npm run build:standalone",
     "check": "npm test && npm run validate && npm run build:data"
   }
 }
@@ -789,10 +795,232 @@ git add js/app.js index.html tests/app.test.mjs
 git commit -m "feat: integrate the offline learning app"
 ```
 
-### Task 12: Verify File-Open, Responsive, and Visual Behavior
+### Task 12: Build the Standalone Single-File HTML
+
+**Files:**
+- Create: `scripts/build-single-file.mjs`
+- Create: `tests/build-single-file.test.mjs`
+- Modify: `dist/` directory (created by build output)
+
+**Interfaces:**
+- Consumes: `index.html`, `styles.css`, `js/*.js`, `data/library-data.js` (from `npm run build`), `assets/audio/*.m4a`
+- Produces: `dist/hanzi-grade4.html` — one self-contained HTML file with all CSS, JS, and audio inlined
+- Exports: `inlineCss(html, cssContent)`, `inlineScripts(html, baseDir)`, `inlineAudio(libraryJs, audioDir)`, `buildStandalone(options)`
+
+- [ ] **Step 1: Write failing standalone build tests**
+
+```js
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync } from 'fs';
+import { resolve } from 'path';
+import { inlineCss, inlineScripts, inlineAudio, buildStandalone } from '../scripts/build-single-file.mjs';
+
+test('inlineCss replaces link tag with style tag', () => {
+  const html = '<head><link rel="stylesheet" href="styles.css"></head>';
+  const result = inlineCss(html, 'body { color: red; }\n');
+  assert.match(result, /<style>/);
+  assert.match(result, /body \{ color: red; \}/);
+  assert.doesNotMatch(result, /<link/);
+});
+
+test('inlineScripts replaces script src with inline script', () => {
+  const fixtures = resolve('tests/fixtures/standalone');
+  const html = '<script src="js/app.js"></script>';
+  const result = inlineScripts(html, fixtures);
+  assert.match(result, /<script>/);
+  assert.doesNotMatch(result, /src="/);
+});
+
+test('inlineAudio replaces file paths with base64 data URIs', () => {
+  const libraryJs = 'window.HANZI_LIBRARY = {"audio":{"readings":{"chao2":{"file":"assets/audio/chao2.m4a"}}}}';
+  const fixtures = resolve('tests/fixtures/standalone');
+  const result = inlineAudio(libraryJs, fixtures);
+  assert.match(result, /data:audio\/mp4;base64,/);
+  assert.doesNotMatch(result, /\.m4a/);
+});
+
+test('buildStandalone writes a file with no external references', () => {
+  const fixtures = resolve('tests/fixtures/standalone');
+  const outputPath = resolve('tests/fixtures/standalone/output/test.html');
+  mkdirSync(resolve(fixtures, 'output'), { recursive: true });
+
+  buildStandalone({
+    inputHtml: resolve(fixtures, 'index.html'),
+    libraryJs: resolve(fixtures, 'data/library-data.js'),
+    stylesCss: resolve(fixtures, 'styles.css'),
+    audioDir: resolve(fixtures, 'assets/audio'),
+    outputPath
+  });
+
+  const output = readFileSync(outputPath, 'utf-8');
+  assert.doesNotMatch(output, /<link[^>]*href="/);
+  assert.doesNotMatch(output, /<script[^>]*src="/);
+  assert.doesNotMatch(output, /assets\/audio\/[^"]*\.m4a/);
+  assert.match(output, /data:audio\/mp4;base64,/);
+
+  rmSync(resolve(fixtures, 'output'), { recursive: true });
+});
+```
+
+- [ ] **Step 2: Create test fixtures**
+
+Create `tests/fixtures/standalone/` with minimal files:
+
+```
+tests/fixtures/standalone/
+├── index.html          — <link href="styles.css"> + <script src="data/library-data.js"> + <script src="js/app.js">
+├── styles.css          — body { color: blue; }
+├── data/
+│   └── library-data.js — window.HANZI_LIBRARY = {"audio":{"readings":{"chao2":{"file":"assets/audio/chao2.m4a"}}}};
+├── js/
+│   └── app.js          — console.log('app loaded');
+└── assets/audio/
+    └── chao2.m4a       — minimal valid M4A file (can be a small valid audio or a 1-byte placeholder)
+```
+
+Create a minimal valid M4A file for the test fixture. Use a real but tiny audio snippet:
+
+```bash
+# Generate a minimal valid M4A for testing — use ffmpeg if available, or create a tiny valid placeholder
+```
+
+For the test, the M4A fixture can be a valid 1-second silent audio generated during test setup, or the test can use a known-good file checked into the repo.
+
+- [ ] **Step 3: Run tests and verify they fail**
+
+Run: `node --test tests/build-single-file.test.mjs`
+
+Expected: FAIL because `scripts/build-single-file.mjs` does not exist.
+
+- [ ] **Step 4: Implement the standalone builder**
+
+```js
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { resolve, basename, dirname } from 'path';
+
+export function inlineCss(html, cssContent) {
+  return html.replace(
+    /<link[^>]*href="([^"]*\.css)"[^>]*\/?>/g,
+    () => `<style>\n${cssContent}\n</style>`
+  );
+}
+
+export function inlineScripts(html, baseDir) {
+  return html.replace(
+    /<script[^>]*src="([^"]*\.js)"[^>]*><\/script>/g,
+    (match, src) => {
+      const filePath = resolve(baseDir, src);
+      const content = readFileSync(filePath, 'utf-8');
+      return `<script>\n${content}\n</script>`;
+    }
+  );
+}
+
+export function inlineAudio(libraryJs, audioDir) {
+  return libraryJs.replace(
+    /"file":\s*"([^"]*(?:\.m4a))"/g,
+    (match, filePath) => {
+      const audioPath = resolve(audioDir, basename(filePath));
+      if (!existsSync(audioPath)) {
+        throw new Error(`Audio file not found: ${audioPath}`);
+      }
+      const buffer = readFileSync(audioPath);
+      const b64 = buffer.toString('base64');
+      return `"file":"data:audio/mp4;base64,${b64}"`;
+    }
+  );
+}
+
+export function buildStandalone({ inputHtml, libraryJs, stylesCss, audioDir, outputPath }) {
+  let libraryContent = readFileSync(libraryJs, 'utf-8');
+  libraryContent = inlineAudio(libraryContent, audioDir);
+
+  let html = readFileSync(inputHtml, 'utf-8');
+  const cssContent = readFileSync(stylesCss, 'utf-8');
+  html = inlineCss(html, cssContent);
+
+  const baseDir = dirname(inputHtml);
+
+  html = html.replace(
+    /<script[^>]*src="([^"]*\/)?library-data\.js"[^>]*><\/script>/g,
+    () => `<script>\n${libraryContent}\n</script>`
+  );
+
+  html = inlineScripts(html, baseDir);
+
+  mkdirSync(dirname(outputPath), { recursive: true });
+  writeFileSync(outputPath, html, 'utf-8');
+
+  return { outputPath, size: Buffer.byteLength(html, 'utf-8') };
+}
+
+// CLI entry point
+const projectRoot = resolve(dirname(new URL(import.meta.url).pathname), '..');
+const result = buildStandalone({
+  inputHtml: resolve(projectRoot, 'index.html'),
+  libraryJs: resolve(projectRoot, 'data', 'library-data.js'),
+  stylesCss: resolve(projectRoot, 'styles.css'),
+  audioDir: resolve(projectRoot, 'assets', 'audio'),
+  outputPath: resolve(projectRoot, 'dist', 'hanzi-grade4.html')
+});
+console.log(`Standalone HTML written: ${result.outputPath} (${(result.size / 1024 / 1024).toFixed(1)} MB)`);
+```
+
+- [ ] **Step 5: Create minimal test fixture audio file**
+
+The standalone test needs a valid audio file. Generate a tiny silent M4A using ffmpeg:
+
+```bash
+ffmpeg -f lavfi -i anullsrc=r=24000:cl=mono -t 0.01 -c:a aac -b:a 64k tests/fixtures/standalone/assets/audio/chao2.m4a
+```
+
+If ffmpeg is not available, use a pre-built silent M4A fixture or skip the audio integration test in CI and cover the base64 encoding in a unit test that mocks file reads.
+
+- [ ] **Step 6: Run standalone build tests**
+
+Run: `node --test tests/build-single-file.test.mjs`
+
+Expected: all standalone build tests PASS.
+
+- [ ] **Step 7: Run full build and verify output**
+
+Run: `npm run build:all`
+
+Expected:
+- `dist/folder/` contains the multi-file version (if the multi-file copy step exists)
+- `dist/hanzi-grade4.html` exists and is a single HTML file
+- `dist/hanzi-grade4.html` contains no `<link href=` tags
+- `dist/hanzi-grade4.html` contains no `<script src=` tags
+- `dist/hanzi-grade4.html` contains base64-encoded audio data URIs
+- File size is between 1 MB and 6 MB
+
+Verify with:
+
+```bash
+grep -c '<link href=' dist/hanzi-grade4.html  # should be 0
+grep -c '<script src=' dist/hanzi-grade4.html  # should be 0
+grep -c 'data:audio/mp4;base64,' dist/hanzi-grade4.html  # should match audio count
+```
+
+Update `package.json` to include `build:standalone` in the `check` script now that the standalone builder exists:
+
+```json
+"check": "npm test && npm run validate && npm run build:all"
+```
+
+- [ ] **Step 8: Commit**
+
+```bash
+git add scripts/build-single-file.mjs tests/build-single-file.test.mjs tests/fixtures/standalone
+git commit -m "build: add standalone single-file HTML output"
+```
+
+### Task 13: Verify File-Open, Responsive, and Visual Behavior
 
 **Files:**
 - Create: `tests/browser/app.spec.mjs`
+- Create: `tests/browser/standalone.spec.mjs`
 - Create: `tests/browser/offline.spec.mjs`
 - Create: `scripts/run-browser-tests.mjs`
 - Create: `README.md`
@@ -819,21 +1047,52 @@ test('uses no network resources', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 2: Run browser tests and verify any integration failures**
+- [ ] **Step 2: Write standalone file acceptance test**
+
+```js
+test('standalone HTML loads via file:// and shows directory with no network requests', async ({ page }) => {
+  const requests = [];
+  page.on('request', request => requests.push(request.url()));
+
+  await page.goto(fileUrl('dist/hanzi-grade4.html'));
+
+  // Directory view renders
+  await expect(page.getByText('语文四年级上册')).toBeVisible();
+
+  // Navigate to a lesson
+  await page.getByRole('button', { name: /观潮/ }).click();
+  await expect(page.getByText('会写')).toBeVisible();
+
+  // Navigate to a character
+  await page.getByRole('button', { name: /潮/ }).click();
+  await expect(page.locator('[data-tracking-dot]')).toBeVisible();
+
+  // Verify no network requests
+  assert.deepEqual(requests.filter(url => /^https?:/.test(url)), []);
+});
+
+test('standalone HTML loads via file:// on a tablet-sized viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 });
+  await page.goto(fileUrl('dist/hanzi-grade4.html'));
+  await expect(page.getByText('语文四年级上册')).toBeVisible();
+});
+```
+
+- [ ] **Step 3: Run browser tests and verify any integration failures**
 
 Run: `npm run test:browser`
 
 Expected before fixes: tests identify remaining file URL, accessibility-name, animation, or layout issues.
 
-- [ ] **Step 3: Fix only failures demonstrated by acceptance tests**
+- [ ] **Step 4: Fix only failures demonstrated by acceptance tests**
 
-Add `test:browser` to `package.json`, keep all runtime resources relative, and adjust DOM/CSS/controller wiring until file-open tests pass. Do not add a production server or runtime dependency.
+Add `test:browser` to `package.json`, keep all runtime resources relative, and adjust DOM/CSS/controller wiring until file-open tests pass for both multi-file and standalone versions. Do not add a production server or runtime dependency.
 
-- [ ] **Step 4: Capture and inspect responsive screenshots**
+- [ ] **Step 5: Capture and inspect responsive screenshots**
 
-Run the browser script at 360×800, 768×1024, and 1440×900 for directory, lesson, and character views. Verify nonblank SVG pixels, tracking-dot movement across two samples, stable board dimensions, no overlap, and no horizontal overflow.
+Run the browser script at 360×800, 768×1024, and 1440×900 for directory, lesson, and character views on both multi-file and standalone versions. Verify nonblank SVG pixels, tracking-dot movement across two samples, stable board dimensions, no overlap, and no horizontal overflow.
 
-- [ ] **Step 5: Perform final verification**
+- [ ] **Step 6: Perform final verification**
 
 Run: `npm run check`
 
@@ -843,11 +1102,14 @@ Run: `git diff --check && git status --short`
 
 Expected: all checks PASS; only intentional documentation or generated screenshot artifacts remain, and screenshots are excluded unless they are useful fixtures.
 
-- [ ] **Step 6: Document direct use and commit**
+- [ ] **Step 7: Document direct use and commit**
 
-`README.md` states: open `index.html`, choose a unit and lesson, switch “会写 / 会认”, select a character, and use the tracking controls. It also documents `npm run check`, source-data provenance, and the fact that audio never autoplays.
+`README.md` states how to use both versions:
+- **Multi-file**: open `dist/folder/index.html`, choose a unit and lesson, switch “会写 / 会认”, select a character, and use the tracking controls.
+- **Standalone (tablet)**: transfer `dist/hanzi-grade4.html` to the tablet, open it in the browser — no other files needed.
+- Documents `npm run build`, `npm run build:all`, `npm run check`, source-data provenance, and the fact that audio never autoplays.
 
 ```bash
 git add README.md package.json scripts/run-browser-tests.mjs tests/browser
-git commit -m "test: verify offline learning experience"
+git commit -m “test: verify offline learning and standalone build”
 ```
