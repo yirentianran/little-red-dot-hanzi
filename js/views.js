@@ -1401,7 +1401,8 @@
       : viewModel.lesson.title;
     var root = node(documentObject, 'div', {
       'class': 'view view--practice',
-      'data-view': 'practice'
+      'data-view': 'practice',
+      'data-practice-status': viewModel.status
     });
     var backAttributes = practiceContextAttributes(viewModel, 'practice-back');
     backAttributes['class'] = 'button button--quiet back-button'

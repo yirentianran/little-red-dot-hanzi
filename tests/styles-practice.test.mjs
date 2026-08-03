@@ -123,32 +123,49 @@ test('practice surface is one column by default and two columns on wide screens'
   );
 });
 
-test('all routed pages use three landscape height bands without portrait or device sub-splits', async () => {
+test('all routed pages share three exclusive landscape device modes', async () => {
   const css = await readStyles();
-  const regular = mediaBody(
+  const desktop = mediaBody(css, 'orientation: landscape) and (min-width: 1281px');
+  const tablet = mediaBody(
     css,
-    'min-width: 760px) and (orientation: landscape) and (min-height: 761px'
+    'orientation: landscape) and (min-width: 960px) and (max-width: 1280px'
   );
-  const compactTablet = mediaBody(
-    css,
-    'min-width: 760px) and (orientation: landscape) and (min-height: 431px) and (max-height: 760px'
-  );
-  const compactLandscape = mediaBody(css, 'orientation: landscape) and (max-height: 760px');
-  const phone = mediaBody(css, 'orientation: landscape) and (max-height: 430px');
+  const phone = mediaBody(css, 'orientation: landscape) and (max-width: 959px');
 
-  assert.match(regular, /\.view--practice/i);
-  assert.match(compactLandscape, /\.view--directory/i);
-  assert.match(compactLandscape, /\.view--lesson/i);
-  assert.match(compactTablet, /\.view--directory/i);
-  assert.match(compactTablet, /\.view--lesson/i);
-  assert.match(compactTablet, /\.view--character/i);
-  assert.match(compactTablet, /\.view--practice/i);
-  assert.match(phone, /\.view--lesson/i);
-  assert.match(phone, /\.view--character/i);
-  assert.match(phone, /\.view--practice/i);
-  assert.doesNotMatch(css, /@media[^\{]*max-width:\s*(?:479|600)px/i);
-  assert.doesNotMatch(css, /@media[^\{]*max-height:\s*360px/i);
+  for (const mode of [desktop, tablet, phone]) {
+    assert.match(mode, /\.view--directory/i);
+    assert.match(mode, /\.view--lesson/i);
+    assert.match(mode, /\.view--character/i);
+    assert.match(mode, /\.view--practice/i);
+  }
+  assert.doesNotMatch(css, /@media[^\{]*orientation:\s*landscape[^\{]*(?:min|max)-height/i);
   assert.doesNotMatch(css, /@media[^\{]*orientation:\s*portrait/i);
+});
+
+test('tablet mode keeps full learning details in a compact ordered tool grid', async () => {
+  const css = await readStyles();
+  const tablet = mediaBody(
+    css,
+    'orientation: landscape) and (min-width: 960px) and (max-width: 1280px'
+  );
+  const sharedTools = ruleBody(tablet, '.character-tools', /display:\s*grid/i);
+  const characterTools = ruleBody(tablet, '.character-tools', /grid-template-rows:/i);
+  const practiceTools = ruleBody(tablet, '.practice-tools', /grid-template-columns:/i);
+  const characterDisplay = ruleBody(tablet, '.character-display');
+  const characterWords = ruleBody(tablet, '.character-words');
+  const strokeControls = ruleBody(tablet, '.stroke-controls');
+  const speedControl = ruleBody(tablet, '.speed-control');
+  const boards = ruleBody(tablet, '.character-board');
+
+  assert.match(sharedTools, /display:\s*grid/i);
+  assert.match(characterTools, /grid-template-rows:/i);
+  assert.match(practiceTools, /grid-template-rows:/i);
+  assert.doesNotMatch(characterDisplay, /display:\s*none/i);
+  assert.doesNotMatch(characterWords, /display:\s*none/i);
+  assert.match(strokeControls, /grid-row:\s*6/i);
+  assert.match(speedControl, /grid-row:\s*7/i);
+  assert.match(boards, /calc\(100vh\s*-\s*184px\)/i);
+  assert.match(boards, /calc\(100dvh\s*-\s*184px\)/i);
 });
 
 test('practice tools, actions, and long text remain usable without nested cards', async () => {

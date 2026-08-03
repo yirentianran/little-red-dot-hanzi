@@ -46,6 +46,7 @@ class MainActivity : Activity() {
       mediaPlaybackRequiresUserGesture = true
       builtInZoomControls = false
       displayZoomControls = false
+      textZoom = 100
       cacheMode = WebSettings.LOAD_DEFAULT
       defaultTextEncodingName = "utf-8"
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {

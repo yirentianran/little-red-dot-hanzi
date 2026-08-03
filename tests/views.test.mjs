@@ -1018,6 +1018,7 @@ test('renders active practice as an unframed board with stable live handles and 
 
   assert.equal(byAttribute(container, 'data-view', 'practice').length, 1);
   assert.equal(handle.root.getAttribute('class'), 'view view--practice');
+  assert.equal(handle.root.getAttribute('data-practice-status'), 'active');
   assert.equal(
     Object.keys(handle).join(','),
     'root,heading,board,setFeedback,setStrokePosition,setUnavailable'
@@ -1218,6 +1219,7 @@ test('renders complete summaries, conditional review actions, return action, and
   renderPractice(cleanDom.container, withoutNeeds);
 
   assert.equal(handle.board, null);
+  assert.equal(handle.root.getAttribute('data-practice-status'), 'complete');
   assert.equal(byAttribute(needsDom.container, 'data-slot', 'practice-board').length, 0);
   assert.match(needsDom.container.textContent, /本轮完成 15 个/);
   assert.match(needsDom.container.textContent, /当前掌握 1 个/);
@@ -1390,21 +1392,19 @@ test('styles define the responsive bright-classroom system without unsafe visual
   assert.match(css, /touch-action:\s*manipulation/i);
   assert.match(css, /prefers-reduced-motion:\s*reduce/i);
   assert.match(css, /overflow-wrap:\s*anywhere/i);
+  assert.match(css, /-webkit-text-size-adjust:\s*100%/i);
+  assert.match(css, /text-size-adjust:\s*100%/i);
   assert.match(css, /\.character-words\s*\{/i);
   assert.match(css, /max-width:\s*18rem/i);
   assert.match(css, /\.visually-hidden\s*\{/i);
   assert.match(css, /\.skip-link:focus-visible/i);
   assert.match(css, /min-width:\s*0/i);
-  for (const inset of [237, 51]) {
+  for (const inset of [225, 184, 16]) {
     const fallback = `calc(100vh - ${inset}px)`;
     const dynamic = `calc(100dvh - ${inset}px)`;
     assert.ok(css.includes(fallback), `missing legacy WebView viewport fallback: ${fallback}`);
     assert.ok(css.indexOf(fallback) < css.indexOf(dynamic), `${fallback} must precede ${dynamic}`);
   }
-  assert.ok(
-    (css.match(/calc\(100vh - 237px\)/g) || []).length >= 2,
-    'learning and practice boards must share the same non-phone height fallback'
-  );
   assert.doesNotMatch(css, /gradient\s*\(/i);
   assert.doesNotMatch(css, /(?:^|[^a-z-])-?\d*\.?\d+vw\b/im);
   assert.doesNotMatch(css, /letter-spacing:\s*-/i);

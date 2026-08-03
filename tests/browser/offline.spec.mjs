@@ -11,6 +11,7 @@ const IPAD_AIR_LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 1180, height: 820, label: 'iPad-Air-1180x820' })
 ]);
 const MATEPAD_LANDSCAPE_VIEWPORTS = Object.freeze([
+  Object.freeze({ width: 1000, height: 607, label: 'MatePad-effective-1000x607' }),
   Object.freeze({ width: 1280, height: 601, label: 'MatePad-1280x601' }),
   Object.freeze({ width: 1280, height: 700, label: 'MatePad-1280x700' }),
   Object.freeze({ width: 1280, height: 760, label: 'MatePad-1280x760' })
@@ -29,11 +30,13 @@ const PHONE_LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 844, height: 390, label: 'phone-844x390' }),
   Object.freeze({ width: 844, height: 320, label: 'Magic-7-844x320' }),
   Object.freeze({ width: 844, height: 360, label: 'Magic-7-844x360' }),
-  Object.freeze({ width: 915, height: 320, label: 'wide-phone-915x320' })
+  Object.freeze({ width: 915, height: 320, label: 'wide-phone-915x320' }),
+  Object.freeze({ width: 844, height: 300, label: 'Magic-7-844x300' }),
+  Object.freeze({ width: 915, height: 300, label: 'wide-phone-915x300' })
 ]);
 const PHONE_TOOL_BOUNDARY_VIEWPORTS = Object.freeze([
-  Object.freeze({ width: 844, height: 430, label: 'phone-tools-844x430' }),
-  Object.freeze({ width: 844, height: 431, label: 'phone-tools-844x431' })
+  Object.freeze({ width: 959, height: 607, label: 'phone-tools-959x607' }),
+  Object.freeze({ width: 960, height: 607, label: 'tablet-tools-960x607' })
 ]);
 const COMPACT_LESSON_LANDSCAPE_VIEWPORTS = Object.freeze([
   ...COMPACT_TABLET_LANDSCAPE_VIEWPORTS,
@@ -393,11 +396,16 @@ async function assertCharacterGeometry(page, viewport, label) {
     return {
       board: box('[data-slot="character-board"]'),
       tools: box('.character-tools'),
+      pinyin: box('.character-pinyin'),
+      words: box('.character-words'),
+      characterDisplay: box('.character-display'),
+      practiceStatus: box('.character-practice-status'),
       practiceButton: box('[data-action="start-character-practice"]'),
       audioButton: box('[data-action="play-audio"]'),
       animationStatus: box('.animation-status'),
       strokeControls: box('.stroke-controls'),
       speedControl: box('.speed-control'),
+      selectedSpeed: box('.speed-control [aria-pressed="true"]'),
       selectedSpeedCenterDelta: {
         x: Math.abs(
           (selectedSpeedBox.left + (selectedSpeedBox.width / 2))
@@ -420,7 +428,35 @@ async function assertCharacterGeometry(page, viewport, label) {
     layout.selectedSpeedCenterDelta.x <= 2 && layout.selectedSpeedCenterDelta.y <= 2,
     `${label}: selected speed text is not centered ${JSON.stringify(layout.selectedSpeedCenterDelta)}`
   );
+  if (viewport.label === 'MatePad-effective-1000x607') {
+    for (const [first, second] of [
+      ['pinyin', 'words'],
+      ['words', 'practiceStatus'],
+      ['practiceStatus', 'practiceButton'],
+      ['audioButton', 'animationStatus'],
+      ['animationStatus', 'strokeControls'],
+      ['strokeControls', 'speedControl']
+    ]) {
+      assert.ok(
+        layout[first].bottom <= layout[second].top + 1,
+        `${label}: ${first} is not above ${second} ${JSON.stringify(layout)}`
+      );
+    }
+    assert.equal(
+      intersects(layout.characterDisplay, layout.pinyin)
+        || intersects(layout.characterDisplay, layout.words),
+      false,
+      `${label}: character details overlap pronunciation details ${JSON.stringify(layout)}`
+    );
+  }
   if (viewport.height <= 430) {
+    assert.ok(
+      layout.selectedSpeed.left >= layout.speedControl.left - 1
+        && layout.selectedSpeed.right <= layout.speedControl.right + 1
+        && layout.selectedSpeed.top >= layout.speedControl.top - 1
+        && layout.selectedSpeed.bottom <= layout.speedControl.bottom + 1,
+      `${label}: selected speed overflows its segmented control ${JSON.stringify(layout)}`
+    );
     assert.ok(
       layout.strokeControls.bottom <= layout.speedControl.top + 1,
       `${label}: stroke and speed controls are not stacked ${JSON.stringify(layout)}`
@@ -928,6 +964,13 @@ async function assertPracticeActiveGeometry(page, viewport, phase, label) {
       lesson: box('.practice-lesson-title'),
       group: box('.practice-group-label'),
       heading: box('[data-view="practice"] > [data-view-heading]'),
+      pinyin: box('.practice-pinyin'),
+      character: box('.practice-character'),
+      phase: box('.practice-phase'),
+      strokePosition: box('.practice-stroke-position'),
+      feedback: box('.practice-feedback'),
+      progress: box('.practice-progress'),
+      actions: box('.practice-actions'),
       writer: box('.practice-writer-host'),
       overlay: box('.practice-overlay'),
       writerPathCount: writerPaths.filter((path) => (path.getAttribute('d') || '').trim() !== '').length,
@@ -962,6 +1005,27 @@ async function assertPracticeActiveGeometry(page, viewport, phase, label) {
   } else {
     assert.ok(geometry.board.right <= geometry.tools.left + 1,
       `${label}: desktop practice surface is not two columns ${JSON.stringify(geometry)}`);
+  }
+  if (viewport.label === 'MatePad-effective-1000x607') {
+    for (const [first, second] of [
+      ['pinyin', 'phase'],
+      ['phase', 'strokePosition'],
+      ['character', 'strokePosition'],
+      ['strokePosition', 'feedback'],
+      ['feedback', 'progress'],
+      ['progress', 'actions']
+    ]) {
+      assert.ok(
+        geometry[first].bottom <= geometry[second].top + 1,
+        `${label}: ${first} is not above ${second} ${JSON.stringify(geometry)}`
+      );
+    }
+    assert.equal(
+      intersects(geometry.character, geometry.pinyin)
+        || intersects(geometry.character, geometry.phase),
+      false,
+      `${label}: character details overlap practice labels ${JSON.stringify(geometry)}`
+    );
   }
   if (viewport.height <= 430) {
     await assertSelectorsAreContained(page, '.practice-tools', [
@@ -1262,7 +1326,7 @@ export async function registerBrowserTests({ test }) {
         '.stroke-controls',
         '.speed-control'
       ];
-      if (viewport.height > 430) visibleToolSelectors.push('.character-words');
+      if (viewport.width >= 960) visibleToolSelectors.push('.character-words');
       await assertSelectorsAreContained(
         page,
         '.character-tools',
