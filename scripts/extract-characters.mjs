@@ -6,36 +6,24 @@ const defaultRootDir = fileURLToPath(new URL('../', import.meta.url));
 
 const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 
-function curriculumCharacters(curriculum) {
-  const source = 'data/curriculum.json';
-  if (!isRecord(curriculum)) throw new Error(`${source}: must be an object`);
-  if (!Array.isArray(curriculum.units)) throw new Error(`${source}.units: must be an array`);
+function catalogCharacters(catalog) {
+  const source = 'data/catalog.json';
+  if (!isRecord(catalog)) throw new Error(`${source}: must be an object`);
+  if (!Array.isArray(catalog.sets)) throw new Error(`${source}.sets: must be an array`);
 
   const characters = new Set();
-  for (const [unitIndex, unit] of curriculum.units.entries()) {
-    const unitLocation = `${source}.units[${unitIndex}]`;
-    if (!isRecord(unit)) throw new Error(`${unitLocation}: must be an object`);
-    if (!Array.isArray(unit.lessons)) throw new Error(`${unitLocation}.lessons: must be an array`);
-
-    for (const [sectionIndex, section] of unit.lessons.entries()) {
-      const sectionLocation = `${unitLocation}.lessons[${sectionIndex}]`;
-      if (!isRecord(section)) throw new Error(`${sectionLocation}: must be an object`);
-
-      for (const group of ['recognize', 'write']) {
-        const entries = section[group];
-        const groupLocation = `${sectionLocation}.${group}`;
-        if (!Array.isArray(entries)) throw new Error(`${groupLocation}: must be an array`);
-
-        for (const [entryIndex, entry] of entries.entries()) {
-          const location = `${groupLocation}[${entryIndex}].character`;
-          const character = isRecord(entry) ? entry.character : undefined;
-          if (typeof character !== 'string' || Array.from(character).length !== 1) {
-            throw new Error(`${location}: must be one code point`);
-          }
-          characters.add(character);
+  for (const [setIndex, set] of catalog.sets.entries()) {
+      const setLocation = `${source}.sets[${setIndex}]`;
+      if (!isRecord(set)) throw new Error(`${setLocation}: must be an object`);
+      if (!Array.isArray(set.entries)) throw new Error(`${setLocation}.entries: must be an array`);
+      for (const [entryIndex, entry] of set.entries.entries()) {
+        const location = `${setLocation}.entries[${entryIndex}].character`;
+        const character = isRecord(entry) ? entry.character : undefined;
+        if (typeof character !== 'string' || Array.from(character).length !== 1) {
+          throw new Error(`${location}: must be one code point`);
         }
+        characters.add(character);
       }
-    }
   }
 
   return [...characters].sort();
@@ -43,11 +31,11 @@ function curriculumCharacters(curriculum) {
 
 function modificationNotice(characterCount) {
   return {
-    date: '2026-07-25',
+    date: '2026-08-03',
     source: 'hanzi-writer-data@2.0.1',
     license: 'ARPHICPL.TXT',
     changes: [
-      `Extracted the ${characterCount}-character subset used by the PEP Grade 4 Volume 1 curriculum.`,
+      `Extracted the ${characterCount}-character subset used by the independently ranked g4-fall catalog.`,
       'Removed radStrokes and all other upstream fields, retaining only strokes and medians.',
       'Added strokeCount to each character record.',
       'Sorted character keys deterministically.',
@@ -79,8 +67,8 @@ function malformedReason(source) {
   return undefined;
 }
 
-export function extractCharacters(curriculum, upstream) {
-  const wantedCharacters = curriculumCharacters(curriculum);
+export function extractCharacters(catalog, upstream) {
+  const wantedCharacters = catalogCharacters(catalog);
   if (!isRecord(upstream)) throw new Error('upstream geometry must be an object');
 
   const characters = Object.fromEntries(wantedCharacters.map(character => {
@@ -119,22 +107,22 @@ export async function runExtraction({
   rootDir = defaultRootDir,
   stdout = message => console.log(message)
 } = {}) {
-  const curriculumPath = path.join(rootDir, 'data/curriculum.json');
-  let curriculumSource;
+  const catalogPath = path.join(rootDir, 'data/catalog.json');
+  let catalogSource;
   try {
-    curriculumSource = await readFile(curriculumPath, 'utf8');
+    catalogSource = await readFile(catalogPath, 'utf8');
   } catch (error) {
-    throw new Error(`unable to read data/curriculum.json: ${error.message}`);
+    throw new Error(`unable to read data/catalog.json: ${error.message}`);
   }
 
-  let curriculum;
+  let catalog;
   try {
-    curriculum = JSON.parse(curriculumSource);
+    catalog = JSON.parse(catalogSource);
   } catch (error) {
-    throw new Error(`invalid JSON in data/curriculum.json: ${error.message}`);
+    throw new Error(`invalid JSON in data/catalog.json: ${error.message}`);
   }
 
-  const wantedCharacters = curriculumCharacters(curriculum);
+  const wantedCharacters = catalogCharacters(catalog);
   const sourceDir = parseSourceDirectory(argv, rootDir);
   const upstream = {};
 
@@ -154,7 +142,7 @@ export async function runExtraction({
     }
   }));
 
-  const document = extractCharacters(curriculum, upstream);
+  const document = extractCharacters(catalog, upstream);
   const outputPath = path.join(rootDir, 'data/characters.json');
   await mkdir(path.dirname(outputPath), { recursive: true });
   await writeFile(outputPath, `${JSON.stringify(document, null, 2)}\n`, 'utf8');

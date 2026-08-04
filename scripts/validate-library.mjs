@@ -45,14 +45,14 @@ export async function runValidation({
   stderr = message => console.error(message)
 } = {}) {
   const errors = [];
-  const [curriculum, characterDocument, audioIds] = await Promise.all([
-    readJson(rootDir, 'data/curriculum.json', errors),
+  const [catalog, characterDocument, audioIds] = await Promise.all([
+    readJson(rootDir, 'data/catalog.json', errors),
     readJson(rootDir, 'data/characters.json', errors),
     readAudioIds(rootDir, errors)
   ]);
 
-  if (curriculum !== undefined && characterDocument !== undefined) {
-    errors.push(...validateLibrary(curriculum, characterDocument, audioIds));
+  if (catalog !== undefined && characterDocument !== undefined) {
+    errors.push(...validateLibrary(catalog, characterDocument, audioIds));
   }
 
   if (errors.length > 0) {
@@ -60,7 +60,7 @@ export async function runValidation({
     return 1;
   }
 
-  stdout('Library valid');
+  stdout('Catalog library valid');
   return 0;
 }
 

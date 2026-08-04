@@ -1,0 +1,1131 @@
+{
+  "schemaVersion": 1,
+  "releaseRule": "Every field must be reviewed before a release build.",
+  "entries": {
+    "宵": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "宴": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "扇": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "崭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "渗": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "凿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蛛": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "焰": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "缚": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "瞅": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蜘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "僵": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "讶": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "苏": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "驻": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "砂": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "挫": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "埃": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "耽": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "雀": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "淘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "渣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "慨": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "鉴": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蔬": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "躁": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "辽": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "吁": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "扰": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "苇": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "邮": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "诊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "怖": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "陌": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "侮": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "胧": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "循": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "塌": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "缠": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "瞒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "朦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "燥": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "丑": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "扒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "凸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "凹": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "芽": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "宏": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "虏": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "刹": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "俘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "狭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "陡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "逝": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "贼": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "颂": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "陵": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "梢": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "辅": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "辐": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "碱": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "懒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "夕": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "爪": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "丙": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "屿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "州": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "吞": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "汹": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "贪": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "竖": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "哆": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "竿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "浊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蚊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "烫": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "谊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "梳": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "淀": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "绷": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "翘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "嗦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "遣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "黎": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "艘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "邀": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "乒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "乓": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "华": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "茂": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "佩": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "柄": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "耍": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "贱": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "矩": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "烁": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "昼": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "聊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "铲": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "堪": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "毯": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "橡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "膛": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "潭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "卡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "圣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "囱": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "甸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "沥": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "垄": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "氛": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "荔": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "卸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "垒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "倦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "巢": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "葫": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "鹊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "赖": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "锣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "寡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "嘲": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蹦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "乃": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "讼": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "驮": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "旺": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "忠": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "昧": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "拜": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "恼": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "绒": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "络": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "轿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "脯": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "搀": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "滋": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "署": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "竭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "磷": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "覆": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "霸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "尔": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "亚": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "劣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "驳": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "纽": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "枉": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "顷": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "咙": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "郊": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "衫": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "奏": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "罚": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "捡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "徐": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "盔": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "粘": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "猩": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "奠": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "谦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "搏": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "煌": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "窟": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "谬": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "嫩": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "窿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "卜": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "叭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "旬": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "灶": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "奉": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "杰": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "氓": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "沸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "弥": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "钞": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "涤": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "萝": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "阐": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "揍": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "搂": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "喇": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "储": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "雇": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "锡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "剿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "誓": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "赚": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "辣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "毅": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "融": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "址": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "坝": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "吟": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "伺": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "陈": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "坯": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "拐": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "乳": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "肿": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "询": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "垫": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "砌": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "恍": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "剖": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "诸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "逻": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "惭": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "绸": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "赔": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "鹅": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "堡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "羡": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "蓬": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "腹": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "慕": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "忧": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "泌": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "饶": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "捣": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "档": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "悦": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "陶": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    },
+    "匾": {
+      "pinyin": "source-verified",
+      "words": "pending-human-review",
+      "audio": "pending-auditory-review"
+    }
+  }
+}

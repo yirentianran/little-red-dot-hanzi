@@ -2,16 +2,16 @@
 
 ## Prominent modification notice
 
-On 2026-07-25, this project modified the upstream character geometry by extracting only the 428 unique characters used in the PEP Grade 4 Volume 1 curriculum, removing `radStrokes` and every other upstream field, adding `strokeCount`, sorting the character keys deterministically, and combining the selected records into the single file `data/characters.json`.
+On 2026-08-03, this project extracted only the 225 characters referenced by the independent `g4-fall` stage, removed `radStrokes` and every other upstream field, added `strokeCount`, sorted keys deterministically, and combined the selected records into `data/characters.json`.
 
 ## Provenance
 
-- npm package: `hanzi-writer-data` version `2.0.1` (installed as an exact development dependency)
+- Package: `hanzi-writer-data` 2.0.1
+- Authors: the Hanzi Writer Data contributors and upstream Make Me a Hanzi contributors
 - Repository: <https://github.com/chanind/hanzi-writer-data>
-- Upstream data source: [Make Me a Hanzi](https://github.com/skishore/makemeahanzi), as documented by the package README and package metadata
-- npm package integrity: `sha512-nbQwM+MaryGoq7pBMIZLCd3lFq03nXuJuwku1+6UbjL58uU+9OULVcMkoNvNuJSoIV7f1bbPRfD4D/LQa5S7qg==`
-- npm package SHA-1: `09ce12eb1c47d86aeb33313e622f17ba5cbac1ad`
+- Upstream data source: <https://github.com/skishore/makemeahanzi>
+- Package integrity: `sha512-nbQwM+MaryGoq7pBMIZLCd3lFq03nXuJuwku1+6UbjL58uU+9OULVcMkoNvNuJSoIV7f1bbPRfD4D/LQa5S7qg==`
+- License: ARPHIC Public License
+- Bundled license: `data/ARPHICPL.TXT`
 
-The npm package declares its license as `SEE LICENSE IN ARPHICPL.TXT`. Its unmodified license text is bundled at `node_modules/hanzi-writer-data/ARPHICPL.TXT` after dependency installation and is redistributed byte-for-byte in this repository as `data/ARPHICPL.TXT`.
-
-The extracted geometry in `data/characters.json` is derived from that package and is distributed subject to the terms in `data/ARPHICPL.TXT`. In particular, Section 1 requires the license file to remain unaltered in distributed copies, and Section 2(a) requires a prominent notice describing how and when modified files were changed. The same date and complete transformation list are embedded near the top of `data/characters.json` in `modificationNotice`; this companion record does not replace or reinterpret the license text.
+The extracted geometry is distributed under ARPHICPL. The modification notice is also embedded in `data/characters.json`.

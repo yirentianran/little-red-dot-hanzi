@@ -493,19 +493,19 @@ test('classic loading merges the API without reading document or fetch', async (
   assert.equal(typeof sandbox.window.HanziApp.clampProgress, 'function');
 });
 
-test('renders all 15 strokes from the real frozen 潮 geometry without mutation', async () => {
+test('renders all strokes from the real frozen 宵 geometry without mutation', async () => {
   const source = JSON.parse(await readFile(new URL('../data/characters.json', import.meta.url), 'utf8'));
-  const geometry = deepFreeze(source.characters['潮']);
+  const geometry = deepFreeze(source.characters['宵']);
   const snapshot = JSON.stringify(geometry);
   const { container } = createDom({ metricsMode: 'absent' });
   const renderer = createSvgRenderer(container, geometry);
   const [svg] = container.childNodes;
 
-  assert.equal(geometry.strokeCount, 15);
-  assert.equal(renderer.getStrokeCount(), 15);
-  assert.equal(withClass(svg, 'hanzi-stroke--ghost').length, 15);
-  assert.equal(withClass(svg, 'hanzi-stroke--completed').length, 15);
-  assert.equal(withClass(svg, 'hanzi-stroke-start-cap').length, 15);
-  assert.equal(withClass(svg, 'hanzi-stroke-reveal').length, 15);
+  assert.equal(geometry.strokeCount, 10);
+  assert.equal(renderer.getStrokeCount(), 10);
+  assert.equal(withClass(svg, 'hanzi-stroke--ghost').length, 10);
+  assert.equal(withClass(svg, 'hanzi-stroke--completed').length, 10);
+  assert.equal(withClass(svg, 'hanzi-stroke-start-cap').length, 10);
+  assert.equal(withClass(svg, 'hanzi-stroke-reveal').length, 10);
   assert.equal(JSON.stringify(geometry), snapshot);
 });

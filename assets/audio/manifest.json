@@ -10,15 +10,6 @@
     "attribution": "Wang Chen (王琛), Hugo Lopez, Nicolas Vion"
   },
   "readings": {
-    "a1": {
-      "file": "assets/audio/a1.mp3",
-      "sourceFile": "64k/syllabs/cmn-a1.mp3",
-      "sourceLabel": "a1",
-      "bytes": 8794,
-      "sha256": "c37e4240175f61eeefc0ddc57a085962e7846f71302cd507a20dac868e0f68f2",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "ai1": {
       "file": "assets/audio/ai1.mp3",
       "sourceFile": "64k/syllabs/cmn-ai1.mp3",
@@ -28,39 +19,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ai4": {
-      "file": "assets/audio/ai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ai4.mp3",
-      "sourceLabel": "ai4",
-      "bytes": 8028,
-      "sha256": "4029edc24af6ad5603e10385a5409b2751ca65a688879eb0d70eceb51cd9bfc4",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "an4": {
-      "file": "assets/audio/an4.mp3",
-      "sourceFile": "64k/syllabs/cmn-an4.mp3",
-      "sourceLabel": "an4",
+    "ao1": {
+      "file": "assets/audio/ao1.mp3",
+      "sourceFile": "64k/syllabs/cmn-ao1.mp3",
+      "sourceLabel": "ao1",
       "bytes": 8412,
-      "sha256": "25d298b566284f9617c92ea82086c9f417a67f285c4e3be3871210c776158c56",
+      "sha256": "fb4bc1ba143b7ec2196b48cead74cdf2dd97ddd2c66c601abb540a4c80959962",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ang2": {
-      "file": "assets/audio/ang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ang2.mp3",
-      "sourceLabel": "ang2",
-      "bytes": 9182,
-      "sha256": "4ec3bbaffe8c835169199311030a9a37ee597c0be3c166a1433cfc32f6f371fc",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ao4": {
-      "file": "assets/audio/ao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ao4.mp3",
-      "sourceLabel": "ao4",
-      "bytes": 8412,
-      "sha256": "26824cef7b8880949ab8fb1c41e0e9fd8584c1431dc8051d8ad3993ec177f5b2",
+    "ba1": {
+      "file": "assets/audio/ba1.mp3",
+      "sourceFile": "64k/syllabs/cmn-ba1.mp3",
+      "sourceLabel": "ba1",
+      "bytes": 8796,
+      "sha256": "7130b5cadc1c890e3795fb877749ba3eedaa54efca989ce6c857637fb2378637",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -82,93 +55,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "bao4": {
-      "file": "assets/audio/bao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-bao4.mp3",
-      "sourceLabel": "bao4",
-      "bytes": 8414,
-      "sha256": "e66c083a4a2d4ada18e68e6797a23fa99d95c1a3b6da8eb99b0a7a1eaaf5294b",
+    "bao3": {
+      "file": "assets/audio/bao3.mp3",
+      "sourceFile": "64k/syllabs/cmn-bao3.mp3",
+      "sourceLabel": "bao3",
+      "bytes": 10334,
+      "sha256": "c8471f0ea5f01d51a721e00a6009253c6afa71a130413db835dca2a90471dd30",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "bei1": {
-      "file": "assets/audio/bei1.mp3",
-      "sourceFile": "64k/syllabs/cmn-bei1.mp3",
-      "sourceLabel": "bei1",
-      "bytes": 9182,
-      "sha256": "b231989d98fe34a420c0cf2bd9d3fd491eada97304493087ffe64e3b0883733e",
+    "beng3": {
+      "file": "assets/audio/beng3.mp3",
+      "sourceFile": "64k/syllabs/cmn-beng3.mp3",
+      "sourceLabel": "beng3",
+      "bytes": 11296,
+      "sha256": "083c32a195eabfe36f1689be65080c52b652d23061b5b0e96632914b8a49e2b3",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ben1": {
-      "file": "assets/audio/ben1.mp3",
-      "sourceFile": "64k/syllabs/cmn-ben1.mp3",
-      "sourceLabel": "ben1",
-      "bytes": 8030,
-      "sha256": "234c8f2c5bde868417b1d563ad8cfae860d212aaf7adec46da69972ec295ecbc",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "beng1": {
-      "file": "assets/audio/beng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-beng1.mp3",
-      "sourceLabel": "beng1",
-      "bytes": 8800,
-      "sha256": "af559d901f28bd02137ee811f6ed105ad658e7f089e3b8257c6fd12088ff1c87",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "bi1": {
-      "file": "assets/audio/bi1.mp3",
-      "sourceFile": "64k/syllabs/cmn-bi1.mp3",
-      "sourceLabel": "bi1",
-      "bytes": 8412,
-      "sha256": "c35895681ed7b66c5acab74bd906db9cc740fd0bf7300681b9219050dbb0c2fd",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "bi4": {
-      "file": "assets/audio/bi4.mp3",
-      "sourceFile": "64k/syllabs/cmn-bi4.mp3",
-      "sourceLabel": "bi4",
-      "bytes": 8028,
-      "sha256": "ddb0b05e4972c9f749e4fe9db2138d5026919f95e969a51002b207c570d880fd",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "bian1": {
-      "file": "assets/audio/bian1.mp3",
-      "sourceFile": "64k/syllabs/cmn-bian1.mp3",
-      "sourceLabel": "bian1",
-      "bytes": 8800,
-      "sha256": "cbeb15d1c40477c61b65ff6972c5de0352cea5dd73f488d60e320693324e8ce3",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "bian4": {
-      "file": "assets/audio/bian4.mp3",
-      "sourceFile": "64k/syllabs/cmn-bian4.mp3",
-      "sourceLabel": "bian4",
+    "beng4": {
+      "file": "assets/audio/beng4.mp3",
+      "sourceFile": "64k/syllabs/cmn-beng4.mp3",
+      "sourceLabel": "beng4",
       "bytes": 8416,
-      "sha256": "d01991bfa98be36f9fa75f89d331f81a47b1b7fc1764745888642d3b35526452",
+      "sha256": "8afca737d1a6fa7e9ba4d56ca6a1f25aa42c91a043c10673b6dd799e78122599",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "biao1": {
-      "file": "assets/audio/biao1.mp3",
-      "sourceFile": "64k/syllabs/cmn-biao1.mp3",
-      "sourceLabel": "biao1",
-      "bytes": 9184,
-      "sha256": "709e6029898835712232fb4dde91a59ec6573099aa42ded48e6abbff50e842bf",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "bing1": {
-      "file": "assets/audio/bing1.mp3",
-      "sourceFile": "64k/syllabs/cmn-bing1.mp3",
-      "sourceLabel": "bing1",
-      "bytes": 9184,
-      "sha256": "59ffbb5db8bcf678b8cfd5679eecb612ce6167671b001425d4c86496d904fe7c",
+    "bian3": {
+      "file": "assets/audio/bian3.mp3",
+      "sourceFile": "64k/syllabs/cmn-bian3.mp3",
+      "sourceLabel": "bian3",
+      "bytes": 9952,
+      "sha256": "891f4e7dabcee99e32bd28e89905b24bef2687e0ec4e799c75820fd7baab4cb1",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -190,6 +109,15 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
+    "bu3": {
+      "file": "assets/audio/bu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-bu3.mp3",
+      "sourceLabel": "bu3",
+      "bytes": 9948,
+      "sha256": "5ef3bbd2d513d7f4b3eb3faa4418630bae58b31b47346614e9e68e648ac8d6ae",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
     "bu4": {
       "file": "assets/audio/bu4.mp3",
       "sourceFile": "64k/syllabs/cmn-bu4.mp3",
@@ -199,39 +127,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "can3": {
-      "file": "assets/audio/can3.mp3",
-      "sourceFile": "64k/syllabs/cmn-can3.mp3",
-      "sourceLabel": "can3",
-      "bytes": 11294,
-      "sha256": "416de5c07918e13dfa476da6d767977c26380f25cd8b0cf91b5adcdd89bab8d2",
+    "can2": {
+      "file": "assets/audio/can2.mp3",
+      "sourceFile": "64k/syllabs/cmn-can2.mp3",
+      "sourceLabel": "can2",
+      "bytes": 9950,
+      "sha256": "33685151228da8a5f995802319bfda836c713dd907e4b1b3d52a91ccf1276fc5",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "cao1": {
-      "file": "assets/audio/cao1.mp3",
-      "sourceFile": "64k/syllabs/cmn-cao1.mp3",
-      "sourceLabel": "cao1",
-      "bytes": 9566,
-      "sha256": "ec4bb805d295f9f923756a0db115398e605cb78fdd36b00ed1df67d2de63d111",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ce4": {
-      "file": "assets/audio/ce4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ce4.mp3",
-      "sourceLabel": "ce4",
-      "bytes": 8796,
-      "sha256": "981d44171f8097b6fdc224d545de974d1e29f642e73696aee9bf5969e08c3934",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ceng2": {
-      "file": "assets/audio/ceng2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ceng2.mp3",
-      "sourceLabel": "ceng2",
-      "bytes": 8800,
-      "sha256": "a42aa4929648863cf4bc1c2c46871dc6eea13c9e10df37da6beb301fcbb92549",
+    "chan1": {
+      "file": "assets/audio/chan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-chan1.mp3",
+      "sourceLabel": "chan1",
+      "bytes": 9568,
+      "sha256": "29bf5368d38528751d135cbebc2c73678e22d398dc3cdff37e4489f87804f434",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -244,21 +154,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "chan4": {
-      "file": "assets/audio/chan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-chan4.mp3",
-      "sourceLabel": "chan4",
-      "bytes": 9568,
-      "sha256": "d09881f93dc4303418f638e81f3cca80f50b5f0c660f0a48f1fe631ab0e9dcfb",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "chang2": {
-      "file": "assets/audio/chang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-chang2.mp3",
-      "sourceLabel": "chang2",
-      "bytes": 9186,
-      "sha256": "b3d84633492192df08aa65833806a0e42145cf84236d05f618dc139873c1a6d8",
+    "chan3": {
+      "file": "assets/audio/chan3.mp3",
+      "sourceFile": "64k/syllabs/cmn-chan3.mp3",
+      "sourceLabel": "chan3",
+      "bytes": 11296,
+      "sha256": "6e08526eaef1a64585a292df1beeb326728886161af7ebae9b05a619fe8ea125",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -280,57 +181,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "che4": {
-      "file": "assets/audio/che4.mp3",
-      "sourceFile": "64k/syllabs/cmn-che4.mp3",
-      "sourceLabel": "che4",
-      "bytes": 9566,
-      "sha256": "c41135611e34e702c7264e07712195f10c22fc5eaf50f2bc2a6d9895602cc3b7",
+    "chen2": {
+      "file": "assets/audio/chen2.mp3",
+      "sourceFile": "64k/syllabs/cmn-chen2.mp3",
+      "sourceLabel": "chen2",
+      "bytes": 9952,
+      "sha256": "3438378dd9b8d84a9d270d5bd2a1a3d4b69d309144f8bca9377530d5a70fe7a0",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "cheng1": {
-      "file": "assets/audio/cheng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-cheng1.mp3",
-      "sourceLabel": "cheng1",
-      "bytes": 8418,
-      "sha256": "9be4c63862d0db061300cc0814f145a90b2d547117e00981e72b398b9e579c90",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "cheng2": {
-      "file": "assets/audio/cheng2.mp3",
-      "sourceFile": "64k/syllabs/cmn-cheng2.mp3",
-      "sourceLabel": "cheng2",
-      "bytes": 9954,
-      "sha256": "2db048a4d263a51c25113afb1859e9e9e982bd8bf13c384a794c1698cfe78280",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "chi2": {
-      "file": "assets/audio/chi2.mp3",
-      "sourceFile": "64k/syllabs/cmn-chi2.mp3",
-      "sourceLabel": "chi2",
-      "bytes": 9566,
-      "sha256": "e3912945bd298583a55482d29db89f14fa6d1793f11566ee14acce39aa77884d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "chi3": {
-      "file": "assets/audio/chi3.mp3",
-      "sourceFile": "64k/syllabs/cmn-chi3.mp3",
-      "sourceLabel": "chi3",
-      "bytes": 11294,
-      "sha256": "9df5177214a7830e8560ef198242e6b65d337e8b6b6096ea26780444fdfbd781",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "chi4": {
-      "file": "assets/audio/chi4.mp3",
-      "sourceFile": "64k/syllabs/cmn-chi4.mp3",
-      "sourceLabel": "chi4",
-      "bytes": 8414,
-      "sha256": "466d47d3dcb8b0e37b40bd7d39d43ed1f47dadfec954e0c9bbb0b7c3e2a80a16",
+    "chou2": {
+      "file": "assets/audio/chou2.mp3",
+      "sourceFile": "64k/syllabs/cmn-chou2.mp3",
+      "sourceLabel": "chou2",
+      "bytes": 9568,
+      "sha256": "7e7aeec96e70f4e73c007422f69bebde64a524f01448e270741785887257288e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -343,30 +208,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "chui2": {
-      "file": "assets/audio/chui2.mp3",
-      "sourceFile": "64k/syllabs/cmn-chui2.mp3",
-      "sourceLabel": "chui2",
-      "bytes": 9184,
-      "sha256": "ddaa9f63b9efdcf5a26001c53d7d2a1592901cab308293f6b6a41c15aae48274",
+    "chu3": {
+      "file": "assets/audio/chu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-chu3.mp3",
+      "sourceLabel": "chu3",
+      "bytes": 11294,
+      "sha256": "37c291b33d5441174ac1661247bdefc40410feb72b7155093170e2eec9b82d73",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ci2": {
-      "file": "assets/audio/ci2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ci2.mp3",
-      "sourceLabel": "ci2",
-      "bytes": 9948,
-      "sha256": "c45c4db29f97ac933030ded6aedceb56d8e052b4f33ef190e0d6e2e62aab31a0",
+    "ci4": {
+      "file": "assets/audio/ci4.mp3",
+      "sourceFile": "64k/syllabs/cmn-ci4.mp3",
+      "sourceLabel": "ci4",
+      "bytes": 9180,
+      "sha256": "3cd95d01b02b8773c6b0c365dc7e104b4bbde7989a9391243c2a80a3f98032cb",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "cui1": {
-      "file": "assets/audio/cui1.mp3",
-      "sourceFile": "64k/syllabs/cmn-cui1.mp3",
-      "sourceLabel": "cui1",
-      "bytes": 10334,
-      "sha256": "d13c2e220b710548d8406f00caf2688db985ce2968bea0d20be58a8e0907470c",
+    "cong1": {
+      "file": "assets/audio/cong1.mp3",
+      "sourceFile": "64k/syllabs/cmn-cong1.mp3",
+      "sourceLabel": "cong1",
+      "bytes": 10336,
+      "sha256": "75830354ea2e7a26514a64f9dac304cb504216053666e1fe1c3060e2acd4f3b7",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -379,24 +244,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "da2": {
-      "file": "assets/audio/da2.mp3",
-      "sourceFile": "64k/syllabs/cmn-da2.mp3",
-      "sourceLabel": "da2",
-      "bytes": 9180,
-      "sha256": "a159c0c7b4bc10ea6d066fe81f580f74bc4aee775731b46a4c254eb90357cf91",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "dai1": {
-      "file": "assets/audio/dai1.mp3",
-      "sourceFile": "64k/syllabs/cmn-dai1.mp3",
-      "sourceLabel": "dai1",
-      "bytes": 8798,
-      "sha256": "306172f9733d26a4f263b65d6d9937ae0f14d585d9c26457e0a1342c8694f448",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "dan1": {
       "file": "assets/audio/dan1.mp3",
       "sourceFile": "64k/syllabs/cmn-dan1.mp3",
@@ -406,129 +253,66 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "dan4": {
-      "file": "assets/audio/dan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-dan4.mp3",
-      "sourceLabel": "dan4",
-      "bytes": 8030,
-      "sha256": "45adbc3ef7df0aa44c9228dacee1e87dc57d6d6c501d904b382a521157c77104",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "dang1": {
-      "file": "assets/audio/dang1.mp3",
-      "sourceFile": "64k/syllabs/cmn-dang1.mp3",
-      "sourceLabel": "dang1",
-      "bytes": 9568,
-      "sha256": "42bce83a31bf5bd7973cdc28db49c1bceb41bb6e128c92f7796dc2b396354d84",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "dao4": {
-      "file": "assets/audio/dao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-dao4.mp3",
-      "sourceLabel": "dao4",
-      "bytes": 8414,
-      "sha256": "d1549fc7a41be4f6afcf9cd88192fe73fac602435d396ecf05c25bc07767ccef",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "di1": {
-      "file": "assets/audio/di1.mp3",
-      "sourceFile": "64k/syllabs/cmn-di1.mp3",
-      "sourceLabel": "di1",
-      "bytes": 9180,
-      "sha256": "1ae3215e1ca9b336e1a1f6e109587ac9e9661013f6493c5838e8e876b08df622",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "di4": {
-      "file": "assets/audio/di4.mp3",
-      "sourceFile": "64k/syllabs/cmn-di4.mp3",
-      "sourceLabel": "di4",
-      "bytes": 8412,
-      "sha256": "e823aa5989e503b613ef45249a1c0b49da35d7784241b0de582ecf2d4a876785",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "diao4": {
-      "file": "assets/audio/diao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-diao4.mp3",
-      "sourceLabel": "diao4",
-      "bytes": 8416,
-      "sha256": "5c6a2eae6160e7e2ba9d8bbc8eeacfa16590b0a789adba31716bc966d329761a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "die2": {
-      "file": "assets/audio/die2.mp3",
-      "sourceFile": "64k/syllabs/cmn-die2.mp3",
-      "sourceLabel": "die2",
-      "bytes": 8414,
-      "sha256": "f8004a01e478b66468d2a89f3a92abe0610240b88f274739e2d399f5547b0298",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ding1": {
-      "file": "assets/audio/ding1.mp3",
-      "sourceFile": "64k/syllabs/cmn-ding1.mp3",
-      "sourceLabel": "ding1",
+    "dang4": {
+      "file": "assets/audio/dang4.mp3",
+      "sourceFile": "64k/syllabs/cmn-dang4.mp3",
+      "sourceLabel": "dang4",
       "bytes": 8032,
-      "sha256": "dce9a623258b6885477d828eb4d681269513945f80acbdf4b6dfa26f9aa586ae",
+      "sha256": "f511e2458bad65181489410b3a2bd44d29fa3d5495e7e87c6d5ad08ee86070d4",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ding3": {
-      "file": "assets/audio/ding3.mp3",
-      "sourceFile": "64k/syllabs/cmn-ding3.mp3",
-      "sourceLabel": "ding3",
-      "bytes": 10336,
-      "sha256": "790d78bb1c373762f9135b7c7f270e9c7ae9063468bd219f88614988983016d8",
+    "dao3": {
+      "file": "assets/audio/dao3.mp3",
+      "sourceFile": "64k/syllabs/cmn-dao3.mp3",
+      "sourceLabel": "dao3",
+      "bytes": 10334,
+      "sha256": "519a1a0de8e4eb9e4490bcf19ba87a46e17586684abb05faaa9e16815d5aa552",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ding4": {
-      "file": "assets/audio/ding4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ding4.mp3",
-      "sourceLabel": "ding4",
-      "bytes": 8800,
-      "sha256": "d17e4f6d8428f50e86aae57415c91103c8ae9b2877f3d3c979c4c377979ee1c4",
+    "di2": {
+      "file": "assets/audio/di2.mp3",
+      "sourceFile": "64k/syllabs/cmn-di2.mp3",
+      "sourceLabel": "di2",
+      "bytes": 8796,
+      "sha256": "ae8d75586d18f38addc6ebc4fd9f515daf7c8b5522d232723e1da3d22e00a0a6",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "du3": {
-      "file": "assets/audio/du3.mp3",
-      "sourceFile": "64k/syllabs/cmn-du3.mp3",
-      "sourceLabel": "du3",
-      "bytes": 10332,
-      "sha256": "38868640cfe061b7b150c509839b0859fd6301ae9f099ddb683448533daff912",
+    "dian1": {
+      "file": "assets/audio/dian1.mp3",
+      "sourceFile": "64k/syllabs/cmn-dian1.mp3",
+      "sourceLabel": "dian1",
+      "bytes": 9952,
+      "sha256": "1f712724ee97786d8e0532deb61fe764427d8b0ce17cf4c94af329ca5f383247",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "du4": {
-      "file": "assets/audio/du4.mp3",
-      "sourceFile": "64k/syllabs/cmn-du4.mp3",
-      "sourceLabel": "du4",
-      "bytes": 8412,
-      "sha256": "46ff63ed9a3ce927d16b416c29f787aea1efd9dbff1c774977ff0e8a7be7291e",
+    "dian4": {
+      "file": "assets/audio/dian4.mp3",
+      "sourceFile": "64k/syllabs/cmn-dian4.mp3",
+      "sourceLabel": "dian4",
+      "bytes": 8032,
+      "sha256": "360d57889f22af8313c3ff2a1d20216cbd71753dcf2b346806e245a414fe0331",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "duan4": {
-      "file": "assets/audio/duan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-duan4.mp3",
-      "sourceLabel": "duan4",
-      "bytes": 8416,
-      "sha256": "1ea68838b06e0c92e617d5e3c4a5fde54be8a60d245936ba3c5309bf6f540c5d",
+    "dou3": {
+      "file": "assets/audio/dou3.mp3",
+      "sourceFile": "64k/syllabs/cmn-dou3.mp3",
+      "sourceLabel": "dou3",
+      "bytes": 9182,
+      "sha256": "287d04bfc9e0522cef23c254dfbb57885ffb89d4b309164268d810bd0a3231dd",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "dun4": {
-      "file": "assets/audio/dun4.mp3",
-      "sourceFile": "64k/syllabs/cmn-dun4.mp3",
-      "sourceLabel": "dun4",
-      "bytes": 8414,
-      "sha256": "0dd3253d3cf3ea8bcff63bf30e7dda4c29f90525487f641ef3c54f0ce2495ef2",
+    "duo1": {
+      "file": "assets/audio/duo1.mp3",
+      "sourceFile": "64k/syllabs/cmn-duo1.mp3",
+      "sourceLabel": "duo1",
+      "bytes": 8798,
+      "sha256": "6bc28fd710ac3877014f8d563800c1a779d1417fa20e7f450b1c6d4a09e0a062",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -541,48 +325,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "e4": {
-      "file": "assets/audio/e4.mp3",
-      "sourceFile": "64k/syllabs/cmn-e4.mp3",
-      "sourceLabel": "e4",
-      "bytes": 8410,
-      "sha256": "bd0a3d3819da2233fbf7df186c6a094b89bb9efee435c331191ade1a5bf70398",
+    "er3": {
+      "file": "assets/audio/er3.mp3",
+      "sourceFile": "64k/syllabs/cmn-er3.mp3",
+      "sourceLabel": "er3",
+      "bytes": 10332,
+      "sha256": "2b577d166ea6cdf4b7f137c8ab37765128844ce7d23903e915199303cf3f3252",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "fan1": {
-      "file": "assets/audio/fan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-fan1.mp3",
-      "sourceLabel": "fan1",
-      "bytes": 8414,
-      "sha256": "f73bbda35ef7df77770f07beb6a00e98e8ba863ad87dbe771c60a4a91f36fad5",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "fan2": {
-      "file": "assets/audio/fan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-fan2.mp3",
-      "sourceLabel": "fan2",
-      "bytes": 8798,
-      "sha256": "5c225bffd16fe88f38629646f516081d8a80f7abda27133bf73404bfe09c7fa5",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "fan3": {
-      "file": "assets/audio/fan3.mp3",
-      "sourceFile": "64k/syllabs/cmn-fan3.mp3",
-      "sourceLabel": "fan3",
-      "bytes": 11294,
-      "sha256": "1f13da55cf77abf842606893d68d54f1ce3c067080b236e99a1ca52932aadfb1",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "fan4": {
-      "file": "assets/audio/fan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-fan4.mp3",
-      "sourceLabel": "fan4",
-      "bytes": 8030,
-      "sha256": "9c084a932fe6ae0fcb4e1d06d218b48d6e811ff9319d1489058931ed8f101cdc",
+    "fa2": {
+      "file": "assets/audio/fa2.mp3",
+      "sourceFile": "64k/syllabs/cmn-fa2.mp3",
+      "sourceLabel": "fa2",
+      "bytes": 8028,
+      "sha256": "bb419b7841260ab989bd53f08e8291f93762d17a8db3823d50a24ce47ed6491e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -604,39 +361,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "fen4": {
-      "file": "assets/audio/fen4.mp3",
-      "sourceFile": "64k/syllabs/cmn-fen4.mp3",
-      "sourceLabel": "fen4",
-      "bytes": 8798,
-      "sha256": "a39447d8633bbc67a49e82a8461329d803ed4a209dfb2d3649f49f1ff7475b7f",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "feng1": {
-      "file": "assets/audio/feng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-feng1.mp3",
-      "sourceLabel": "feng1",
-      "bytes": 10336,
-      "sha256": "9c5f1bafed6e31794852f853e3ccaf4339fa9704213b1ff383ebfb898cf43ad8",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "fou3": {
-      "file": "assets/audio/fou3.mp3",
-      "sourceFile": "64k/syllabs/cmn-fou3.mp3",
-      "sourceLabel": "fou3",
-      "bytes": 11294,
-      "sha256": "dab740b0a3f6c0dc447063bd3a01a61dcab2aa178112e4ded6724140d99b36a7",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "fu1": {
-      "file": "assets/audio/fu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-fu1.mp3",
-      "sourceLabel": "fu1",
-      "bytes": 9180,
-      "sha256": "ad3e9d7392fe52d58193e462e66e761addcfeb5a016502507804712a6a09d669",
+    "feng4": {
+      "file": "assets/audio/feng4.mp3",
+      "sourceFile": "64k/syllabs/cmn-feng4.mp3",
+      "sourceLabel": "feng4",
+      "bytes": 8032,
+      "sha256": "125a83824f02c961d44913baf341b7a5de78e37d78663d7cc5a796f14f77aff4",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -667,57 +397,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "gai3": {
-      "file": "assets/audio/gai3.mp3",
-      "sourceFile": "64k/syllabs/cmn-gai3.mp3",
-      "sourceLabel": "gai3",
-      "bytes": 10334,
-      "sha256": "4e97e2354729a693e6767398feea0a8176e8979518699838ecedd2ecca3f2bfa",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "gai4": {
-      "file": "assets/audio/gai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-gai4.mp3",
-      "sourceLabel": "gai4",
-      "bytes": 8414,
-      "sha256": "9b208e4c39ae52fbc59abee6e38140820ea52174cfa342a17adeb650868e4629",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "gang1": {
-      "file": "assets/audio/gang1.mp3",
-      "sourceFile": "64k/syllabs/cmn-gang1.mp3",
-      "sourceLabel": "gang1",
-      "bytes": 8416,
-      "sha256": "4a3650b7dbe3f910dbe48340869bb21d08a4db56e581c9775334a9309f88b648",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "gang4": {
-      "file": "assets/audio/gang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-gang4.mp3",
-      "sourceLabel": "gang4",
-      "bytes": 8032,
-      "sha256": "12b19e890d82725f4b42d9b3efaf286696accf5a5dbb1a7238da9f3ba9176e4e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "geng3": {
-      "file": "assets/audio/geng3.mp3",
-      "sourceFile": "64k/syllabs/cmn-geng3.mp3",
-      "sourceLabel": "geng3",
-      "bytes": 9952,
-      "sha256": "9bbee02783649e85c5068b3178bf105f7ebf0dc58081ca1f3630fcdd5183d07d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "gou1": {
-      "file": "assets/audio/gou1.mp3",
-      "sourceFile": "64k/syllabs/cmn-gou1.mp3",
-      "sourceLabel": "gou1",
-      "bytes": 8798,
-      "sha256": "15058923979733f97fdb7ddfb093a1ba306a09da5403b6d2d81f1d23950b8a56",
+    "gan1": {
+      "file": "assets/audio/gan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-gan1.mp3",
+      "sourceLabel": "gan1",
+      "bytes": 9566,
+      "sha256": "4c0df4519be05181f5ab5571c3eed9ed063e49a15c0fb223f6a306dbc691aaa6",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -730,156 +415,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "guan4": {
-      "file": "assets/audio/guan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-guan4.mp3",
-      "sourceLabel": "guan4",
-      "bytes": 8032,
-      "sha256": "687483d59f285850000e62f1701b1a260688bd13fb37d68fa7c41b65ef3414aa",
+    "gua3": {
+      "file": "assets/audio/gua3.mp3",
+      "sourceFile": "64k/syllabs/cmn-gua3.mp3",
+      "sourceLabel": "gua3",
+      "bytes": 10718,
+      "sha256": "1b6fe9f7bbf8f952aaa2beb2b636b02487707ddcffa9944cfc44a72161e96a2a",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "gui4": {
-      "file": "assets/audio/gui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-gui4.mp3",
-      "sourceLabel": "gui4",
-      "bytes": 9182,
-      "sha256": "a9c1a3640536e13d5aa4b4e5c9eab6e37bbc1a56e0086d19313f37c3756f57f8",
+    "guai3": {
+      "file": "assets/audio/guai3.mp3",
+      "sourceFile": "64k/syllabs/cmn-guai3.mp3",
+      "sourceLabel": "guai3",
+      "bytes": 11296,
+      "sha256": "6233596afebf6ad51356e8f11a4f1248fc1c0f443804ad68a8c8dad5da4a13a0",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "gun3": {
-      "file": "assets/audio/gun3.mp3",
-      "sourceFile": "64k/syllabs/cmn-gun3.mp3",
-      "sourceLabel": "gun3",
-      "bytes": 9950,
-      "sha256": "6402080eb5d88cbe75f30918bd59aea3b01573a854466d517904bd016c8b0e7a",
+    "hong2": {
+      "file": "assets/audio/hong2.mp3",
+      "sourceFile": "64k/syllabs/cmn-hong2.mp3",
+      "sourceLabel": "hong2",
+      "bytes": 9568,
+      "sha256": "0922382c6778340535f02edce5f66cd7af7dac9ed39b89d796413d17b1b36c1d",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "guo1": {
-      "file": "assets/audio/guo1.mp3",
-      "sourceFile": "64k/syllabs/cmn-guo1.mp3",
-      "sourceLabel": "guo1",
-      "bytes": 9566,
-      "sha256": "4908211392b43d36b23030e468ed4eedc9ec49a806c7f7e3f04d5e195980643b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "han4": {
-      "file": "assets/audio/han4.mp3",
-      "sourceFile": "64k/syllabs/cmn-han4.mp3",
-      "sourceLabel": "han4",
-      "bytes": 8414,
-      "sha256": "c34ac8312082bd30a5b46d934854ce8396129f2be66426efc0e03220cf6692e9",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hao2": {
-      "file": "assets/audio/hao2.mp3",
-      "sourceFile": "64k/syllabs/cmn-hao2.mp3",
-      "sourceLabel": "hao2",
-      "bytes": 8414,
-      "sha256": "3b2e1cab71dc8deebe041142fa411fbc138e9d17c46a08050ce0d2c2e2f8583c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hao4": {
-      "file": "assets/audio/hao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-hao4.mp3",
-      "sourceLabel": "hao4",
-      "bytes": 8414,
-      "sha256": "5386e9fac04be136fdf93f77c71cfe93f99ac81315ee6c24f353eed3f4a3f805",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "he1": {
-      "file": "assets/audio/he1.mp3",
-      "sourceFile": "64k/syllabs/cmn-he1.mp3",
-      "sourceLabel": "he1",
-      "bytes": 10332,
-      "sha256": "6ba3fec9323dba6540fb91aeb5f908aff4ba9a18f4675be17fffd70faf2781b6",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "he2": {
-      "file": "assets/audio/he2.mp3",
-      "sourceFile": "64k/syllabs/cmn-he2.mp3",
-      "sourceLabel": "he2",
-      "bytes": 9564,
-      "sha256": "010a2aee776cf3001be63b6f8d997cbcf72d0ed0e6b311640202ba31ed9b0201",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "he4": {
-      "file": "assets/audio/he4.mp3",
-      "sourceFile": "64k/syllabs/cmn-he4.mp3",
-      "sourceLabel": "he4",
-      "bytes": 9180,
-      "sha256": "00bd7d45aecb09e689c5640ce8c40d857f3d760b2c7a5e7b86fdca169941ad06",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hen3": {
-      "file": "assets/audio/hen3.mp3",
-      "sourceFile": "64k/syllabs/cmn-hen3.mp3",
-      "sourceLabel": "hen3",
-      "bytes": 9950,
-      "sha256": "c4a6f8ee84fb792584037b3291353e06f0d0b520761e86bf0fc95a4c5f8e722e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hen4": {
-      "file": "assets/audio/hen4.mp3",
-      "sourceFile": "64k/syllabs/cmn-hen4.mp3",
-      "sourceLabel": "hen4",
-      "bytes": 8798,
-      "sha256": "e179aadba355525aedcd31b7c6d653be3d940935b7fcb6f75eb550dd7aa77b94",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "heng2": {
-      "file": "assets/audio/heng2.mp3",
-      "sourceFile": "64k/syllabs/cmn-heng2.mp3",
-      "sourceLabel": "heng2",
-      "bytes": 8416,
-      "sha256": "97abc90101bedd848dda52c84c3eb64f3e1f0c7a97b32985bda139fcd80ef84e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hong1": {
-      "file": "assets/audio/hong1.mp3",
-      "sourceFile": "64k/syllabs/cmn-hong1.mp3",
-      "sourceLabel": "hong1",
-      "bytes": 8416,
-      "sha256": "2cc2200d16cc8690ee955a52d3b38799c7a5c5853c4946e2dc44e34e42bb4282",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hou2": {
-      "file": "assets/audio/hou2.mp3",
-      "sourceFile": "64k/syllabs/cmn-hou2.mp3",
-      "sourceLabel": "hou2",
-      "bytes": 9182,
-      "sha256": "37729e0aa8f13a482f36bae7b018748326b70550c7e53bb256a799f17283187e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hu3": {
-      "file": "assets/audio/hu3.mp3",
-      "sourceFile": "64k/syllabs/cmn-hu3.mp3",
-      "sourceLabel": "hu3",
-      "bytes": 10716,
-      "sha256": "0bea4ddc9d42c2e765e3823ad789e54e94a54beb4c4154a6309cbb9c8b8d73ca",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hu4": {
-      "file": "assets/audio/hu4.mp3",
-      "sourceFile": "64k/syllabs/cmn-hu4.mp3",
-      "sourceLabel": "hu4",
-      "bytes": 8796,
-      "sha256": "56a22a2ce70b1dfb79a293021b9f294059ee4c8c4e15c1e83b4cd2130307b8be",
+    "hu2": {
+      "file": "assets/audio/hu2.mp3",
+      "sourceFile": "64k/syllabs/cmn-hu2.mp3",
+      "sourceLabel": "hu2",
+      "bytes": 8412,
+      "sha256": "b4f4e4c7023bfc61799063c634ad07279f3974f0b8a2934c8b53f4953ceb4194",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -892,120 +460,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "huai2": {
-      "file": "assets/audio/huai2.mp3",
-      "sourceFile": "64k/syllabs/cmn-huai2.mp3",
-      "sourceLabel": "huai2",
-      "bytes": 8800,
-      "sha256": "f01d9b08fb75b791e362f49f962cb9788a08f7fade936feff43fcedb7c3c6374",
+    "huang2": {
+      "file": "assets/audio/huang2.mp3",
+      "sourceFile": "64k/syllabs/cmn-huang2.mp3",
+      "sourceLabel": "huang2",
+      "bytes": 9954,
+      "sha256": "0c4c72fd98e61fb27372ccfe85fc705bb5a94fa524131842f8694f100da74796",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "huan2": {
-      "file": "assets/audio/huan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-huan2.mp3",
-      "sourceLabel": "huan2",
-      "bytes": 10336,
-      "sha256": "8719b36904f4abf50eefb0f31c351d65e306dac4ec1f719925d66d202d3b3c00",
+    "huang3": {
+      "file": "assets/audio/huang3.mp3",
+      "sourceFile": "64k/syllabs/cmn-huang3.mp3",
+      "sourceLabel": "huang3",
+      "bytes": 12834,
+      "sha256": "dffe85b9339163a215c048c40792536669baeeb5972636b0f5075e5ab5cfe41f",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "huan3": {
-      "file": "assets/audio/huan3.mp3",
-      "sourceFile": "64k/syllabs/cmn-huan3.mp3",
-      "sourceLabel": "huan3",
-      "bytes": 11680,
-      "sha256": "64863dfc2111b40c1cc4d9dba1b63a64b5810df89a8238bdaa4f9910a3a3a2bc",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "huan4": {
-      "file": "assets/audio/huan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-huan4.mp3",
-      "sourceLabel": "huan4",
-      "bytes": 8416,
-      "sha256": "d27117b803abc7e74ed0e9337c27248609bcde0ace662853495369f4a719ac33",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hui4": {
-      "file": "assets/audio/hui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-hui4.mp3",
-      "sourceLabel": "hui4",
-      "bytes": 8798,
-      "sha256": "8d095aa597ab453b1692ae2ec60da0d7643e6089b519cea48bd677f2dc519b29",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hun1": {
-      "file": "assets/audio/hun1.mp3",
-      "sourceFile": "64k/syllabs/cmn-hun1.mp3",
-      "sourceLabel": "hun1",
-      "bytes": 12446,
-      "sha256": "3001df49050dfd33e8f77c7f292d8def024a5765fa932b07402ceff56d2c71e9",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "hun4": {
-      "file": "assets/audio/hun4.mp3",
-      "sourceFile": "64k/syllabs/cmn-hun4.mp3",
-      "sourceLabel": "hun4",
-      "bytes": 9566,
-      "sha256": "88952a6367cbe63305588d65d99a80c601a52c901d2fee43eaabf4b72c7b6939",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "huo4": {
-      "file": "assets/audio/huo4.mp3",
-      "sourceFile": "64k/syllabs/cmn-huo4.mp3",
-      "sourceLabel": "huo4",
-      "bytes": 9182,
-      "sha256": "1c8978bee276d14fbd21dcccb411cd20a34822f394cf0a46e1779ca49e27855b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ji2": {
-      "file": "assets/audio/ji2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ji2.mp3",
-      "sourceLabel": "ji2",
-      "bytes": 9564,
-      "sha256": "61fbef56134b68f991b261d24c3e2c92a96ec276aff5b484d85ae45780952d2a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ji3": {
-      "file": "assets/audio/ji3.mp3",
-      "sourceFile": "64k/syllabs/cmn-ji3.mp3",
-      "sourceLabel": "ji3",
-      "bytes": 12444,
-      "sha256": "ff3a610c740a73bbc6937a19c98628bd9d5f6a5e6168363f62d8831e726b905c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ji4": {
-      "file": "assets/audio/ji4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ji4.mp3",
-      "sourceLabel": "ji4",
-      "bytes": 8796,
-      "sha256": "7094f14c27c357db4e2aed62c381291be13651f96f713c06fd0f4b5e2f2aa5c6",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jia4": {
-      "file": "assets/audio/jia4.mp3",
-      "sourceFile": "64k/syllabs/cmn-jia4.mp3",
-      "sourceLabel": "jia4",
-      "bytes": 9566,
-      "sha256": "c7794547f6d27ebbe5cd52268c747c6bb1be1a58f0ae31560a7c903a2bf65a92",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jian1": {
-      "file": "assets/audio/jian1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jian1.mp3",
-      "sourceLabel": "jian1",
-      "bytes": 9952,
-      "sha256": "ee63d7c9868b9346df5f59460f509661823db8db9fd7e1d28f8fa469c3f645c4",
+    "jian3": {
+      "file": "assets/audio/jian3.mp3",
+      "sourceFile": "64k/syllabs/cmn-jian3.mp3",
+      "sourceLabel": "jian3",
+      "bytes": 11296,
+      "sha256": "7810b48b0d15d7edb58e5020017544c8c4eba33168035c7268c37f1cbd06b671",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1024,15 +502,6 @@
       "sourceLabel": "jiang1",
       "bytes": 10338,
       "sha256": "e9003d269dd50db2ac026176e638510ea943e24bea16a630099d054db88a39ca",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jiang4": {
-      "file": "assets/audio/jiang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-jiang4.mp3",
-      "sourceLabel": "jiang4",
-      "bytes": 8418,
-      "sha256": "c572ea774cee4205155c91c9c65b2f9ca1d710ee883d9e162337b6e85cc60e51",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1063,15 +532,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "jie1": {
-      "file": "assets/audio/jie1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jie1.mp3",
-      "sourceLabel": "jie1",
-      "bytes": 9566,
-      "sha256": "8cdad4f0375eaa113c82abbc39342469b6e84548a544c1d589a1b080a389cf45",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "jie2": {
       "file": "assets/audio/jie2.mp3",
       "sourceFile": "64k/syllabs/cmn-jie2.mp3",
@@ -1081,138 +541,57 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "jie4": {
-      "file": "assets/audio/jie4.mp3",
-      "sourceFile": "64k/syllabs/cmn-jie4.mp3",
-      "sourceLabel": "jie4",
+    "ju3": {
+      "file": "assets/audio/ju3.mp3",
+      "sourceFile": "64k/syllabs/cmn-ju3.mp3",
+      "sourceLabel": "ju3",
+      "bytes": 12828,
+      "sha256": "b3bce654dc9e5655e131d95581cc8ed009be928c7260d6511cb200b945f03071",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "juan4": {
+      "file": "assets/audio/juan4.mp3",
+      "sourceFile": "64k/syllabs/cmn-juan4.mp3",
+      "sourceLabel": "juan4",
+      "bytes": 9568,
+      "sha256": "aff686b9bf11d23f93f4adff8b4024ed1b95c4d2e7eaf062bdaf380f5a18f015",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "ka3": {
+      "file": "assets/audio/ka3.mp3",
+      "sourceFile": "64k/syllabs/cmn-ka3.mp3",
+      "sourceLabel": "ka3",
+      "bytes": 9948,
+      "sha256": "b90e49abcfbeb40ef0f5231ef720a598e672f7814577ab97d94592269996d2fb",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "kai3": {
+      "file": "assets/audio/kai3.mp3",
+      "sourceFile": "64k/syllabs/cmn-kai3.mp3",
+      "sourceLabel": "kai3",
+      "bytes": 12830,
+      "sha256": "9525d63d49010f315f0f1f55d9fd5d4be5ff94ef5f5f764b75cf822121f5a76b",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "kan1": {
+      "file": "assets/audio/kan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-kan1.mp3",
+      "sourceLabel": "kan1",
       "bytes": 8030,
-      "sha256": "e8fc69f9a637711eecb3a5855f9a2d293781fd3adc34ce0b93f24490c131298a",
+      "sha256": "02a20b7900383236f8fd96b5b4c11709d8d3dd4f97c52266609a0c6cb4549851",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "jin1": {
-      "file": "assets/audio/jin1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jin1.mp3",
-      "sourceLabel": "jin1",
-      "bytes": 8798,
-      "sha256": "8eec7f0c73332a6f47456d93dd0869c1c5a022f09e72a0a2df95e63e2ddb6117",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jing1": {
-      "file": "assets/audio/jing1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jing1.mp3",
-      "sourceLabel": "jing1",
-      "bytes": 9952,
-      "sha256": "33138dd60adea7f9ccd12a09b86d320eda12cfd82863959b3c2197f9d21f1b77",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jing4": {
-      "file": "assets/audio/jing4.mp3",
-      "sourceFile": "64k/syllabs/cmn-jing4.mp3",
-      "sourceLabel": "jing4",
-      "bytes": 8800,
-      "sha256": "2e111a99c95a4c54a9d03b0a5b56cfc92642f1dfc937410fe7815d3c192cdfcb",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jiu1": {
-      "file": "assets/audio/jiu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jiu1.mp3",
-      "sourceLabel": "jiu1",
-      "bytes": 9566,
-      "sha256": "071b2579750c902a46c0418e615228b121f24afa50ab2489943d7990291e7758",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jiu3": {
-      "file": "assets/audio/jiu3.mp3",
-      "sourceFile": "64k/syllabs/cmn-jiu3.mp3",
-      "sourceLabel": "jiu3",
-      "bytes": 11294,
-      "sha256": "d1a9643ed537ec61cdd0c4f7f73474f05eaeb06cbadf8bbd200b3bab4be480bb",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ju4": {
-      "file": "assets/audio/ju4.mp3",
-      "sourceFile": "64k/syllabs/cmn-jv4.mp3",
-      "sourceLabel": "jv4",
-      "bytes": 9180,
-      "sha256": "20c6fcf7792348e073c2c1886828acc4b32339d18f1c94a6395c045dec7c206c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jue2": {
-      "file": "assets/audio/jue2.mp3",
-      "sourceFile": "64k/syllabs/cmn-jue2.mp3",
-      "sourceLabel": "jue2",
-      "bytes": 8414,
-      "sha256": "9503cd85e4caad5004c32b6693ea9d76d46c5e84bf49d32a6ed9a54d5ff4534a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "jun1": {
-      "file": "assets/audio/jun1.mp3",
-      "sourceFile": "64k/syllabs/cmn-jun1.mp3",
-      "sourceLabel": "jun1",
-      "bytes": 9182,
-      "sha256": "58ca5c3000775d674690a5114bf899832a26fa1dd25e151fa2d58a2a3f49fa41",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "kang4": {
-      "file": "assets/audio/kang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-kang4.mp3",
-      "sourceLabel": "kang4",
-      "bytes": 8032,
-      "sha256": "55fcd409a6718ca9c678f17f179d49dc7adfdd5f2e26b486828c046740641bc7",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ke1": {
-      "file": "assets/audio/ke1.mp3",
-      "sourceFile": "64k/syllabs/cmn-ke1.mp3",
-      "sourceLabel": "ke1",
-      "bytes": 9564,
-      "sha256": "046f31a71f5605acc96f80ec050acae0dabf188a4869238d605aef19057ed4b0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "keng1": {
-      "file": "assets/audio/keng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-keng1.mp3",
-      "sourceLabel": "keng1",
-      "bytes": 9952,
-      "sha256": "ee87cbd1adf12f6b438f1280443393b0e7b844a2eba52c7274fdbf16edb00715",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "kong3": {
-      "file": "assets/audio/kong3.mp3",
-      "sourceFile": "64k/syllabs/cmn-kong3.mp3",
-      "sourceLabel": "kong3",
-      "bytes": 11296,
-      "sha256": "2be7395f88addbd60c2e137195f6b080909f2ad3b491cc5a46a44a399fdc7dce",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ku4": {
-      "file": "assets/audio/ku4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ku4.mp3",
-      "sourceLabel": "ku4",
+    "ku1": {
+      "file": "assets/audio/ku1.mp3",
+      "sourceFile": "64k/syllabs/cmn-ku1.mp3",
+      "sourceLabel": "ku1",
       "bytes": 8796,
-      "sha256": "f12297028e9d2210e6aecb73bb549a0ee553cbeb5b0401dd46f578003d79efaf",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "kuang4": {
-      "file": "assets/audio/kuang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-kuang4.mp3",
-      "sourceLabel": "kuang4",
-      "bytes": 8034,
-      "sha256": "ad1bd9eda3f569e293bdc8559d51341d23f7622b1644dcdac3697dfd8b341f2b",
+      "sha256": "73ae549e8746996731bd3216c2507de42fc91b5411bec396474b14238cfe4502",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1225,21 +604,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "kui4": {
-      "file": "assets/audio/kui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-kui4.mp3",
-      "sourceLabel": "kui4",
-      "bytes": 8030,
-      "sha256": "cda63ef206ceee2a99efb09c76cd5e758edf318bf3ef710bce39dbf853d222a1",
+    "la3": {
+      "file": "assets/audio/la3.mp3",
+      "sourceFile": "64k/syllabs/cmn-la3.mp3",
+      "sourceLabel": "la3",
+      "bytes": 11676,
+      "sha256": "2771c578d82c2436d2fd8d2e95010cd808b14169c4cd36481f0203de77307985",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "kuo4": {
-      "file": "assets/audio/kuo4.mp3",
-      "sourceFile": "64k/syllabs/cmn-kuo4.mp3",
-      "sourceLabel": "kuo4",
-      "bytes": 8030,
-      "sha256": "c720bcfd3bd1143943a10e6550db8747c79550701b555e10a462261b60a2ec82",
+    "la4": {
+      "file": "assets/audio/la4.mp3",
+      "sourceFile": "64k/syllabs/cmn-la4.mp3",
+      "sourceLabel": "la4",
+      "bytes": 8796,
+      "sha256": "8181611591400de8a2fc0788c6b1c8b354e0d78d83ed2b91d8bc311a8d55b4d0",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1252,12 +631,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lan2": {
-      "file": "assets/audio/lan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-lan2.mp3",
-      "sourceLabel": "lan2",
-      "bytes": 9950,
-      "sha256": "1382cd4b56848048b8dc43c91b409cabc16ecd44dd49822b0a9606454320d06a",
+    "lan3": {
+      "file": "assets/audio/lan3.mp3",
+      "sourceFile": "64k/syllabs/cmn-lan3.mp3",
+      "sourceLabel": "lan3",
+      "bytes": 9182,
+      "sha256": "c6683784ae95bbdccd503469f07826f3e0c667eb6d8d514cd3888f51b34fe83f",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1270,21 +649,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lei4": {
-      "file": "assets/audio/lei4.mp3",
-      "sourceFile": "64k/syllabs/cmn-lei4.mp3",
-      "sourceLabel": "lei4",
-      "bytes": 9182,
-      "sha256": "ec333d45ce16205547cf34d57da1f0608bf414c1f9a0d0ba44b569399f55f881",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "leng4": {
-      "file": "assets/audio/leng4.mp3",
-      "sourceFile": "64k/syllabs/cmn-leng4.mp3",
-      "sourceLabel": "leng4",
-      "bytes": 8800,
-      "sha256": "df4fc8118bf503c7e30cac08c92a33d3c00bdcd21f765986a943cb2e8e783007",
+    "li2": {
+      "file": "assets/audio/li2.mp3",
+      "sourceFile": "64k/syllabs/cmn-li2.mp3",
+      "sourceLabel": "li2",
+      "bytes": 8796,
+      "sha256": "fe89848863298170ae50cdeb860cf333bcb3410bd563e7fd4f70105df43f2804",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1297,48 +667,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lia3": {
-      "file": "assets/audio/lia3.mp3",
-      "sourceFile": "64k/syllabs/cmn-lia3.mp3",
-      "sourceLabel": "lia3",
-      "bytes": 12446,
-      "sha256": "395aa5ae9fb2ecef3f1f504ce0bd3977f49acc7a53e06b90427a6c0fcf53b8fb",
+    "liao2": {
+      "file": "assets/audio/liao2.mp3",
+      "sourceFile": "64k/syllabs/cmn-liao2.mp3",
+      "sourceLabel": "liao2",
+      "bytes": 9184,
+      "sha256": "3cac04939196f2daa9101ae6205501b0bcd5c0fd81d0351247acc7cc06a88bcc",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lian2": {
-      "file": "assets/audio/lian2.mp3",
-      "sourceFile": "64k/syllabs/cmn-lian2.mp3",
-      "sourceLabel": "lian2",
-      "bytes": 10336,
-      "sha256": "67419d2505f43158ad40386aa0a35323e2c5ab93c4f54aa2ffb5944eb1df0d4c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "lian4": {
-      "file": "assets/audio/lian4.mp3",
-      "sourceFile": "64k/syllabs/cmn-lian4.mp3",
-      "sourceLabel": "lian4",
-      "bytes": 8032,
-      "sha256": "185867683a47a3708ce9c9de3482e881c2159c22ee364b2e8a2424b8260914a3",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "liang2": {
-      "file": "assets/audio/liang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-liang2.mp3",
-      "sourceLabel": "liang2",
-      "bytes": 9954,
-      "sha256": "dfb6115478361b4d8f42c5f6a280c1cfbeed715ec41b54611c470b957afb2d5d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "liang4": {
-      "file": "assets/audio/liang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-liang4.mp3",
-      "sourceLabel": "liang4",
-      "bytes": 8802,
-      "sha256": "b36e658d9e15153eb7ae74d10e87ea655513751d885c3cbd6a13af62d938cdaf",
+    "lie4": {
+      "file": "assets/audio/lie4.mp3",
+      "sourceFile": "64k/syllabs/cmn-lie4.mp3",
+      "sourceLabel": "lie4",
+      "bytes": 9182,
+      "sha256": "fa24cff5824168466b923cca3bea208b676752fb3ab1241aeb009c71746aba1f",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1351,6 +694,15 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
+    "ling2": {
+      "file": "assets/audio/ling2.mp3",
+      "sourceFile": "64k/syllabs/cmn-ling2.mp3",
+      "sourceLabel": "ling2",
+      "bytes": 10336,
+      "sha256": "7ded2a9e9ae04efeeddce909b8384dee7166362e89dfd65812502cc03d43a0a4",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
     "long2": {
       "file": "assets/audio/long2.mp3",
       "sourceFile": "64k/syllabs/cmn-long2.mp3",
@@ -1360,30 +712,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lou4": {
-      "file": "assets/audio/lou4.mp3",
-      "sourceFile": "64k/syllabs/cmn-lou4.mp3",
-      "sourceLabel": "lou4",
-      "bytes": 9566,
-      "sha256": "c08ba93eef3e08827047c141ffa8001d257637f2420d9ed0ae3cf362390ad7f1",
+    "long3": {
+      "file": "assets/audio/long3.mp3",
+      "sourceFile": "64k/syllabs/cmn-long3.mp3",
+      "sourceLabel": "long3",
+      "bytes": 11680,
+      "sha256": "3dc0b12924517cc9da02cca486778a0237def05d21aaee1d77af8ec99226de27",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "lu2": {
-      "file": "assets/audio/lu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-lu2.mp3",
-      "sourceLabel": "lu2",
-      "bytes": 9564,
-      "sha256": "285648b113bb1a259f738df5033f3bd66f2af129dfee87bbaf78835d9c890539",
+    "lou3": {
+      "file": "assets/audio/lou3.mp3",
+      "sourceFile": "64k/syllabs/cmn-lou3.mp3",
+      "sourceLabel": "lou3",
+      "bytes": 11678,
+      "sha256": "4ac03674c6670330d510089651df98ae1389f114c5461fde68c4ec1f41bc21b2",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "luan3": {
-      "file": "assets/audio/luan3.mp3",
-      "sourceFile": "64k/syllabs/cmn-luan3.mp3",
-      "sourceLabel": "luan3",
-      "bytes": 12448,
-      "sha256": "3825d4e9315299d6d0b1fb3da09c0d32024f2f7740f3f190c2ca011964c7a500",
+    "lu3": {
+      "file": "assets/audio/lu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-lu3.mp3",
+      "sourceLabel": "lu3",
+      "bytes": 10716,
+      "sha256": "bc6c4662d63bc76af3f4ba9aa64b0081575c535eab9ec49c6f7e69917c3b601b",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1396,12 +748,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "mao2": {
-      "file": "assets/audio/mao2.mp3",
-      "sourceFile": "64k/syllabs/cmn-mao2.mp3",
-      "sourceLabel": "mao2",
-      "bytes": 8030,
-      "sha256": "bbe2b13fb7013a0c8d2a9795518e93bcf56fd9a87e1277211ec4376d1b7fb647",
+    "luo4": {
+      "file": "assets/audio/luo4.mp3",
+      "sourceFile": "64k/syllabs/cmn-luo4.mp3",
+      "sourceLabel": "luo4",
+      "bytes": 8414,
+      "sha256": "b488aaf08eec3a28fb2bddf0d297f74afd87bdcc65403a938c5357927757f2fc",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "man2": {
+      "file": "assets/audio/man2.mp3",
+      "sourceFile": "64k/syllabs/cmn-man2.mp3",
+      "sourceLabel": "man2",
+      "bytes": 9566,
+      "sha256": "5fe6ac245a0ce0ae8fcc421c52f410075bfb3c7422d0f77cf91dd1cd1464cde7",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "mang2": {
+      "file": "assets/audio/mang2.mp3",
+      "sourceFile": "64k/syllabs/cmn-mang2.mp3",
+      "sourceLabel": "mang2",
+      "bytes": 9184,
+      "sha256": "725fe6174008513e347b1c46f807d45bb41dc50f7445ab16e72570dd360d8056",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1414,15 +784,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "mei2": {
-      "file": "assets/audio/mei2.mp3",
-      "sourceFile": "64k/syllabs/cmn-mei2.mp3",
-      "sourceLabel": "mei2",
-      "bytes": 9566,
-      "sha256": "32c0005553e367063eb9e13b30e9167a9507c37315bbabca4eb46ea04c44fca6",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "mei4": {
       "file": "assets/audio/mei4.mp3",
       "sourceFile": "64k/syllabs/cmn-mei4.mp3",
@@ -1432,21 +793,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "mian2": {
-      "file": "assets/audio/mian2.mp3",
-      "sourceFile": "64k/syllabs/cmn-mian2.mp3",
-      "sourceLabel": "mian2",
+    "meng2": {
+      "file": "assets/audio/meng2.mp3",
+      "sourceFile": "64k/syllabs/cmn-meng2.mp3",
+      "sourceLabel": "meng2",
       "bytes": 9568,
-      "sha256": "9e43f3afe8178a8d79f91ac40f7dc079f9d7ccdffb21ee29a2a5cf5b8f3f9c7f",
+      "sha256": "803d1485695ed703e298a67797b8636dbfea572974a95709766f0c26bb3df058",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "mo1": {
-      "file": "assets/audio/mo1.mp3",
-      "sourceFile": "64k/syllabs/cmn-mo1.mp3",
-      "sourceLabel": "mo1",
-      "bytes": 9180,
-      "sha256": "661f2c65f598a3c529c9d33f947a96ceb56b3df54ae8ed75989682c4b036211d",
+    "mi2": {
+      "file": "assets/audio/mi2.mp3",
+      "sourceFile": "64k/syllabs/cmn-mi2.mp3",
+      "sourceLabel": "mi2",
+      "bytes": 8412,
+      "sha256": "1fc609d893ba99dceb4e5b94459f9bfd4b2806090e73d12cbbdb75a7659245bb",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "mi4": {
+      "file": "assets/audio/mi4.mp3",
+      "sourceFile": "64k/syllabs/cmn-mi4.mp3",
+      "sourceLabel": "mi4",
+      "bytes": 8796,
+      "sha256": "b215ce1366067958b7dabb46cf6ec8f5d1bbb3a08fd92f7418654c77478169e3",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "miu4": {
+      "file": "assets/audio/miu4.mp3",
+      "sourceFile": "64k/syllabs/cmn-miu4.mp3",
+      "sourceLabel": "miu4",
+      "bytes": 8414,
+      "sha256": "902dc96cd700fd25bc6fecc920f8ba104056727ac3c45878c0eef4f991a012ac",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1459,15 +838,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "mu3": {
-      "file": "assets/audio/mu3.mp3",
-      "sourceFile": "64k/syllabs/cmn-mu3.mp3",
-      "sourceLabel": "mu3",
-      "bytes": 11676,
-      "sha256": "6df7020d7134ac77eca3ae34261d133d574a1c180d3e91d85e9f1582cd2bcae3",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "mu4": {
       "file": "assets/audio/mu4.mp3",
       "sourceFile": "64k/syllabs/cmn-mu4.mp3",
@@ -1477,21 +847,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "nai4": {
-      "file": "assets/audio/nai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-nai4.mp3",
-      "sourceLabel": "nai4",
-      "bytes": 9950,
-      "sha256": "27101d31d18355d80bb3aa2e00edb2adaf57c637f4e0e0993d2425f5fd472149",
+    "nai3": {
+      "file": "assets/audio/nai3.mp3",
+      "sourceFile": "64k/syllabs/cmn-nai3.mp3",
+      "sourceLabel": "nai3",
+      "bytes": 11294,
+      "sha256": "5265b001571da905423112beb23c779c9f89741e6c3caa6b12c22b91b9979f56",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "nang2": {
-      "file": "assets/audio/nang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-nang2.mp3",
-      "sourceLabel": "nang2",
-      "bytes": 9952,
-      "sha256": "575653a120ce4f370adcb71972c030d8e245f40fbbf9a7f6783ea8e3faa50f20",
+    "nao3": {
+      "file": "assets/audio/nao3.mp3",
+      "sourceFile": "64k/syllabs/cmn-nao3.mp3",
+      "sourceLabel": "nao3",
+      "bytes": 12830,
+      "sha256": "837d28602b113285f566260c4ead7c23cf1c0c9fdaccccc6b16b6c1e7f0ab528",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1504,84 +874,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ni4": {
-      "file": "assets/audio/ni4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ni4.mp3",
-      "sourceLabel": "ni4",
-      "bytes": 9180,
-      "sha256": "c968f81f69a8e6da8be7412cc47c8d63f504e6bbc8fd974aca565dec72f19fd2",
+    "niu3": {
+      "file": "assets/audio/niu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-niu3.mp3",
+      "sourceLabel": "niu3",
+      "bytes": 11678,
+      "sha256": "89f1f1ed6a1596683bdf8d4aba031b168df33490e14333e09c1c922f05868bc6",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "nian4": {
-      "file": "assets/audio/nian4.mp3",
-      "sourceFile": "64k/syllabs/cmn-nian4.mp3",
-      "sourceLabel": "nian4",
-      "bytes": 8800,
-      "sha256": "9985cfe4eef447aca93fbc4398355268cc50e226cee7d2b16beb91cf397debea",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ning4": {
-      "file": "assets/audio/ning4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ning4.mp3",
-      "sourceLabel": "ning4",
+    "pang1": {
+      "file": "assets/audio/pang1.mp3",
+      "sourceFile": "64k/syllabs/cmn-pang1.mp3",
+      "sourceLabel": "pang1",
       "bytes": 9184,
-      "sha256": "651c775c92e8b924b960a8cf1d286bb7137f5019691cb290bde2bfb3806d5f06",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ou3": {
-      "file": "assets/audio/ou3.mp3",
-      "sourceFile": "64k/syllabs/cmn-ou3.mp3",
-      "sourceLabel": "ou3",
-      "bytes": 11292,
-      "sha256": "a1841202bf760ec3ba7cff6025eac2ca1d079e9e1d7a489955d6ed32fbe85ae2",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pai4": {
-      "file": "assets/audio/pai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-pai4.mp3",
-      "sourceLabel": "pai4",
-      "bytes": 8414,
-      "sha256": "df471f599762da937b541c1d0e05e103a34d199fa84e19defe0716f0e87107b0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pan1": {
-      "file": "assets/audio/pan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-pan1.mp3",
-      "sourceLabel": "pan1",
-      "bytes": 9566,
-      "sha256": "f6192c4aa8b5dc98af086ef1b215e281a785669d78c2f8f70907c75de52f6960",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pan4": {
-      "file": "assets/audio/pan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-pan4.mp3",
-      "sourceLabel": "pan4",
-      "bytes": 8798,
-      "sha256": "d800a14fdf7033e1bbfd019a8e9be2d0c12e645c6d2665a86bee9df903f7c743",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pang2": {
-      "file": "assets/audio/pang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-pang2.mp3",
-      "sourceLabel": "pang2",
-      "bytes": 9568,
-      "sha256": "170df7472018c16181b7bbf32a0356d20ef36b9700655e5862d0e3fd80b1ec02",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pao1": {
-      "file": "assets/audio/pao1.mp3",
-      "sourceFile": "64k/syllabs/cmn-pao1.mp3",
-      "sourceLabel": "pao1",
-      "bytes": 8414,
-      "sha256": "19b045fba8b9a1c145aec97b7176631698848685ec962eb03a70c550b49d0683",
+      "sha256": "ebfa5d4a6d83cbb186c0d88d290b36ddd54b10961d3adc83d8380b711ecf39d3",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1603,6 +910,15 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
+    "peng2": {
+      "file": "assets/audio/peng2.mp3",
+      "sourceFile": "64k/syllabs/cmn-peng2.mp3",
+      "sourceLabel": "peng2",
+      "bytes": 9184,
+      "sha256": "d91b620be9153a9ac3390d565de7af1409983e1fa6b90e79fd67427533aa8bb7",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
     "pi1": {
       "file": "assets/audio/pi1.mp3",
       "sourceFile": "64k/syllabs/cmn-pi1.mp3",
@@ -1612,48 +928,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "pian4": {
-      "file": "assets/audio/pian4.mp3",
-      "sourceFile": "64k/syllabs/cmn-pian4.mp3",
-      "sourceLabel": "pian4",
-      "bytes": 9568,
-      "sha256": "0b4723de1db80d0d1312c634b8d84afdedfb1848a09e82846dec4df14a6fc0c3",
+    "ping1": {
+      "file": "assets/audio/ping1.mp3",
+      "sourceFile": "64k/syllabs/cmn-ping1.mp3",
+      "sourceLabel": "ping1",
+      "bytes": 9184,
+      "sha256": "10835e8f9d452cc0153f0c361c6bfe84626e09691d13d2f2c99b771aaeacf7ca",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "pie3": {
-      "file": "assets/audio/pie3.mp3",
-      "sourceFile": "64k/syllabs/cmn-pie3.mp3",
-      "sourceLabel": "pie3",
-      "bytes": 11294,
-      "sha256": "419cb658040c20a8f02adfb3800fdadce030e248b481e1df060ec100b61a4d76",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "pin3": {
-      "file": "assets/audio/pin3.mp3",
-      "sourceFile": "64k/syllabs/cmn-pin3.mp3",
-      "sourceLabel": "pin3",
-      "bytes": 11678,
-      "sha256": "a7f7d20661547899b8f0215401d0a5ca707c4a4b1dd5f266d6073371b5a3bc4e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ping2": {
-      "file": "assets/audio/ping2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ping2.mp3",
-      "sourceLabel": "ping2",
-      "bytes": 9568,
-      "sha256": "28a4e115526a9cee5770ddd129127de021068e5f091f7131d71be8d661a6ab56",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "po4": {
-      "file": "assets/audio/po4.mp3",
-      "sourceFile": "64k/syllabs/cmn-po4.mp3",
-      "sourceLabel": "po4",
-      "bytes": 9564,
-      "sha256": "eeacbc5e69409c4d665c034bed99694d32dd3f95bbbcdf792b406d23a0658843",
+    "pou1": {
+      "file": "assets/audio/pou1.mp3",
+      "sourceFile": "64k/syllabs/cmn-pou1.mp3",
+      "sourceLabel": "pou1",
+      "bytes": 9182,
+      "sha256": "e0189dfea38171b66e9aa55b909324993d562140d0bb986a1874bb1a6f577d13",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1666,30 +955,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "pu3": {
-      "file": "assets/audio/pu3.mp3",
-      "sourceFile": "64k/syllabs/cmn-pu3.mp3",
-      "sourceLabel": "pu3",
-      "bytes": 11676,
-      "sha256": "9130c6ba1e5649c9740585169898fe60ea29987f3c051b4fd64f86a0a9614bdf",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qi1": {
-      "file": "assets/audio/qi1.mp3",
-      "sourceFile": "64k/syllabs/cmn-qi1.mp3",
-      "sourceLabel": "qi1",
+    "qi4": {
+      "file": "assets/audio/qi4.mp3",
+      "sourceFile": "64k/syllabs/cmn-qi4.mp3",
+      "sourceLabel": "qi4",
       "bytes": 9948,
-      "sha256": "3b80a1a84a92f357b8e8856312c20164b7db5e24b9fe04fe2d14fb4cb5dc8017",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qia1": {
-      "file": "assets/audio/qia1.mp3",
-      "sourceFile": "64k/syllabs/cmn-qia1.mp3",
-      "sourceLabel": "qia1",
-      "bytes": 8414,
-      "sha256": "ca6cf396c51d10082953996298196ba3dff918d52c949e9ae3679ea969b0a421",
+      "sha256": "a82bd28b7ebcb8d2eaf5f39a75c94ba38e83e0f143922f4a5cddcea390db189b",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1702,93 +973,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "qian2": {
-      "file": "assets/audio/qian2.mp3",
-      "sourceFile": "64k/syllabs/cmn-qian2.mp3",
-      "sourceLabel": "qian2",
-      "bytes": 9952,
-      "sha256": "44cefaf8180ec3d93a5efe2ecc5292927cf24596f4cce0376fff3e2d3bc6fef0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qiang1": {
-      "file": "assets/audio/qiang1.mp3",
-      "sourceFile": "64k/syllabs/cmn-qiang1.mp3",
-      "sourceLabel": "qiang1",
-      "bytes": 10338,
-      "sha256": "303a457349992fc588b6dc9492503c31c7d8c46333ade30b11365ec73afc3c10",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qiao2": {
-      "file": "assets/audio/qiao2.mp3",
-      "sourceFile": "64k/syllabs/cmn-qiao2.mp3",
-      "sourceLabel": "qiao2",
-      "bytes": 9568,
-      "sha256": "a34458605e71fc702e7ff09cdbb87c315fdecbb0988d7c4030b984c37a803e91",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qiao3": {
-      "file": "assets/audio/qiao3.mp3",
-      "sourceFile": "64k/syllabs/cmn-qiao3.mp3",
-      "sourceLabel": "qiao3",
+    "qian3": {
+      "file": "assets/audio/qian3.mp3",
+      "sourceFile": "64k/syllabs/cmn-qian3.mp3",
+      "sourceLabel": "qian3",
       "bytes": 12448,
-      "sha256": "b9008b9ed539fb6aef53329db8d8921fceee758ce6b1e5973940e3ad66b0527d",
+      "sha256": "ba360abf5b886e92c2b2778583c7afa089b486124466120f7a0ac929708b8347",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "qin2": {
-      "file": "assets/audio/qin2.mp3",
-      "sourceFile": "64k/syllabs/cmn-qin2.mp3",
-      "sourceLabel": "qin2",
-      "bytes": 9566,
-      "sha256": "5f2d5a4f31ca058991660cedbb0183a0e5d093404a20ad064a7f0c3073d00bc0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qing1": {
-      "file": "assets/audio/qing1.mp3",
-      "sourceFile": "64k/syllabs/cmn-qing1.mp3",
-      "sourceLabel": "qing1",
-      "bytes": 10720,
-      "sha256": "7f7537fdf7d311ed7c9b896637019a258fce273ef389d240da578bc8c797fbc4",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qiu2": {
-      "file": "assets/audio/qiu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-qiu2.mp3",
-      "sourceLabel": "qiu2",
-      "bytes": 9566,
-      "sha256": "73b6668d58725860ff934904c53e64c31430b909071af4dc193188d8f48acd1e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qu1": {
-      "file": "assets/audio/qu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-qu1.mp3",
-      "sourceLabel": "qu1",
-      "bytes": 9564,
-      "sha256": "40c5b428ceaad84ef0cf29b1542598d31b1e74cd2935d2587fecf42eb3ef9e8a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "qu3": {
-      "file": "assets/audio/qu3.mp3",
-      "sourceFile": "64k/syllabs/cmn-qu3.mp3",
-      "sourceLabel": "qu3",
-      "bytes": 11292,
-      "sha256": "f586820f30e8d5642b0bc4c01a78a021d094b279f9db68b4aeb2a3c3ab510305",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "quan2": {
-      "file": "assets/audio/quan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-quan2.mp3",
-      "sourceLabel": "quan2",
+    "qiao4": {
+      "file": "assets/audio/qiao4.mp3",
+      "sourceFile": "64k/syllabs/cmn-qiao4.mp3",
+      "sourceLabel": "qiao4",
       "bytes": 9952,
-      "sha256": "3b821b33bcf4b99212ceaf28a0410e100465c5f75f7985213e4cf5e0ee828117",
+      "sha256": "a3e35116e031d6fa94396a97ca5bce8fb08e8114cb1000142eefd09e0b98f547",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "qing3": {
+      "file": "assets/audio/qing3.mp3",
+      "sourceFile": "64k/syllabs/cmn-qing3.mp3",
+      "sourceLabel": "qing3",
+      "bytes": 12832,
+      "sha256": "2f51a2108c023523b4e6b27783298e7d61eba80468736c9a2e1431cdeabef970",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "que4": {
+      "file": "assets/audio/que4.mp3",
+      "sourceFile": "64k/syllabs/cmn-que4.mp3",
+      "sourceLabel": "que4",
+      "bytes": 9182,
+      "sha256": "2d6faf024b2123bdb548277729eca21683843e63d861c1ce5fc75185677d3a41",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1810,51 +1027,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "rao4": {
-      "file": "assets/audio/rao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-rao4.mp3",
-      "sourceLabel": "rao4",
-      "bytes": 9950,
-      "sha256": "070f1ed0c6b660fbe92de07c5468edf34c045e7993733aff1d64cbb7bf9ae4f8",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "re3": {
-      "file": "assets/audio/re3.mp3",
-      "sourceFile": "64k/syllabs/cmn-re3.mp3",
-      "sourceLabel": "re3",
-      "bytes": 12828,
-      "sha256": "dbd9a2a75a487615b9c321fd602bc665be0459f42302b41cb6c41534e1d56246",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ren4": {
-      "file": "assets/audio/ren4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ren4.mp3",
-      "sourceLabel": "ren4",
-      "bytes": 9566,
-      "sha256": "accaac41ea989f6ffa079b6d3be2cc08c35ec8fb8f70e9a27c5d626fe2ffa249",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "reng1": {
-      "file": "assets/audio/reng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-reng1.mp3",
-      "sourceLabel": "reng1",
-      "bytes": 9952,
-      "sha256": "28299a256ba80572449539b70cecbad37f9ec6a1862ffc614cf2781e97641578",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "reng2": {
-      "file": "assets/audio/reng2.mp3",
-      "sourceFile": "64k/syllabs/cmn-reng2.mp3",
-      "sourceLabel": "reng2",
-      "bytes": 10336,
-      "sha256": "d241e8cc07461c3f72a5d893c84ed6a43bd1641c58ecd17edaf9c1e3a36d8a51",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "rong2": {
       "file": "assets/audio/rong2.mp3",
       "sourceFile": "64k/syllabs/cmn-rong2.mp3",
@@ -1864,48 +1036,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "rui3": {
-      "file": "assets/audio/rui3.mp3",
-      "sourceFile": "64k/syllabs/cmn-rui3.mp3",
-      "sourceLabel": "rui3",
-      "bytes": 9950,
-      "sha256": "13c66d83cdac988259a1ec21b4e4e2c600b26b32acfdd2e708a23fee98921725",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "rui4": {
-      "file": "assets/audio/rui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-rui4.mp3",
-      "sourceLabel": "rui4",
-      "bytes": 9182,
-      "sha256": "330b779b2bd7505a75ee7169141130f467fb40e9f62d6c3995de37a3f491d441",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "sai4": {
-      "file": "assets/audio/sai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-sai4.mp3",
-      "sourceLabel": "sai4",
-      "bytes": 9182,
-      "sha256": "873119948333171afbd47d656ee737a48ddb05a1af7b0868d8fd7ad97fe00f6b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "sao1": {
-      "file": "assets/audio/sao1.mp3",
-      "sourceFile": "64k/syllabs/cmn-sao1.mp3",
-      "sourceLabel": "sao1",
-      "bytes": 8798,
-      "sha256": "8b3bffcc5aae6df1766d00c66f14d38255c9094f1486f2e229eaa1870f1b2cb7",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "se4": {
-      "file": "assets/audio/se4.mp3",
-      "sourceFile": "64k/syllabs/cmn-se4.mp3",
-      "sourceLabel": "se4",
-      "bytes": 8796,
-      "sha256": "a1f093fe39117f3696cc8d6b25fe9f32ae483dc27d41c7888022f9beec7e8452",
+    "ru3": {
+      "file": "assets/audio/ru3.mp3",
+      "sourceFile": "64k/syllabs/cmn-ru3.mp3",
+      "sourceLabel": "ru3",
+      "bytes": 11676,
+      "sha256": "15ea68b9442f1bad30ce16fc75e5ed2459fe876db87c3d845c830d196e83172f",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1918,12 +1054,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "sha4": {
-      "file": "assets/audio/sha4.mp3",
-      "sourceFile": "64k/syllabs/cmn-sha4.mp3",
-      "sourceLabel": "sha4",
-      "bytes": 9182,
-      "sha256": "b2c5bdf57834eb0c6a07204fed30537509c62bcc94e555c89a990e9f1119779a",
+    "shan1": {
+      "file": "assets/audio/shan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-shan1.mp3",
+      "sourceLabel": "shan1",
+      "bytes": 10336,
+      "sha256": "e2b39c9bba85923a1a83cd98e0d72e45707013f80b8c84a5939a06fb584fba0d",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1936,21 +1072,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "shao4": {
-      "file": "assets/audio/shao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-shao4.mp3",
-      "sourceLabel": "shao4",
+    "shao1": {
+      "file": "assets/audio/shao1.mp3",
+      "sourceFile": "64k/syllabs/cmn-shao1.mp3",
+      "sourceLabel": "shao1",
       "bytes": 9568,
-      "sha256": "04c616909b56f27eaa99e7f910c94134f313dbf48bbe686692965c34356aee1e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "shen1": {
-      "file": "assets/audio/shen1.mp3",
-      "sourceFile": "64k/syllabs/cmn-shen1.mp3",
-      "sourceLabel": "shen1",
-      "bytes": 10336,
-      "sha256": "a463d896c0fa722f22d048cd035948903b1dbeaff69e487c7314d9812e8e16d4",
+      "sha256": "fa0acd01acb64c67e6f74ad969bf866c2dc8059308b23470b73af48b9dcf65f2",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1963,21 +1090,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "sheng2": {
-      "file": "assets/audio/sheng2.mp3",
-      "sourceFile": "64k/syllabs/cmn-sheng2.mp3",
-      "sourceLabel": "sheng2",
-      "bytes": 9186,
-      "sha256": "58b6307376e29d36ecc18b5fbfd5f0dcca51776fd2633ab4cac9efa076275f39",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "shi3": {
-      "file": "assets/audio/shi3.mp3",
-      "sourceFile": "64k/syllabs/cmn-shi3.mp3",
-      "sourceLabel": "shi3",
-      "bytes": 12062,
-      "sha256": "e871e5343f79a28cd12fd71427657e5c44af9cd989ce8e0a4ddec5676e09e32e",
+    "sheng4": {
+      "file": "assets/audio/sheng4.mp3",
+      "sourceFile": "64k/syllabs/cmn-sheng4.mp3",
+      "sourceLabel": "sheng4",
+      "bytes": 9570,
+      "sha256": "af9c2bd82718eabd267d1b603ef3f1e07f6e3b03e204eba8a8a15ebd27a92ca1",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -1990,30 +1108,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "shou4": {
-      "file": "assets/audio/shou4.mp3",
-      "sourceFile": "64k/syllabs/cmn-shou4.mp3",
-      "sourceLabel": "shou4",
-      "bytes": 9952,
-      "sha256": "0c021ce911a9d0e4ae807349ae9c8bad91401ba74926b894891d895d077fb8b4",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "shu1": {
       "file": "assets/audio/shu1.mp3",
       "sourceFile": "64k/syllabs/cmn-shu1.mp3",
       "sourceLabel": "shu1",
       "bytes": 9950,
       "sha256": "eb30c2b3893e5723a54e1e5688d891fe7b11fb34ec500d9c3f110de491c3da5d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "shu2": {
-      "file": "assets/audio/shu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-shu2.mp3",
-      "sourceLabel": "shu2",
-      "bytes": 9950,
-      "sha256": "4fdf2c916fe28e86c33229c67f94d04327a62915fb476329dc31e5b1772a9cdf",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2035,30 +1135,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "shuai1": {
-      "file": "assets/audio/shuai1.mp3",
-      "sourceFile": "64k/syllabs/cmn-shuai1.mp3",
-      "sourceLabel": "shuai1",
-      "bytes": 10722,
-      "sha256": "3c8885fd5becd7c3e810b909be9f9dd0aed1c780adb0b52a6d592f0c177e6a53",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "shuai4": {
-      "file": "assets/audio/shuai4.mp3",
-      "sourceFile": "64k/syllabs/cmn-shuai4.mp3",
-      "sourceLabel": "shuai4",
-      "bytes": 9186,
-      "sha256": "acf60cb38111f2c02a71067b06d6da2cf03a3604d408fa1a14fb58533787942d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "shun4": {
-      "file": "assets/audio/shun4.mp3",
-      "sourceFile": "64k/syllabs/cmn-shun4.mp3",
-      "sourceLabel": "shun4",
-      "bytes": 9568,
-      "sha256": "c37b9f9e00d4f0952b8895a5804e16a7e1bfa7a13bb12654633e0716f1b77190",
+    "shua3": {
+      "file": "assets/audio/shua3.mp3",
+      "sourceFile": "64k/syllabs/cmn-shua3.mp3",
+      "sourceLabel": "shua3",
+      "bytes": 13600,
+      "sha256": "51e29aaafee00decf5a40afaf4b6674ac5cf26f6d9fa579e76982c1d26801de8",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2068,15 +1150,6 @@
       "sourceLabel": "shuo4",
       "bytes": 10336,
       "sha256": "ed4e5f68440797ac68d60dc42f88038f98d40a777b324c2df3c31a118eef8685",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "si1": {
-      "file": "assets/audio/si1.mp3",
-      "sourceFile": "64k/syllabs/cmn-si1.mp3",
-      "sourceLabel": "si1",
-      "bytes": 10332,
-      "sha256": "55a9017b026d6bad7b29543a583f9a6994daf44589542d03e34ff6b627eb7caf",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2098,57 +1171,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "su2": {
-      "file": "assets/audio/su2.mp3",
-      "sourceFile": "64k/syllabs/cmn-su2.mp3",
-      "sourceLabel": "su2",
-      "bytes": 10332,
-      "sha256": "18894d10be00170398b31471acffd04b97c520c85a6603dc7811f25f083d2a2c",
+    "su1": {
+      "file": "assets/audio/su1.mp3",
+      "sourceFile": "64k/syllabs/cmn-su1.mp3",
+      "sourceLabel": "su1",
+      "bytes": 9948,
+      "sha256": "e3064abe231520c13ac289816641c6ce9caa31c148d79d34c9c390aed9c8b3cf",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "su4": {
-      "file": "assets/audio/su4.mp3",
-      "sourceFile": "64k/syllabs/cmn-su4.mp3",
-      "sourceLabel": "su4",
-      "bytes": 8412,
-      "sha256": "54b69a1c4a2ea584ae77f395a214b5acfb72ae6ccd3a6b9f951809fb3e6f2970",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "suan4": {
-      "file": "assets/audio/suan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-suan4.mp3",
-      "sourceLabel": "suan4",
-      "bytes": 10720,
-      "sha256": "78ec00eb531ff1559a7d31028786bb4edc3ee48f8df5a878b9d0704585fb14b0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "sui3": {
-      "file": "assets/audio/sui3.mp3",
-      "sourceFile": "64k/syllabs/cmn-sui3.mp3",
-      "sourceLabel": "sui3",
-      "bytes": 9950,
-      "sha256": "10ea7757de7225efdbce9e3dd386f363d08b0c72c90c19cb5f2c1598ae389f4c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "sui4": {
-      "file": "assets/audio/sui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-sui4.mp3",
-      "sourceLabel": "sui4",
+    "suo1": {
+      "file": "assets/audio/suo1.mp3",
+      "sourceFile": "64k/syllabs/cmn-suo1.mp3",
+      "sourceLabel": "suo1",
       "bytes": 10334,
-      "sha256": "38861d2ce17d2aadf4fd435f855a287d56d15ddd6d3c88f52c15d628940a5da8",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "suo3": {
-      "file": "assets/audio/suo3.mp3",
-      "sourceFile": "64k/syllabs/cmn-suo3.mp3",
-      "sourceLabel": "suo3",
-      "bytes": 12062,
-      "sha256": "779f9a94ebd8fa6011512a663399ff635951020aefc1c12320430baa6ba83075",
+      "sha256": "0c28144d71463ec2d2f7eee6356142af0dd92a0705721e53ecfd24453d62e51c",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2161,21 +1198,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "tai2": {
-      "file": "assets/audio/tai2.mp3",
-      "sourceFile": "64k/syllabs/cmn-tai2.mp3",
-      "sourceLabel": "tai2",
-      "bytes": 9566,
-      "sha256": "4ae3642a549a82caa35da20c5f86bc1d5e5fcc3d366add32bb0a277a37e58251",
+    "tan1": {
+      "file": "assets/audio/tan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-tan1.mp3",
+      "sourceLabel": "tan1",
+      "bytes": 9950,
+      "sha256": "7b4a6179d9f135027ed7fa08726737326f3e42038a47316e61fc157c1aa22435",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "tan4": {
-      "file": "assets/audio/tan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-tan4.mp3",
-      "sourceLabel": "tan4",
-      "bytes": 9182,
-      "sha256": "6eeff9e8a11f342a9942bf536b31465d5bdb04243c8da52b20a937d81746e01a",
+    "tan2": {
+      "file": "assets/audio/tan2.mp3",
+      "sourceFile": "64k/syllabs/cmn-tan2.mp3",
+      "sourceLabel": "tan2",
+      "bytes": 9950,
+      "sha256": "03b0ce3824399ef1b323258599ec7f17d9585084f9495caea3fbf486d77f1cc3",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "tan3": {
+      "file": "assets/audio/tan3.mp3",
+      "sourceFile": "64k/syllabs/cmn-tan3.mp3",
+      "sourceLabel": "tan3",
+      "bytes": 12446,
+      "sha256": "a727006c461509ef181c6046b760be011d2a5ccf48e1a881092fab8b1c94b32a",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2188,6 +1234,15 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
+    "tang4": {
+      "file": "assets/audio/tang4.mp3",
+      "sourceFile": "64k/syllabs/cmn-tang4.mp3",
+      "sourceLabel": "tang4",
+      "bytes": 8416,
+      "sha256": "fd16274f39b81fa702cb5bea47f038848d0a5cc8d25d0b775450381c8d680622",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
     "tao2": {
       "file": "assets/audio/tao2.mp3",
       "sourceFile": "64k/syllabs/cmn-tao2.mp3",
@@ -2197,84 +1252,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "tao4": {
-      "file": "assets/audio/tao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-tao4.mp3",
-      "sourceLabel": "tao4",
-      "bytes": 9182,
-      "sha256": "a058ce8a416f07f2c2cc8f69eca2be8fd0d131b3df51a143b10b54175c6fcc35",
+    "tu1": {
+      "file": "assets/audio/tu1.mp3",
+      "sourceFile": "64k/syllabs/cmn-tu1.mp3",
+      "sourceLabel": "tu1",
+      "bytes": 9564,
+      "sha256": "2bba8448ca8f2ff73b430a09d1a83e2ef69ac790f4d3cc2c237adf497340ebb3",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ti2": {
-      "file": "assets/audio/ti2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ti2.mp3",
-      "sourceLabel": "ti2",
-      "bytes": 9948,
-      "sha256": "57e4957e4da316f460fc08e3c7d4b2d51c2dee6676c2ecc39135824ef4594a2e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "tian2": {
-      "file": "assets/audio/tian2.mp3",
-      "sourceFile": "64k/syllabs/cmn-tian2.mp3",
-      "sourceLabel": "tian2",
-      "bytes": 8416,
-      "sha256": "ec5a7c95487f089a2c6db4436e3ad25ca7c797fb33451a55608129c5fe0998d0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ting1": {
-      "file": "assets/audio/ting1.mp3",
-      "sourceFile": "64k/syllabs/cmn-ting1.mp3",
-      "sourceLabel": "ting1",
-      "bytes": 9952,
-      "sha256": "62fbeae2257d445ff8b19bf434f0cacb747600f7b7a43a094b24e9b0cd6f5b82",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "tu2": {
-      "file": "assets/audio/tu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-tu2.mp3",
-      "sourceLabel": "tu2",
-      "bytes": 8796,
-      "sha256": "6e5e2935d9e03c5f900acf8b689fa3fb9ad12246d61f9036b3cdc0b6ae2d0df7",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "tuo1": {
-      "file": "assets/audio/tuo1.mp3",
-      "sourceFile": "64k/syllabs/cmn-tuo1.mp3",
-      "sourceLabel": "tuo1",
+    "tun1": {
+      "file": "assets/audio/tun1.mp3",
+      "sourceFile": "64k/syllabs/cmn-tun1.mp3",
+      "sourceLabel": "tun1",
       "bytes": 9950,
-      "sha256": "8377e9af48f7a5a9f27ca1cb799eac916a327f1f207ca16c896c3f6d956d808c",
+      "sha256": "0c82fe51942980c87d2692978ccca917ed8319a0b6a2f780e557722eb82383e9",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "wa1": {
-      "file": "assets/audio/wa1.mp3",
-      "sourceFile": "64k/syllabs/cmn-wa1.mp3",
-      "sourceLabel": "wa1",
-      "bytes": 9948,
-      "sha256": "5363fd41ef79967a3e80e9549c4fa1e7fd33987ca5ae3b292b8c984bec585bb1",
+    "tuo2": {
+      "file": "assets/audio/tuo2.mp3",
+      "sourceFile": "64k/syllabs/cmn-tuo2.mp3",
+      "sourceLabel": "tuo2",
+      "bytes": 9566,
+      "sha256": "44c2cf94b90663820ba99f4eef9e7996098a0cc97761fb1364d426026776e71e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "wan1": {
-      "file": "assets/audio/wan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-wan1.mp3",
-      "sourceLabel": "wan1",
-      "bytes": 8414,
-      "sha256": "842b5962727cd32b4fee26042b19c28fbff4c06aafe84bdde25247af0497c33e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "wan2": {
-      "file": "assets/audio/wan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-wan2.mp3",
-      "sourceLabel": "wan2",
-      "bytes": 10334,
-      "sha256": "f78db4f12d68c301022c059ca5f94691d6653e7dad5d8cdd59cd9798ba2cb0fc",
+    "wang3": {
+      "file": "assets/audio/wang3.mp3",
+      "sourceFile": "64k/syllabs/cmn-wang3.mp3",
+      "sourceLabel": "wang3",
+      "bytes": 11296,
+      "sha256": "ff68c336ceafd3ab0d7ebcc9d65c3479b96ac474d2e5a34173dffc63fdf21604",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2287,30 +1297,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "wei2": {
-      "file": "assets/audio/wei2.mp3",
-      "sourceFile": "64k/syllabs/cmn-wei2.mp3",
-      "sourceLabel": "wei2",
-      "bytes": 10334,
-      "sha256": "710e6cf176e0534a778625e6c8937dece8bf9ef57d52e1bb0f5f165124c47080",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "wei3": {
       "file": "assets/audio/wei3.mp3",
       "sourceFile": "64k/syllabs/cmn-wei3.mp3",
       "sourceLabel": "wei3",
       "bytes": 11678,
       "sha256": "2552f0e151a7f1d5933912fa18f5a5bdf9bdc32943537d58fe4b7a2c3fae0b4a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "wei4": {
-      "file": "assets/audio/wei4.mp3",
-      "sourceFile": "64k/syllabs/cmn-wei4.mp3",
-      "sourceLabel": "wei4",
-      "bytes": 8798,
-      "sha256": "77da5673dda644b8b22525d0f08cd7bae6c6c5714d871582cc86581d58d00ff7",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2323,30 +1315,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "wo1": {
-      "file": "assets/audio/wo1.mp3",
-      "sourceFile": "64k/syllabs/cmn-wo1.mp3",
-      "sourceLabel": "wo1",
-      "bytes": 9564,
-      "sha256": "a55ab671d5e68313ee4b78ef19d53c799219d2090eef64c42e5a945731400a3b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "wo4": {
-      "file": "assets/audio/wo4.mp3",
-      "sourceFile": "64k/syllabs/cmn-wo4.mp3",
-      "sourceLabel": "wo4",
-      "bytes": 8796,
-      "sha256": "c7ee5d40e3abee1521c0fbe70ee17a7add6b57f611aa2fe5c46172a62fb79a17",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "wu1": {
-      "file": "assets/audio/wu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-wu1.mp3",
-      "sourceLabel": "wu1",
-      "bytes": 9180,
-      "sha256": "efcc05666b8af5ae4c6171b8b60198db40caea22e268be4c5205a8c256f15772",
+    "wu3": {
+      "file": "assets/audio/wu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-wu3.mp3",
+      "sourceLabel": "wu3",
+      "bytes": 12444,
+      "sha256": "55ffb2c309ddc7de39165cc105d32719f143a62ebf43135b3674983d0bc15296",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2359,30 +1333,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xi2": {
-      "file": "assets/audio/xi2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xi2.mp3",
-      "sourceLabel": "xi2",
-      "bytes": 10332,
-      "sha256": "3bd26249fec297d86bc39ab0c2b2cdcf2a1fac53c3a350dc62791e133400af81",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xi4": {
-      "file": "assets/audio/xi4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xi4.mp3",
-      "sourceLabel": "xi4",
-      "bytes": 9564,
-      "sha256": "84516427199f0bf3b0b1865997352535a2866d8249a393f76661b43782446f89",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xian2": {
-      "file": "assets/audio/xian2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xian2.mp3",
-      "sourceLabel": "xian2",
-      "bytes": 10720,
-      "sha256": "099e7021d233e926ef6c555300c13d8eeda310de7004ab67c218e33ed142f457",
+    "xia2": {
+      "file": "assets/audio/xia2.mp3",
+      "sourceFile": "64k/syllabs/cmn-xia2.mp3",
+      "sourceLabel": "xia2",
+      "bytes": 9566,
+      "sha256": "7eca6a4ef48b89851f1da698292928f7bf7bbfc583301f3de077499b8e8a0d6e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2395,15 +1351,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xiang2": {
-      "file": "assets/audio/xiang2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xiang2.mp3",
-      "sourceLabel": "xiang2",
-      "bytes": 10338,
-      "sha256": "33e4d75682c3fb45345ecb86bfbbcbb6ebb12857e1171978c1e31887917b3edc",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "xiang4": {
       "file": "assets/audio/xiang4.mp3",
       "sourceFile": "64k/syllabs/cmn-xiang4.mp3",
@@ -2413,12 +1360,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xiao4": {
-      "file": "assets/audio/xiao4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xiao4.mp3",
-      "sourceLabel": "xiao4",
-      "bytes": 9568,
-      "sha256": "3fdc0fe00a9a4bfd3d06ef7ae13889eec08095b576afc3a0b7acabe2ebcfb763",
+    "xiao1": {
+      "file": "assets/audio/xiao1.mp3",
+      "sourceFile": "64k/syllabs/cmn-xiao1.mp3",
+      "sourceLabel": "xiao1",
+      "bytes": 10720,
+      "sha256": "9647a6aea89e485b18a84102d405faf5fe387b7edb9755ce18e355c72d79f380",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "xie4": {
+      "file": "assets/audio/xie4.mp3",
+      "sourceFile": "64k/syllabs/cmn-xie4.mp3",
+      "sourceLabel": "xie4",
+      "bytes": 9950,
+      "sha256": "b97ef5cc2bd56dc337bae4367298fbd1139d2588695db57ae2375a0d8f745a78",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "xing1": {
+      "file": "assets/audio/xing1.mp3",
+      "sourceFile": "64k/syllabs/cmn-xing1.mp3",
+      "sourceLabel": "xing1",
+      "bytes": 11296,
+      "sha256": "3a4abf21dfe5885ba1e5c78174e0ce445756f7c003125d5fcc16b79a735bb138",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2431,24 +1396,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xiong2": {
-      "file": "assets/audio/xiong2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xiong2.mp3",
-      "sourceLabel": "xiong2",
-      "bytes": 9954,
-      "sha256": "299f9438b5bb82075d8b72d3d623ad1250dd1d81ec26f07437afdec72f576f7e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xiu4": {
-      "file": "assets/audio/xiu4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xiu4.mp3",
-      "sourceLabel": "xiu4",
-      "bytes": 9566,
-      "sha256": "68523410c6301a0e0117d7ff6519ce76ade9428c79af72e7889c2b4925d947c3",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "xu1": {
       "file": "assets/audio/xu1.mp3",
       "sourceFile": "64k/syllabs/cmn-xu1.mp3",
@@ -2458,120 +1405,48 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xu4": {
-      "file": "assets/audio/xu4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xu4.mp3",
-      "sourceLabel": "xu4",
+    "xu2": {
+      "file": "assets/audio/xu2.mp3",
+      "sourceFile": "64k/syllabs/cmn-xu2.mp3",
+      "sourceLabel": "xu2",
       "bytes": 9948,
-      "sha256": "f65b1cb9bd4133ef4c437b2edd45ea191aed70195128db473197813353a0255f",
+      "sha256": "92bc1bc5682b9ca200801530e5f9404c47bc814d5e6075b1b2805bde1a5ad521",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xuan1": {
-      "file": "assets/audio/xuan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-xuan1.mp3",
-      "sourceLabel": "xuan1",
-      "bytes": 10720,
-      "sha256": "0ae3732b3af3974cee1419a31d8041931921ad81fa2538b080438f818d9d6571",
+    "xun2": {
+      "file": "assets/audio/xun2.mp3",
+      "sourceFile": "64k/syllabs/cmn-xun2.mp3",
+      "sourceLabel": "xun2",
+      "bytes": 9950,
+      "sha256": "829f467c253303e97babc3e1b17fdfd2eddb036344463393a8b13f3df51d5f9d",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "xuan2": {
-      "file": "assets/audio/xuan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xuan2.mp3",
-      "sourceLabel": "xuan2",
-      "bytes": 10720,
-      "sha256": "64ca6eb5f91acebe5bd333c258cdca6b479cd343737f00b677b60b32ec0353f0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xuan3": {
-      "file": "assets/audio/xuan3.mp3",
-      "sourceFile": "64k/syllabs/cmn-xuan3.mp3",
-      "sourceLabel": "xuan3",
-      "bytes": 14368,
-      "sha256": "0474142198487a2dfd10e086e99d100f664888ffb8262455173abbae5c760fef",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xue2": {
-      "file": "assets/audio/xue2.mp3",
-      "sourceFile": "64k/syllabs/cmn-xue2.mp3",
-      "sourceLabel": "xue2",
-      "bytes": 9182,
-      "sha256": "6cf1cbcbf4563b31301731970cc5a4987ef1e952174d8749e6ac1a8c2fd7658d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xue4": {
-      "file": "assets/audio/xue4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xue4.mp3",
-      "sourceLabel": "xue4",
-      "bytes": 9566,
-      "sha256": "12518d68359d0a9497d226501aabde9ee133fcfc2eb0c7958e52940ca9d014d4",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "xun4": {
-      "file": "assets/audio/xun4.mp3",
-      "sourceFile": "64k/syllabs/cmn-xun4.mp3",
-      "sourceLabel": "xun4",
-      "bytes": 10718,
-      "sha256": "20b03c31df200b563745141d2b72ee24dd527a8c93a83aeb09490ac67f85ad2a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ya1": {
-      "file": "assets/audio/ya1.mp3",
-      "sourceFile": "64k/syllabs/cmn-ya1.mp3",
-      "sourceLabel": "ya1",
+    "ya2": {
+      "file": "assets/audio/ya2.mp3",
+      "sourceFile": "64k/syllabs/cmn-ya2.mp3",
+      "sourceLabel": "ya2",
       "bytes": 9948,
-      "sha256": "952e1fcb3a5e802c0597ff93b068590893bd55bcc5cb78e419918233c18d88b6",
+      "sha256": "e498bbcd2d818c287427318177afb252b128630f3d108db31c94793f0d002f93",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ya3": {
-      "file": "assets/audio/ya3.mp3",
-      "sourceFile": "64k/syllabs/cmn-ya3.mp3",
-      "sourceLabel": "ya3",
-      "bytes": 13212,
-      "sha256": "2fe496480e59eb0cd010fe32a7364d58b8d0b89854b4650944afc4f41f23ffdc",
+    "ya4": {
+      "file": "assets/audio/ya4.mp3",
+      "sourceFile": "64k/syllabs/cmn-ya4.mp3",
+      "sourceLabel": "ya4",
+      "bytes": 9180,
+      "sha256": "80a41296f198745321444a2f6a74751cbf606b9c7f3d7d70dba65b6942246962",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "yan1": {
-      "file": "assets/audio/yan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-yan1.mp3",
-      "sourceLabel": "yan1",
+    "yan4": {
+      "file": "assets/audio/yan4.mp3",
+      "sourceFile": "64k/syllabs/cmn-yan4.mp3",
+      "sourceLabel": "yan4",
       "bytes": 9566,
-      "sha256": "738d0f2f410155f4c07d4db0e69dc92e0ce0f818afbd5678ec2bcc49983122a8",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yan2": {
-      "file": "assets/audio/yan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-yan2.mp3",
-      "sourceLabel": "yan2",
-      "bytes": 9182,
-      "sha256": "7e496b7cb91832463465aa67088e728b8d5a667fd3279db7e53e2042c09d1200",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yan3": {
-      "file": "assets/audio/yan3.mp3",
-      "sourceFile": "64k/syllabs/cmn-yan3.mp3",
-      "sourceLabel": "yan3",
-      "bytes": 10334,
-      "sha256": "1da8ffcfb87dca8bb9b669009465848f5f691b54e66520e8c80761282dccef3a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yang3": {
-      "file": "assets/audio/yang3.mp3",
-      "sourceFile": "64k/syllabs/cmn-yang3.mp3",
-      "sourceLabel": "yang3",
-      "bytes": 12448,
-      "sha256": "f5bf99990e69bdb33027ee2a345ff7eaacb26cdae874264ea8d91398e0b30e62",
+      "sha256": "9a99a9a52242506279cc64ae649196a38861f35f19298283ab4a370fc82dad40",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2584,39 +1459,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ye4": {
-      "file": "assets/audio/ye4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ye4.mp3",
-      "sourceLabel": "ye4",
-      "bytes": 8796,
-      "sha256": "32a3ccb734db1cf52b7ebe62ec95acf7b642f267cfa536ee221af5886ac5ed8e",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yi3": {
-      "file": "assets/audio/yi3.mp3",
-      "sourceFile": "64k/syllabs/cmn-yi3.mp3",
-      "sourceLabel": "yi3",
-      "bytes": 11292,
-      "sha256": "411ded4463c24428156b2b914787062af4b4b726f9c0f7f727a5e21d1b5b9c06",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "yi4": {
       "file": "assets/audio/yi4.mp3",
       "sourceFile": "64k/syllabs/cmn-yi4.mp3",
       "sourceLabel": "yi4",
       "bytes": 8796,
       "sha256": "8c4518c8689657e024a3984ac9c871a91c08e737569774d44bf0e5dcee69f368",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yin1": {
-      "file": "assets/audio/yin1.mp3",
-      "sourceFile": "64k/syllabs/cmn-yin1.mp3",
-      "sourceLabel": "yin1",
-      "bytes": 9182,
-      "sha256": "463215358d04f52a2b51b7b85d71433460e749a045c951453d13175d66a5e32d",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2629,30 +1477,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "yin3": {
-      "file": "assets/audio/yin3.mp3",
-      "sourceFile": "64k/syllabs/cmn-yin3.mp3",
-      "sourceLabel": "yin3",
-      "bytes": 11678,
-      "sha256": "652bcde11308ee0c6838437bcf665eee22102f5c5e6245f2a7394c179d79de06",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ying2": {
-      "file": "assets/audio/ying2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ying2.mp3",
-      "sourceLabel": "ying2",
-      "bytes": 10336,
-      "sha256": "21e3f489e98e4f450a9a97efd2e8fe433afbe1b5ff43e4122f731ee7b7b58bef",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "ying4": {
-      "file": "assets/audio/ying4.mp3",
-      "sourceFile": "64k/syllabs/cmn-ying4.mp3",
-      "sourceLabel": "ying4",
-      "bytes": 8800,
-      "sha256": "7bd13cd6d3ac85cc6ae81450ce4182d8ae2ecc72675a1e1d11f508d1bb20855f",
+    "you1": {
+      "file": "assets/audio/you1.mp3",
+      "sourceFile": "64k/syllabs/cmn-you1.mp3",
+      "sourceLabel": "you1",
+      "bytes": 9566,
+      "sha256": "477257dd430b382531955b9eeef26d7647ea6d878fa0afdae728a3cb3cf9166e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2665,57 +1495,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "you4": {
-      "file": "assets/audio/you4.mp3",
-      "sourceFile": "64k/syllabs/cmn-you4.mp3",
-      "sourceLabel": "you4",
-      "bytes": 9182,
-      "sha256": "1455ff359a3a3e62892dcb0d52b10092fc1393b09ba7195c1c6b9a30e181805a",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yu1": {
-      "file": "assets/audio/yu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-yu1.mp3",
-      "sourceLabel": "yu1",
-      "bytes": 8412,
-      "sha256": "885e611ae4d31125a10b81c7b9bb8127ffd9beca22b908b12a9a2a5a49e7a1d0",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yu2": {
-      "file": "assets/audio/yu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-yu2.mp3",
-      "sourceLabel": "yu2",
-      "bytes": 8412,
-      "sha256": "9bafcc3cff6e321cc58aa07565a1d910c97f118a61f72a02b23c7e1c3029d03b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yu4": {
-      "file": "assets/audio/yu4.mp3",
-      "sourceFile": "64k/syllabs/cmn-yu4.mp3",
-      "sourceLabel": "yu4",
-      "bytes": 9180,
-      "sha256": "f4fda55991e07e422ba390a77f73e190893f06747a6311dbc71071d345e4b9e1",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yuan2": {
-      "file": "assets/audio/yuan2.mp3",
-      "sourceFile": "64k/syllabs/cmn-yuan2.mp3",
-      "sourceLabel": "yuan2",
-      "bytes": 10336,
-      "sha256": "3e34792d86aae32df6c8b8ca3e0af1e1513af56caaf512bd3ad0238f86a98aca",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "yue1": {
-      "file": "assets/audio/yue1.mp3",
-      "sourceFile": "64k/syllabs/cmn-yue1.mp3",
-      "sourceLabel": "yue1",
-      "bytes": 8414,
-      "sha256": "3c286e8f3501f2470f1e5a34b45aef01274292ead2777d985982c8aaf3499010",
+    "yu3": {
+      "file": "assets/audio/yu3.mp3",
+      "sourceFile": "64k/syllabs/cmn-yu3.mp3",
+      "sourceLabel": "yu3",
+      "bytes": 10332,
+      "sha256": "8d00c3b3aac9aa8feae034acd66fec25c57103eadf8ab8a93cea412ec6320fec",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2728,42 +1513,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "za2": {
-      "file": "assets/audio/za2.mp3",
-      "sourceFile": "64k/syllabs/cmn-za2.mp3",
-      "sourceLabel": "za2",
-      "bytes": 9180,
-      "sha256": "67626419973f90107aa5eec110db8160b18636a93e0a2e7dab72b295376fa165",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zan4": {
-      "file": "assets/audio/zan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zan4.mp3",
-      "sourceLabel": "zan4",
-      "bytes": 8798,
-      "sha256": "87e69db04750235bbab9819a90c3c022dfeee0c54115c67828522c0ea5beb254",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zang4": {
-      "file": "assets/audio/zang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zang4.mp3",
-      "sourceLabel": "zang4",
-      "bytes": 8800,
-      "sha256": "00c608a485dc7208839a8b1231a632c80940f4889bf5e930074b4ff0c5aa1924",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zao1": {
-      "file": "assets/audio/zao1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zao1.mp3",
-      "sourceLabel": "zao1",
-      "bytes": 9182,
-      "sha256": "c011356cd7d4af20fbd6f0cbf0a2d58786ac21b8914945953623b9f6952c74c2",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "zao2": {
       "file": "assets/audio/zao2.mp3",
       "sourceFile": "64k/syllabs/cmn-zao2.mp3",
@@ -2773,12 +1522,21 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "ze2": {
-      "file": "assets/audio/ze2.mp3",
-      "sourceFile": "64k/syllabs/cmn-ze2.mp3",
-      "sourceLabel": "ze2",
-      "bytes": 9564,
-      "sha256": "d40631d7ac90c3be21e50575a05ef03c00547a98207d24640bd04acdfd2c9814",
+    "zao4": {
+      "file": "assets/audio/zao4.mp3",
+      "sourceFile": "64k/syllabs/cmn-zao4.mp3",
+      "sourceLabel": "zao4",
+      "bytes": 9182,
+      "sha256": "fb0f2d21fe37ae275f9e1057b1803bc73f7c0fef76e0a7cbdca78d0cadf8495c",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "zei2": {
+      "file": "assets/audio/zei2.mp3",
+      "sourceFile": "64k/syllabs/cmn-zei2.mp3",
+      "sourceLabel": "zei2",
+      "bytes": 9950,
+      "sha256": "2af2fc6cf2dadebf751fe38ee9dc9dfa113193f513f7ef2c02563e856b002b0a",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2791,84 +1549,39 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhai2": {
-      "file": "assets/audio/zhai2.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhai2.mp3",
-      "sourceLabel": "zhai2",
-      "bytes": 9568,
-      "sha256": "f375432398dd54809634744fb48d95e9b2dedac3c838f2f2485bfd8d16b49aa1",
+    "zhan1": {
+      "file": "assets/audio/zhan1.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhan1.mp3",
+      "sourceLabel": "zhan1",
+      "bytes": 9184,
+      "sha256": "f4f368fc532642d3db9c7008be535460a7f733303f9180378f4fa35078293df8",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhan4": {
-      "file": "assets/audio/zhan4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhan4.mp3",
-      "sourceLabel": "zhan4",
-      "bytes": 9952,
-      "sha256": "308b386e08ec996f0b90ed08678b83cc5fa258897f4d5072f63e2000a7b4a980",
+    "zhan3": {
+      "file": "assets/audio/zhan3.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhan3.mp3",
+      "sourceLabel": "zhan3",
+      "bytes": 12448,
+      "sha256": "4b4ed19bbd5603a0597d562fffb620e3882e997248b34e35e33776d8c45959c3",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhang1": {
-      "file": "assets/audio/zhang1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhang1.mp3",
-      "sourceLabel": "zhang1",
-      "bytes": 9186,
-      "sha256": "7351ff78b518e43b1160227a9d8de36d23e7e9cc5c82a8aedec1b4a052d9c03b",
+    "zhao3": {
+      "file": "assets/audio/zhao3.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhao3.mp3",
+      "sourceLabel": "zhao3",
+      "bytes": 12448,
+      "sha256": "01f0a2f8b0673df4aff84d37d518715a1a42461df7795dd1f3f892a78bec683e",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhang4": {
-      "file": "assets/audio/zhang4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhang4.mp3",
-      "sourceLabel": "zhang4",
-      "bytes": 9186,
-      "sha256": "bf275272e61b49ab94c39aa4e88e91b3ca15626e2be820a303003b664d24127f",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zhe2": {
-      "file": "assets/audio/zhe2.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhe2.mp3",
-      "sourceLabel": "zhe2",
-      "bytes": 8798,
-      "sha256": "c9af553e3fe9ce5308d4e761b9277d53e747f503e40690e01874268655ae9cd9",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zhen4": {
-      "file": "assets/audio/zhen4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhen4.mp3",
-      "sourceLabel": "zhen4",
-      "bytes": 8416,
-      "sha256": "05f16521c6416b2de1262ab2cd19a043b51394596b20991e772eb425ada43e3c",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zheng1": {
-      "file": "assets/audio/zheng1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zheng1.mp3",
-      "sourceLabel": "zheng1",
-      "bytes": 8418,
-      "sha256": "f85f66dc46a01d58f9ff84f262741d1693abb8a48aaa9b8a8c697ce344e12076",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zheng3": {
-      "file": "assets/audio/zheng3.mp3",
-      "sourceFile": "64k/syllabs/cmn-zheng3.mp3",
-      "sourceLabel": "zheng3",
-      "bytes": 12450,
-      "sha256": "a30ad1846448552d7d05854418abc3a36c4821c846b9df039b333e3f6fdc9dc8",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zheng4": {
-      "file": "assets/audio/zheng4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zheng4.mp3",
-      "sourceLabel": "zheng4",
-      "bytes": 9186,
-      "sha256": "22d399e7da9c92b4f82082b5f18f7a30639dd27f4b825f88c5b6c93922a75bd6",
+    "zhen3": {
+      "file": "assets/audio/zhen3.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhen3.mp3",
+      "sourceLabel": "zhen3",
+      "bytes": 12064,
+      "sha256": "158f51166f8bd4b375524b29175fa53f998f66bf29a348f42d7bc0ba5735d5f2",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2890,12 +1603,30 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhi4": {
-      "file": "assets/audio/zhi4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhi4.mp3",
-      "sourceLabel": "zhi4",
-      "bytes": 8414,
-      "sha256": "3a347d288f7082a5564d4f405104fe9fc92b4d5dbf2505f3d383ab9c4c4e80ff",
+    "zhong1": {
+      "file": "assets/audio/zhong1.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhong1.mp3",
+      "sourceLabel": "zhong1",
+      "bytes": 9570,
+      "sha256": "67a855a9d381d38af81a31e041b1472abf1641c07da869a8c05c883f4b5319f8",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "zhong3": {
+      "file": "assets/audio/zhong3.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhong3.mp3",
+      "sourceLabel": "zhong3",
+      "bytes": 11682,
+      "sha256": "1c83cac923101822ccbd545a6652b7aa371c8b2890957f8881558e8d272636e7",
+      "metadataVerified": true,
+      "auditoryReviewed": false
+    },
+    "zhou1": {
+      "file": "assets/audio/zhou1.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhou1.mp3",
+      "sourceLabel": "zhou1",
+      "bytes": 8416,
+      "sha256": "45d91b911abec7f4cd35e7c1bc7555b30671f42efa8330c28847001c0ec93636",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2917,15 +1648,6 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhu2": {
-      "file": "assets/audio/zhu2.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhu2.mp3",
-      "sourceLabel": "zhu2",
-      "bytes": 8798,
-      "sha256": "1ae2395c48b0422dfa53aa2d49daf59305a7e3ffe48ded54d7d6abe011f1883b",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "zhu4": {
       "file": "assets/audio/zhu4.mp3",
       "sourceFile": "64k/syllabs/cmn-zhu4.mp3",
@@ -2935,39 +1657,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zhuan1": {
-      "file": "assets/audio/zhuan1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhuan1.mp3",
-      "sourceLabel": "zhuan1",
+    "zhuan4": {
+      "file": "assets/audio/zhuan4.mp3",
+      "sourceFile": "64k/syllabs/cmn-zhuan4.mp3",
+      "sourceLabel": "zhuan4",
       "bytes": 9570,
-      "sha256": "f18c081af59bafb10c9a9f2477df6a8fd399f2fdd49fbbff53e2ab5253b84bf1",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zhuang1": {
-      "file": "assets/audio/zhuang1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhuang1.mp3",
-      "sourceLabel": "zhuang1",
-      "bytes": 10340,
-      "sha256": "c127f7a63be904d3d1e2c9e3e9755be23f478095d88106ad4725fa4a319b802d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zhui4": {
-      "file": "assets/audio/zhui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhui4.mp3",
-      "sourceLabel": "zhui4",
-      "bytes": 8800,
-      "sha256": "e7a6415843d04212c32303ddcd1ab71f1c2703736d36f0a49875861afa685052",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zhuo1": {
-      "file": "assets/audio/zhuo1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zhuo1.mp3",
-      "sourceLabel": "zhuo1",
-      "bytes": 8800,
-      "sha256": "177420dbcbe2d9382290c3f4d865d7b95ffdc90206485b6320b03b0e3f5c30a7",
+      "sha256": "7af8c3ab7be54a502cb390f29e0b5db1184adcb518a5c153dbbf9bf5130e37ff",
       "metadataVerified": true,
       "auditoryReviewed": false
     },
@@ -2989,39 +1684,12 @@
       "metadataVerified": true,
       "auditoryReviewed": false
     },
-    "zong1": {
-      "file": "assets/audio/zong1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zong1.mp3",
-      "sourceLabel": "zong1",
-      "bytes": 9952,
-      "sha256": "650170f4348722edcc93b25004eac749d7fb0a735e9db1c4c794a9fab283b73d",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
     "zou4": {
       "file": "assets/audio/zou4.mp3",
       "sourceFile": "64k/syllabs/cmn-zou4.mp3",
       "sourceLabel": "zou4",
       "bytes": 9182,
       "sha256": "b5098b839631bacdce3105525b3ac9d7d48016d556521141f09549cbe3cff6a3",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zu1": {
-      "file": "assets/audio/zu1.mp3",
-      "sourceFile": "64k/syllabs/cmn-zu1.mp3",
-      "sourceLabel": "zu1",
-      "bytes": 9948,
-      "sha256": "d5efea8bd88d8a2a7dcac329d94d6204a2e2128312aee3b923a40bee41da7aaf",
-      "metadataVerified": true,
-      "auditoryReviewed": false
-    },
-    "zui4": {
-      "file": "assets/audio/zui4.mp3",
-      "sourceFile": "64k/syllabs/cmn-zui4.mp3",
-      "sourceLabel": "zui4",
-      "bytes": 9182,
-      "sha256": "95b74686bca1390b8fd7a8933631f94c726e2abd20cd3434d3d6151a93ec08cc",
       "metadataVerified": true,
       "auditoryReviewed": false
     }

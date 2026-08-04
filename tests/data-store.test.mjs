@@ -36,7 +36,7 @@ function fixtureLibrary() {
     curriculum: {
       schemaVersion: 1,
       book: {
-        publisher: '人民教育出版社',
+        publisher: '独立编排',
         approvalYear: 2019,
         grade: 4,
         volume: '上册'
@@ -65,7 +65,7 @@ function fixtureLibrary() {
               kind: 'lesson',
               id: 'lesson-3',
               number: 3,
-              title: '现代诗二首',
+              title: '第3组',
               recognize: [{ character: '巢', pinyin: 'cháo', audio: 'chao2', words: ['鸟巢'] }],
               write: []
             }
@@ -522,25 +522,23 @@ test('copies only known notice fields without allowing prototype-shaped keys to 
   assert.equal({}.polluted, undefined);
 });
 
-test('loads the real bundle with 8 units, 31 ordered sections, gardens, and shared geometry', async () => {
+test('loads the real bundle with one stage, 15 ordered sets, and shared geometry', async () => {
   const library = await loadRuntimeLibrary();
   const store = createDataStore(library);
   const units = store.getUnits();
   const sections = units.flatMap(unit => unit.sections);
-  const state = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  const state = store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' });
 
-  assert.equal(units.length, 8);
-  assert.equal(sections.length, 31);
-  assert.deepEqual(units.map(unit => unit.id), [
-    'unit-1', 'unit-2', 'unit-3', 'unit-4', 'unit-5', 'unit-6', 'unit-7', 'unit-8'
-  ]);
-  assert.equal(store.getLesson('garden-2').kind, 'garden');
-  assert.equal(store.getDefaultGroup('lesson-3'), 'recognize');
-  assert.equal(state.entry.pinyin, 'cháo');
-  assert.equal(state.next.character, '据');
-  assert.equal(state.geometry, library.characters['潮']);
+  assert.equal(units.length, 1);
+  assert.equal(sections.length, 15);
+  assert.deepEqual(units.map(unit => unit.id), ['g4-fall']);
+  assert.equal(store.getLesson('g4f-02').kind, 'garden');
+  assert.equal(store.getDefaultGroup('g4f-03'), 'write');
+  assert.equal(state.entry.pinyin, 'xiāo');
+  assert.equal(state.next.character, '宴');
+  assert.equal(state.geometry, library.characters['宵']);
   assert.equal(store.getGeometry('郭'), null);
-  assert.equal(store.resolve({ lessonId: 'lesson-1', group: 'write', character: '郭' }), null);
+  assert.equal(store.resolve({ lessonId: 'g4f-01', group: 'write', character: '郭' }), null);
 });
 
 test('classic scripts merge the store API into window.HanziApp without DOM or fetch', async () => {

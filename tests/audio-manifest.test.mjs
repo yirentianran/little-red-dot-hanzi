@@ -16,7 +16,7 @@ import {
   verifySourceCheckout
 } from '../scripts/sync-audio.mjs';
 
-const curriculum = JSON.parse(await readFile(new URL('../data/curriculum.json', import.meta.url), 'utf8'));
+const catalog = JSON.parse(await readFile(new URL('../data/catalog.json', import.meta.url), 'utf8'));
 
 const expectedSource = {
   repository: 'https://github.com/hugolpz/audio-cmn',
@@ -28,31 +28,27 @@ const expectedSource = {
 };
 
 const criticalReadings = [
-  ['系', 'jì', 'ji4'],
-  ['雀', 'qiǎo', 'qiao3'],
-  ['少', 'shào', 'shao4'],
-  ['还', 'huán', 'huan2'],
-  ['相', 'xiàng', 'xiang4'],
-  ['露', 'lòu', 'lou4'],
-  ['角', 'jué', 'jue2'],
-  ['宁', 'nìng', 'ning4'],
-  ['要', 'yāo', 'yao1'],
-  ['纪', 'jǐ', 'ji3'],
-  ['降', 'xiáng', 'xiang2'],
-  ['血', 'xuè', 'xue4']
+  ['宵', 'xiāo', 'xiao1'],
+  ['宴', 'yàn', 'yan4'],
+  ['扇', 'shàn', 'shan4'],
+  ['崭', 'zhǎn', 'zhan3'],
+  ['渗', 'shèn', 'shen4'],
+  ['凿', 'záo', 'zao2'],
+  ['蛛', 'zhū', 'zhu1'],
+  ['缚', 'fù', 'fu4'],
+  ['瞅', 'chǒu', 'chou3'],
+  ['僵', 'jiāng', 'jiang1'],
+  ['讶', 'yà', 'ya4'],
+  ['苏', 'sū', 'su1']
 ];
 
-function allEntries(document = curriculum) {
-  return document.units.flatMap(unit => unit.lessons)
-    .flatMap(section => [...section.recognize, ...section.write]);
+function allEntries(document = catalog) {
+  return document.sets.flatMap(set => set.entries);
 }
 
-function fixtureCurriculum(ids) {
+function fixtureCatalog(ids) {
   return {
-    units: [{ lessons: [{
-      recognize: ids.map(audio => ({ character: '字', pinyin: 'zì', audio })),
-      write: []
-    }] }]
+    sets: [{ entries: ids.map(audio => ({ character: '字', pinyin: 'zì', audio })) }]
   };
 }
 
@@ -115,29 +111,25 @@ function gitInspection({ sourceDir, head = AUDIO_SOURCE.commit, status = '' }) {
   };
 }
 
-test('collects the 335 unique curriculum audio ids in deterministic order', () => {
-  const ids = collectAudioIds(curriculum);
+test('collects the 187 unique catalog audio ids in deterministic order', () => {
+  const ids = collectAudioIds(catalog);
 
-  assert.equal(ids.length, 335);
+  assert.equal(ids.length, 187);
   assert.deepEqual(ids, [...ids].sort());
   assert.equal(new Set(ids).size, ids.length);
   assert.ok(ids.every(id => /^[a-z]+[1-5]$/.test(id)));
 });
 
-test('rejects missing curriculum structure with exact data locations', () => {
+test('rejects missing catalog structure with exact data locations', () => {
   const invalidDocuments = [
-    [null, /curriculum.*object/i],
-    [{}, /curriculum\.units.*array/i],
-    [{ units: [] }, /curriculum\.units.*non-empty/i],
-    [{ units: [null] }, /curriculum\.units\[0\].*object/i],
-    [{ units: [{}] }, /curriculum\.units\[0\]\.lessons.*array/i],
-    [{ units: [{ lessons: [] }] }, /curriculum\.units\[0\]\.lessons.*non-empty/i],
-    [{ units: [{ lessons: [null] }] }, /curriculum\.units\[0\]\.lessons\[0\].*object/i],
-    [{ units: [{ lessons: [{ write: [] }] }] }, /lessons\[0\]\.recognize.*array/i],
-    [{ units: [{ lessons: [{ recognize: [] }] }] }, /lessons\[0\]\.write.*array/i],
-    [{ units: [{ lessons: [{ recognize: [null], write: [] }] }] }, /recognize\[0\].*object/i],
-    [{ units: [{ lessons: [{ recognize: [{ audio: 'bad' }], write: [] }] }] }, /recognize\[0\]\.audio.*invalid/i],
-    [{ units: [{ lessons: [{ recognize: [], write: [] }] }] }, /at least one audio id/i]
+    [null, /catalog.*object/i],
+    [{}, /catalog\.sets.*array/i],
+    [{ sets: [] }, /catalog\.sets.*non-empty/i],
+    [{ sets: [null] }, /catalog\.sets\[0\].*object/i],
+    [{ sets: [{}] }, /catalog\.sets\[0\]\.entries.*array/i],
+    [{ sets: [{ entries: [null] }] }, /entries\[0\].*object/i],
+    [{ sets: [{ entries: [{ audio: 'bad' }] }] }, /entries\[0\]\.audio.*invalid/i],
+    [{ sets: [{ entries: [] }] }, /at least one audio id/i]
   ];
 
   for (const [document, expected] of invalidDocuments) {
@@ -219,7 +211,7 @@ test('rejects a non-git local source before touching existing output', async t =
   const before = await snapshotDirectory(outputDir);
 
   await assert.rejects(() => syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2')
@@ -240,7 +232,7 @@ test('copies a local source byte-for-byte and writes a deterministic manifest', 
   await writeFile(sourceFile, sourceBytes);
 
   const result = await syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -274,7 +266,7 @@ test('fetches from the pinned raw URL with bounded concurrency', async t => {
   const urls = [];
 
   await syncAudio({
-    curriculum: fixtureCurriculum(ids),
+    catalog: fixtureCatalog(ids),
     outputDir: path.join(directory, 'output'),
     concurrency: 2,
     fetchImpl: async url => {
@@ -301,7 +293,7 @@ test('reports a missing local source without writing a partial manifest', async 
   const outputDir = path.join(directory, 'output');
 
   await assert.rejects(() => syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir: path.join(directory, 'missing'),
     inspectFile: async () => inspection('chao2'),
@@ -312,31 +304,31 @@ test('reports a missing local source without writing a partial manifest', async 
   await assertNoPublishTemps(directory);
 });
 
-test('rejects malformed curriculum before fetching or changing existing output', async t => {
-  const directory = await temporaryDirectory(t, 'hanzi-audio-curriculum-');
+test('rejects malformed catalog before fetching or changing existing output', async t => {
+  const directory = await temporaryDirectory(t, 'hanzi-audio-catalog-');
   const outputDir = path.join(directory, 'output');
   await mkdir(outputDir);
   await writeFile(path.join(outputDir, 'manifest.json'), 'previous manifest\n');
   await writeFile(path.join(outputDir, 'old1.mp3'), 'previous audio');
   const before = await snapshotDirectory(outputDir);
   const invalidDocuments = [
-    { units: [] },
-    { units: [{}] },
-    { units: [{ lessons: [{ write: [] }] }] },
-    { units: [{ lessons: [{ recognize: [] }] }] }
+    { sets: [] },
+    { sets: [{}] },
+    { sets: [{ entries: [null] }] },
+    { sets: [{ entries: [] }] }
   ];
 
-  for (const invalidCurriculum of invalidDocuments) {
+  for (const invalidCatalog of invalidDocuments) {
     let fetched = false;
     await assert.rejects(() => syncAudio({
-      curriculum: invalidCurriculum,
+      catalog: invalidCatalog,
       outputDir,
       fetchImpl: async () => {
         fetched = true;
         throw new Error('fetch must not run');
       },
       inspectFile: async () => inspection('chao2')
-    }), /curriculum\.units/);
+    }), /catalog\.sets|at least one audio id/);
     assert.equal(fetched, false);
     assert.deepEqual(await snapshotDirectory(outputDir), before);
   }
@@ -349,7 +341,7 @@ test('preserves the prior manifest and publishes no partial file when a fetch fa
   await writeFile(path.join(outputDir, 'manifest.json'), 'previous manifest\n');
 
   await assert.rejects(() => syncAudio({
-    curriculum: fixtureCurriculum(['ai1', 'chao2']),
+    catalog: fixtureCatalog(['ai1', 'chao2']),
     outputDir,
     concurrency: 1,
     fetchImpl: async url => url.endsWith('cmn-ai1.mp3')
@@ -368,7 +360,7 @@ test('does not publish files when source metadata does not match the requested r
   const outputDir = path.join(directory, 'output');
 
   await assert.rejects(() => syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     fetchImpl: async () => ({ ok: true, arrayBuffer: async () => Buffer.from('bytes') }),
     inspectFile: async () => inspection('wrong2')
@@ -394,7 +386,7 @@ test('restores the complete prior directory when the candidate directory rename 
   let renameCalls = 0;
 
   await assert.rejects(() => syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -419,7 +411,7 @@ test('re-verifies a synced directory from its manifest without network access', 
   await mkdir(path.dirname(sourceFile), { recursive: true });
   await writeFile(sourceFile, Buffer.from('fixture-source-mp3-bytes'));
   await syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -429,7 +421,7 @@ test('re-verifies a synced directory from its manifest without network access', 
 
   const result = await verifyAudioDirectory({
     audioDir: outputDir,
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     inspectFile: async () => {
       inspected += 1;
       return inspection('chao2');
@@ -448,7 +440,7 @@ test('verification rejects byte tampering before accepting the manifest', async 
   await mkdir(path.dirname(sourceFile), { recursive: true });
   await writeFile(sourceFile, Buffer.from('fixture-source-mp3-bytes'));
   await syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -458,7 +450,7 @@ test('verification rejects byte tampering before accepting the manifest', async 
 
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     inspectFile: async () => inspection('chao2')
   }), /chao2.*byte count|chao2.*SHA-256/i);
 });
@@ -471,7 +463,7 @@ test('verification rejects extra MP3 files and changed embedded labels', async t
   await mkdir(path.dirname(sourceFile), { recursive: true });
   await writeFile(sourceFile, Buffer.from('fixture-source-mp3-bytes'));
   await syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -481,19 +473,19 @@ test('verification rejects extra MP3 files and changed embedded labels', async t
 
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     inspectFile: async () => inspection('chao2')
   }), /unexpected MP3.*extra1\.mp3/i);
 
   await rm(path.join(outputDir, 'extra1.mp3'));
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     inspectFile: async () => inspection('wrong2')
   }), /SWAC_TEXT.*chao2/i);
 });
 
-test('verification rejects a self-consistent manifest that omits a curriculum reading', async t => {
+test('verification rejects a self-consistent manifest that omits a catalog reading', async t => {
   const directory = await temporaryDirectory(t, 'hanzi-audio-coverage-');
   const sourceDir = path.join(directory, 'source');
   const outputDir = path.join(directory, 'output');
@@ -501,7 +493,7 @@ test('verification rejects a self-consistent manifest that omits a curriculum re
   await mkdir(path.dirname(sourceFile), { recursive: true });
   await writeFile(sourceFile, Buffer.from('fixture-source-mp3-bytes'));
   await syncAudio({
-    curriculum: fixtureCurriculum(['chao2']),
+    catalog: fixtureCatalog(['chao2']),
     outputDir,
     sourceDir,
     inspectFile: async () => inspection('chao2'),
@@ -510,15 +502,15 @@ test('verification rejects a self-consistent manifest that omits a curriculum re
 
   await assert.rejects(() => verifyAudioDirectory({
     audioDir: outputDir,
-    curriculum: fixtureCurriculum(['ai1', 'chao2']),
+    catalog: fixtureCatalog(['ai1', 'chao2']),
     inspectFile: async () => inspection('chao2')
-  }), /manifest.*curriculum.*missing.*ai1/i);
+  }), /manifest.*catalog.*missing.*ai1/i);
 });
 
-test('the committed manifest exactly covers the curriculum and byte-preserved MP3 files', async () => {
+test('the committed manifest exactly covers the catalog and byte-preserved MP3 files', async () => {
   const manifestText = await readFile(new URL('../assets/audio/manifest.json', import.meta.url), 'utf8');
   const manifest = JSON.parse(manifestText);
-  const required = collectAudioIds(curriculum);
+  const required = collectAudioIds(catalog);
   const readingIds = Object.keys(manifest.readings);
 
   assert.equal(manifest.schemaVersion, 1);
@@ -551,10 +543,10 @@ test('the committed manifest exactly covers the curriculum and byte-preserved MP
     assert.equal(bytes.subarray(0, 3).toString('ascii'), 'ID3', `${id} MP3 ID3 marker`);
     totalBytes += bytes.length;
   }
-  assert.equal(totalBytes, 3_198_006);
+  assert.equal(totalBytes, 1_840_362);
 });
 
-test('keeps the twelve contextual polyphonic readings linked to available audio ids', async () => {
+test('keeps representative catalog readings linked to available audio ids', async () => {
   const manifest = JSON.parse(await readFile(new URL('../assets/audio/manifest.json', import.meta.url), 'utf8'));
   const entries = allEntries();
 
@@ -568,7 +560,7 @@ test('bundles attribution and the official CC BY-SA 3.0 legal text', async () =>
   const notice = await readFile(new URL('../assets/audio/THIRD_PARTY_NOTICES.md', import.meta.url), 'utf8');
   const legalText = await readFile(new URL('../assets/audio/CC-BY-SA-3.0.html', import.meta.url), 'utf8');
 
-  for (const expected of ['Wang Chen', '王琛', 'Hugo Lopez', 'Nicolas Vion', '© 2013', expectedSource.repository, expectedSource.commit, expectedSource.subset, 'CC BY-SA 3.0', 'byte-for-byte']) {
+  for (const expected of ['Wang Chen', '王琛', 'Hugo Lopez', 'Nicolas Vion', '© 2013', expectedSource.repository, expectedSource.commit, expectedSource.subset, 'Attribution-ShareAlike 3.0', 'byte-for-byte']) {
     assert.match(notice, new RegExp(expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
   }
   assert.match(legalText, /Attribution-ShareAlike 3\.0 Unported/i);
@@ -578,20 +570,13 @@ test('bundles attribution and the official CC BY-SA 3.0 legal text', async () =>
 
 test('marks MP3 assets as binary and documents machine verification separately from listening', async () => {
   const attributes = await readFile(new URL('../.gitattributes', import.meta.url), 'utf8');
-  const audit = await readFile(new URL('../docs/data-audit.md', import.meta.url), 'utf8');
+  const notice = await readFile(new URL('../assets/audio/THIRD_PARTY_NOTICES.md', import.meta.url), 'utf8');
+  const checklist = JSON.parse(await readFile(new URL('../data/review-checklist.json', import.meta.url), 'utf8'));
   const packageDocument = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'));
 
   assert.match(attributes, /^assets\/audio\/\*\.mp3 binary$/m);
-  assert.match(audit, /335 个唯一读音/);
-  assert.match(audit, /3[,.]?198[,.]?006 个字节/);
-  assert.match(audit, /ffprobe/);
-  assert.match(audit, /ffmpeg/);
-  assert.match(audit, /metadataVerified.*true/);
-  assert.match(audit, /auditoryReviewed.*false/);
-  assert.match(audit, /尚未人工听检/);
-  assert.doesNotMatch(audit, /没有生成、试听或声学验收音频文件/);
-  assert.match(audit, /课程数据阶段只审计了音频 id 的文本映射/);
-  assert.match(audit, /现已导入并完成上述机器验证/);
+  assert.match(notice, /187 selected MP3 files/);
+  assert.match(notice, /byte-for-byte/);
+  assert.ok(Object.values(checklist.entries).every(entry => entry.audio === 'pending-auditory-review'));
   assert.equal(packageDocument.scripts['verify:audio'], 'node scripts/sync-audio.mjs --verify');
-  for (const id of criticalReadings.map(([, , audio]) => audio)) assert.match(audit, new RegExp(`\\b${id}\\b`));
 });

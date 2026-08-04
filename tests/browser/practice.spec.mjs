@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 const PRACTICE_STORAGE_KEY = 'hanzi-tracking:practice-progress:v2';
 const PADDING = 0;
 
-const LESSON_ONE_RECOGNIZE = Object.freeze([
-  '盐', '薄', '屹', '昂', '顿', '鼎', '沸', '贯', '浩', '崩', '震', '霎', '余'
+const FIRST_SET = Object.freeze([
+  '宵', '宴', '扇', '崭', '渗', '凿', '蛛', '焰', '缚', '瞅', '蜘', '僵', '讶', '苏', '驻'
 ]);
 
 function practiceHash(lessonId, group, scope, character) {
@@ -150,8 +150,8 @@ async function expectRejected(page, character, strokeIndex, options) {
   assert.equal(await page.locator('[data-slot="practice-stroke-position"]').textContent(), before);
 }
 
-function recognizeTailState() {
-  const completed = LESSON_ONE_RECOGNIZE.slice(2);
+function writeTailState() {
+  const completed = FIRST_SET.slice(2);
   const characters = Object.fromEntries(completed.map((character) => [character, {
     attemptCount: 1,
     lastOutcome: 'mastered',
@@ -161,15 +161,15 @@ function recognizeTailState() {
     schemaVersion: 2,
     characters,
     groups: {
-      'lesson-1:recognize': {
+      'g4f-01:write': {
         completedCharacters: completed,
-        roundCharacters: LESSON_ONE_RECOGNIZE.slice(),
+        roundCharacters: FIRST_SET.slice(),
         roundCompletedCharacters: completed,
-        remainingCharacters: ['盐', '薄'],
+        remainingCharacters: ['宵', '宴'],
         needsPracticeCharacters: [],
         roundInitialMasteredCharacters: completed,
         roundNewlyMasteredCharacters: [],
-        currentCharacter: '盐',
+        currentCharacter: '宵',
         currentPhase: 'guided'
       }
     }
@@ -181,7 +181,7 @@ async function seedRecognizeTail(page) {
     if (localStorage.getItem(key) === null) localStorage.setItem(key, value);
   }, {
     key: PRACTICE_STORAGE_KEY,
-    value: JSON.stringify(recognizeTailState())
+    value: JSON.stringify(writeTailState())
   });
 }
 
@@ -206,23 +206,22 @@ async function installDocumentListenerProbe(page) {
 }
 
 export async function registerBrowserTests({ test }) {
-  test('starts group and character practice from write and recognize views and returns to each origin', async ({
+  test('starts group and character practice from write and write views and returns to each origin', async ({
     indexUrl,
     openPage
   }) => {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
     const groupEntries = [
-      { group: 'write', character: '潮' },
-      { group: 'recognize', character: '盐' }
+      { group: 'write', character: '宵' }
     ];
     for (const entry of groupEntries) {
-      const origin = lessonHash('lesson-1', entry.group);
+      const origin = lessonHash('g4f-01', entry.group);
       await page.goto(withHash(indexUrl, origin));
       await page.locator('[data-view="lesson"]').waitFor();
       await page.locator('[data-action="start-group-practice"]').click();
       await waitForPractice(page, entry.character, '引导描写');
       assert.equal(new URL(page.url()).hash, practiceHash(
-        'lesson-1', entry.group, 'group', entry.character
+        'g4f-01', entry.group, 'group', entry.character
       ));
       await page.locator('[data-action="practice-back"]').click();
       await page.locator('[data-view="lesson"]').waitFor();
@@ -230,17 +229,17 @@ export async function registerBrowserTests({ test }) {
     }
 
     const characterEntries = [
-      { group: 'write', character: '潮' },
-      { group: 'recognize', character: '盐' }
+      { group: 'write', character: '宵' },
+      { group: 'write', character: '宴' }
     ];
     for (const entry of characterEntries) {
-      const origin = characterHash('lesson-1', entry.group, entry.character);
+      const origin = characterHash('g4f-01', entry.group, entry.character);
       await page.goto(withHash(indexUrl, origin));
       await page.locator('[data-view="character"]').waitFor();
       await page.locator('[data-action="start-character-practice"]').click();
       await waitForPractice(page, entry.character, '引导描写');
       assert.equal(new URL(page.url()).hash, practiceHash(
-        'lesson-1', entry.group, 'single', entry.character
+        'g4f-01', entry.group, 'single', entry.character
       ));
       await page.locator('[data-action="practice-back"]').click();
       await page.locator('[data-view="character"]').waitFor();
@@ -248,38 +247,38 @@ export async function registerBrowserTests({ test }) {
     }
   });
 
-  test('practices a 16-stroke recognize character through guided and independent rounds', async ({
+  test('practices a 16-stroke write character through guided and independent rounds', async ({
     indexUrl,
     openPage
   }) => {
     const page = await openPage({ reducedMotion: true, viewport: { width: 1180, height: 900 } });
-    await page.goto(withHash(indexUrl, practiceHash('lesson-1', 'recognize', 'single', '薄')));
-    await waitForPractice(page, '薄', '引导描写');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-05', 'write', 'single', '懒')));
+    await waitForPractice(page, '懒', '引导描写');
 
     const oldSvg = await page.locator('.practice-writer-host svg').evaluate((svg) => {
       window.__guidedPracticeSvg = svg;
       return svg.isConnected;
     });
     assert.equal(oldSvg, true);
-    await drawMedian(page, '薄', 0);
+    await drawMedian(page, '懒', 0);
     await waitForStroke(page, 2, 16);
     assert.equal(await page.locator('.practice-progress').getAttribute('value'), '1');
     assert.match(await page.locator('[data-slot="practice-feedback"]').textContent(), /写对了/);
     for (let index = 1; index < 16; index += 1) {
-      await drawMedian(page, '薄', index);
+      await drawMedian(page, '懒', index);
       if (index < 15) await waitForStroke(page, index + 2, 16);
     }
 
-    await waitForPractice(page, '薄', '独立描写');
+    await waitForPractice(page, '懒', '独立描写');
     assert.equal(await page.evaluate(() => window.__guidedPracticeSvg.isConnected), false);
     assert.equal(await page.locator('.practice-writer-host svg').count(), 1);
-    await drawCharacter(page, '薄', { jitterStroke: 8 });
+    await drawCharacter(page, '懒', { jitterStroke: 8 });
     await page.locator('.practice-complete-result').waitFor();
     assert.match(await page.locator('.practice-complete-result').textContent(), /当前掌握 1 个/);
 
     const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), PRACTICE_STORAGE_KEY);
     assert.equal(saved.schemaVersion, 2);
-    assert.deepEqual(saved.characters['薄'], {
+    assert.deepEqual(saved.characters['懒'], {
       attemptCount: 1,
       lastOutcome: 'mastered',
       mastered: true
@@ -291,21 +290,21 @@ export async function registerBrowserTests({ test }) {
     openPage
   }) => {
     const page = await openPage({ viewport: { width: 900, height: 820 } });
-    await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
-    await waitForPractice(page, '丈', '引导描写');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-03', 'write', 'single', '邮')));
+    await waitForPractice(page, '邮', '引导描写');
 
-    await expectRejected(page, '丈', 0, { reverse: true });
+    await expectRejected(page, '邮', 0, { reverse: true });
     assert.match(await page.locator('[data-slot="practice-feedback"]').textContent(), /方向反了/);
     await restartPractice(page);
-    await expectRejected(page, '丈', 0, { offsetY: 150 });
+    await expectRejected(page, '邮', 0, { offsetY: 150 });
     await restartPractice(page);
 
     const baselineVisible = await page.locator('.practice-writer-host svg path').evaluateAll((paths) => (
       paths.filter((path) => getComputedStyle(path).opacity !== '0'
         && getComputedStyle(path).visibility !== 'hidden').length
     ));
-    await expectRejected(page, '丈', 0, { short: true });
-    await expectRejected(page, '丈', 0, { short: true });
+    await expectRejected(page, '邮', 0, { short: true });
+    await expectRejected(page, '邮', 0, { short: true });
     await page.waitForFunction((baseline) => {
       const paths = [...document.querySelectorAll('.practice-writer-host svg path')];
       return paths.filter((path) => getComputedStyle(path).opacity !== '0'
@@ -321,20 +320,20 @@ export async function registerBrowserTests({ test }) {
     openPage
   }) => {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
-    await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
-    await waitForPractice(page, '丈', '引导描写');
-    await drawCharacter(page, '丈');
-    await waitForPractice(page, '丈', '独立描写');
-    await expectRejected(page, '丈', 0, { offsetY: 150 });
-    await drawCharacter(page, '丈');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-03', 'write', 'single', '邮')));
+    await waitForPractice(page, '邮', '引导描写');
+    await drawCharacter(page, '邮');
+    await waitForPractice(page, '邮', '独立描写');
+    await expectRejected(page, '邮', 0, { offsetY: 150 });
+    await drawCharacter(page, '邮');
     await page.locator('.practice-retry-result').waitFor();
     await page.locator('[data-action="practice-retry"]').click();
-    await waitForPractice(page, '丈', '独立描写');
-    await waitForStroke(page, 1, 3);
-    await drawCharacter(page, '丈');
+    await waitForPractice(page, '邮', '独立描写');
+    await waitForStroke(page, 1, 7);
+    await drawCharacter(page, '邮');
     await page.locator('.practice-complete-result').waitFor();
     const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), PRACTICE_STORAGE_KEY);
-    assert.deepEqual(saved.characters['丈'], {
+    assert.deepEqual(saved.characters['邮'], {
       attemptCount: 2,
       lastOutcome: 'mastered',
       mastered: true
@@ -347,35 +346,35 @@ export async function registerBrowserTests({ test }) {
   }) => {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
     await seedRecognizeTail(page);
-    await page.goto(withHash(indexUrl, practiceHash('lesson-1', 'recognize', 'group', '盐')));
-    await waitForPractice(page, '盐', '引导描写');
-    await drawCharacter(page, '盐');
-    await waitForPractice(page, '盐', '独立描写');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-01', 'write', 'group', '宵')));
+    await waitForPractice(page, '宵', '引导描写');
+    await drawCharacter(page, '宵');
+    await waitForPractice(page, '宵', '独立描写');
     await page.locator('.practice-writer-host svg').evaluate((svg) => { window.__saltWriterSvg = svg; });
-    await expectRejected(page, '盐', 0, { offsetX: 150 });
-    await drawCharacter(page, '盐');
+    await expectRejected(page, '宵', 0, { offsetX: 150 });
+    await drawCharacter(page, '宵');
     await page.locator('.practice-retry-result').waitFor();
     assert.match(await page.locator('.practice-retry-result').textContent(), /本次出现 1 次/);
     await page.locator('[data-action="practice-defer"]').click();
-    await waitForPractice(page, '薄', '引导描写');
+    await waitForPractice(page, '宴', '引导描写');
     assert.equal(await page.evaluate(() => window.__saltWriterSvg.isConnected), false);
     assert.equal(await page.locator('.practice-writer-host svg').count(), 1);
-    await drawCharacter(page, '薄');
-    await waitForPractice(page, '薄', '独立描写');
-    await drawCharacter(page, '薄');
+    await drawCharacter(page, '宴');
+    await waitForPractice(page, '宴', '独立描写');
+    await drawCharacter(page, '宴');
     await page.locator('.practice-complete-result').waitFor();
     assert.match(await page.locator('.practice-complete-result').textContent(), /需要再练 1 个/);
 
     const saved = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)), PRACTICE_STORAGE_KEY);
     assert.equal(saved.schemaVersion, 2);
-    assert.equal(saved.characters['盐'].lastOutcome, 'needs-practice');
-    assert.deepEqual(saved.groups['lesson-1:recognize'].needsPracticeCharacters, ['盐']);
+    assert.equal(saved.characters['宵'].lastOutcome, 'needs-practice');
+    assert.deepEqual(saved.groups['g4f-01:write'].needsPracticeCharacters, ['宵']);
 
     await page.locator('[data-action="practice-review-needs"]').click();
-    await waitForPractice(page, '盐', '引导描写');
+    await waitForPractice(page, '宵', '引导描写');
     assert.equal(await page.locator('[data-slot="practice-round-position"]').textContent(), '第 1 / 1 个');
-    assert.equal(await currentCharacter(page), '盐');
-    assert.equal(new URL(page.url()).hash, practiceHash('lesson-1', 'recognize', 'group', '盐'));
+    assert.equal(await currentCharacter(page), '宵');
+    assert.equal(new URL(page.url()).hash, practiceHash('g4f-01', 'write', 'group', '宵'));
   });
 
   test('tears down writer DOM and document listeners and keeps resize alignment without restart', async ({
@@ -384,11 +383,11 @@ export async function registerBrowserTests({ test }) {
   }) => {
     const page = await openPage({ viewport: { width: 1180, height: 900 } });
     await installDocumentListenerProbe(page);
-    await page.goto(withHash(indexUrl, lessonHash('lesson-1', 'recognize')));
+    await page.goto(withHash(indexUrl, lessonHash('g4f-01', 'write')));
     await page.locator('[data-view="lesson"]').waitFor();
     const baselineListeners = await page.evaluate(() => window.__documentListenerCount());
-    await page.goto(withHash(indexUrl, practiceHash('lesson-1', 'recognize', 'single', '盐')));
-    await waitForPractice(page, '盐', '引导描写');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-01', 'write', 'single', '宵')));
+    await waitForPractice(page, '宵', '引导描写');
     assert.ok(await page.evaluate(() => window.__documentListenerCount()) > baselineListeners);
 
     const busyPointerEvents = await page.locator('[data-slot="practice-board"]').evaluate((board) => {
@@ -410,7 +409,7 @@ export async function registerBrowserTests({ test }) {
     const alignment = await page.evaluate((padding) => {
       const board = document.querySelector('[data-slot="practice-board"] .practice-writer-host');
       const dot = document.querySelector('.practice-start-dot');
-      const [x, y] = window.HANZI_LIBRARY.characters['盐'].medians[0][0];
+      const [x, y] = window.HANZI_LIBRARY.characters['宵'].medians[0][0];
       const box = board.getBoundingClientRect();
       const transform = window.HanziWriter.getScalingTransform(box.width, box.height, padding);
       const dotBox = dot.getBoundingClientRect();
@@ -424,7 +423,7 @@ export async function registerBrowserTests({ test }) {
     assert.ok(Math.abs(alignment.actualX - alignment.expectedX) <= 1.5, JSON.stringify(alignment));
     assert.ok(Math.abs(alignment.actualY - alignment.expectedY) <= 1.5, JSON.stringify(alignment));
 
-    const firstPoint = (await mappedMedian(page, '盐', 0))[0];
+    const firstPoint = (await mappedMedian(page, '宵', 0))[0];
     await page.mouse.move(firstPoint.x, firstPoint.y);
     await page.mouse.down();
     await page.locator('[data-action="practice-back"]').evaluate((button) => button.click());
@@ -442,20 +441,20 @@ export async function registerBrowserTests({ test }) {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
     await seedRecognizeTail(page);
     await installDocumentListenerProbe(page);
-    const lessonUrl = withHash(indexUrl, lessonHash('lesson-1', 'recognize'));
+    const lessonUrl = withHash(indexUrl, lessonHash('g4f-01', 'write'));
     await page.goto(lessonUrl);
     await page.locator('[data-view="lesson"]').waitFor();
     const baselineListeners = await page.evaluate(() => window.__documentListenerCount());
     await page.locator('[data-action="start-group-practice"]').click();
-    await waitForPractice(page, '盐', '引导描写');
-    await drawCharacter(page, '盐');
-    await waitForPractice(page, '盐', '独立描写');
+    await waitForPractice(page, '宵', '引导描写');
+    await drawCharacter(page, '宵');
+    await waitForPractice(page, '宵', '独立描写');
     await waitForStroke(page, 1, 10);
     const activeListeners = await page.evaluate(() => window.__documentListenerCount());
     assert.ok(activeListeners > baselineListeners);
 
     await page.reload({ waitUntil: 'load' });
-    await waitForPractice(page, '盐', '独立描写');
+    await waitForPractice(page, '宵', '独立描写');
     await waitForStroke(page, 1, 10);
     assert.equal(await page.locator('.practice-writer-host').count(), 1);
     assert.equal(await page.locator('.practice-overlay').count(), 1);
@@ -466,17 +465,17 @@ export async function registerBrowserTests({ test }) {
     assert.equal(await page.locator('.practice-writer-host').count(), 0);
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), baselineListeners);
     await page.goForward();
-    await waitForPractice(page, '盐', '独立描写');
+    await waitForPractice(page, '宵', '独立描写');
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
     await page.locator('.practice-writer-host').evaluate((host) => { window.__historyWriterHost = host; });
 
-    const finalHash = practiceHash('lesson-22', 'write', 'single', '肃');
+    const finalHash = practiceHash('g4f-02', 'write', 'single', '砂');
     await page.evaluate(({ middle, final }) => {
       window.location.hash = middle;
       window.location.hash = '#/';
       window.location.hash = final;
-    }, { middle: lessonHash('lesson-22', 'write'), final: finalHash });
-    await waitForPractice(page, '肃', '引导描写');
+    }, { middle: lessonHash('g4f-02', 'write'), final: finalHash });
+    await waitForPractice(page, '砂', '引导描写');
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
     assert.equal(new URL(page.url()).hash, finalHash);
     assert.equal(await page.evaluate(() => window.__historyWriterHost.isConnected), false);
@@ -485,7 +484,7 @@ export async function registerBrowserTests({ test }) {
     assert.equal(await page.evaluate(() => window.__documentListenerCount()), activeListeners);
     await page.locator('[data-action="practice-back"]').click();
     await page.locator('[data-view="character"]').waitFor();
-    assert.equal(new URL(page.url()).hash, characterHash('lesson-22', 'write', '肃'));
+    assert.equal(new URL(page.url()).hash, characterHash('g4f-02', 'write', '砂'));
   });
 
   test('completes a short character with trusted Chromium touch input', async ({
@@ -495,8 +494,8 @@ export async function registerBrowserTests({ test }) {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
     const client = await page.context().newCDPSession(page);
     await client.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
-    await page.goto(withHash(indexUrl, practiceHash('lesson-12', 'write', 'single', '丈')));
-    await waitForPractice(page, '丈', '引导描写');
+    await page.goto(withHash(indexUrl, practiceHash('g4f-03', 'write', 'single', '邮')));
+    await waitForPractice(page, '邮', '引导描写');
     assert.match(
       await page.locator('[data-slot="practice-round-position"]').textContent(),
       /^第 \d+ 个，共 \d+ 个$/
@@ -509,20 +508,20 @@ export async function registerBrowserTests({ test }) {
         window.__practiceTouchTrusted = event.isTrusted;
       }, { capture: true, once: true });
     });
-    await drawTouchCharacter(client, page, '丈');
-    await waitForPractice(page, '丈', '独立描写');
-    await drawTouchCharacter(client, page, '丈');
+    await drawTouchCharacter(client, page, '邮');
+    await waitForPractice(page, '邮', '独立描写');
+    await drawTouchCharacter(client, page, '邮');
     await page.locator('.practice-complete-result').waitFor();
     assert.equal(await page.evaluate(() => window.__practiceTouchTrusted), true);
     const nextCharacter = await page.locator('[data-action="next-character"]')
       .getAttribute('data-character');
-    assert.equal(nextCharacter, '撑');
+    assert.equal(nextCharacter, '诊');
     assert.equal(await page.locator('[data-action="next-character"]').isEnabled(), true);
     await page.locator('[data-action="next-character"]').click();
     await page.locator('[data-view="character"]').waitFor();
     assert.equal(
       new URL(page.url()).hash,
-      characterHash('lesson-12', 'write', nextCharacter)
+      characterHash('g4f-03', 'write', nextCharacter)
     );
     await client.detach();
   });
@@ -532,17 +531,16 @@ export async function registerBrowserTests({ test }) {
     openPage
   }) => {
     const page = await openPage({ reducedMotion: true, viewport: { width: 900, height: 820 } });
-    // The curriculum subset has no geometry for 一/戴/藏. 丈 covers horizontal plus
-    // left/right falls, 凡 covers the turning hook, and 囊 supplies a 22-stroke complex substitute.
+    // Exercise simple, turning, and complex geometry from several independent sets.
     const matrix = [
-      { character: '丈', lesson: 'lesson-12', group: 'write' },
-      { character: '亿', lesson: 'lesson-7', group: 'write' },
-      { character: '潮', lesson: 'lesson-1', group: 'write' },
-      { character: '肃', lesson: 'lesson-22', group: 'write' },
-      { character: '凡', lesson: 'lesson-22', group: 'write' },
-      { character: '凿', lesson: 'lesson-26', group: 'recognize' },
-      { character: '鼎', lesson: 'lesson-1', group: 'recognize' },
-      { character: '囊', lesson: 'lesson-19', group: 'recognize' }
+      { character: '邮', lesson: 'g4f-03', group: 'write' },
+      { character: '凹', lesson: 'g4f-04', group: 'write' },
+      { character: '宵', lesson: 'g4f-01', group: 'write' },
+      { character: '砂', lesson: 'g4f-02', group: 'write' },
+      { character: '挫', lesson: 'g4f-02', group: 'write' },
+      { character: '碱', lesson: 'g4f-05', group: 'write' },
+      { character: '扇', lesson: 'g4f-01', group: 'write' },
+      { character: '烫', lesson: 'g4f-06', group: 'write' }
     ];
 
     for (const entry of matrix) {

@@ -5,7 +5,7 @@
     "source": "hanzi-writer-data@2.0.1",
     "license": "ARPHICPL.TXT",
     "changes": [
-      "Extracted the 1-character subset used by the PEP Grade 4 Volume 1 curriculum.",
+      "Extracted the 1-character independent test subset.",
       "Removed radStrokes and all other upstream fields, retaining only strokes and medians.",
       "Added strokeCount to each character record.",
       "Sorted character keys deterministically.",

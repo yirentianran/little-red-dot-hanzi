@@ -6,12 +6,17 @@
     "test": "node --test tests/*.test.mjs",
     "test:browser": "node scripts/run-browser-tests.mjs",
     "validate": "node scripts/validate-library.mjs",
+    "build:index": "node scripts/build-catalog-index.mjs",
+    "build:catalog": "node scripts/build-catalog.mjs",
+    "extract:characters": "node scripts/extract-characters.mjs",
     "sync:audio": "node scripts/sync-audio.mjs",
     "verify:audio": "node scripts/sync-audio.mjs --verify",
     "vendor:hanzi-writer": "node scripts/sync-hanzi-writer.mjs",
     "verify:vendor": "node scripts/sync-hanzi-writer.mjs --verify",
     "build:data": "node scripts/build-library.mjs",
-    "check": "npm test && npm run validate && npm run build:data && npm run verify:vendor"
+    "scan:sensitive": "node scripts/scan-sensitive-content.mjs",
+    "release:check": "npm run check && node scripts/check-release-readiness.mjs",
+    "check": "npm run build:data && npm test && npm run validate && npm run verify:vendor && npm run scan:sensitive"
   },
   "devDependencies": {
     "hanzi-writer-data": "2.0.1"

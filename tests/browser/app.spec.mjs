@@ -138,7 +138,7 @@ export async function registerBrowserTests({ test }) {
     const url = new URL(page.url());
     assert.equal(url.protocol, 'file:');
     assert.equal(await currentHash(page), '#/');
-    assert.equal(await page.locator('[data-view-heading]').textContent(), '课程目录');
+    assert.equal(await page.locator('[data-view-heading]').textContent(), '阶段目录');
   });
 
   test('navigates lesson 1 write characters with canonical history and resumable storage', async ({
@@ -150,22 +150,22 @@ export async function registerBrowserTests({ test }) {
     await waitForView(page, 'directory');
 
     await page.locator(
-      '[data-action="open-lesson"][data-lesson-id="lesson-1"][data-group="write"]'
+      '[data-action="open-lesson"][data-lesson-id="g4f-01"][data-group="write"]'
     ).click();
     await waitForView(page, 'lesson');
-    assert.equal(await currentHash(page), lessonHash('lesson-1', 'write'));
-    assert.equal(await page.locator('[data-view-heading]').textContent(), '1  观潮');
+    assert.equal(await currentHash(page), lessonHash('g4f-01', 'write'));
+    assert.equal(await page.locator('[data-view-heading]').textContent(), '第1组');
 
     await page.locator(
-      '.character-card[data-action="open-character"][data-lesson-id="lesson-1"]'
-        + '[data-group="write"][data-character="潮"]'
+      '.character-card[data-action="open-character"][data-lesson-id="g4f-01"]'
+        + '[data-group="write"][data-character="宵"]'
     ).click();
-    await waitForCharacter(page, '潮');
-    assert.equal(await currentHash(page), characterHash('lesson-1', 'write', '潮'));
-    assert.equal(await page.locator('.character-pinyin').textContent(), 'cháo');
-    assert.equal(await page.locator('.character-display').textContent(), '潮');
-    assert.equal(await page.locator('[data-slot="vocabulary-words"]').textContent(), '组词：潮水  浪潮  涨潮');
-    assert.equal(await page.locator('.stroke-count').textContent(), '共 15 笔');
+    await waitForCharacter(page, '宵');
+    assert.equal(await currentHash(page), characterHash('g4f-01', 'write', '宵'));
+    assert.equal(await page.locator('.character-pinyin').textContent(), 'xiāo');
+    assert.equal(await page.locator('.character-display').textContent(), '宵');
+    assert.equal(await page.locator('[data-slot="vocabulary-words"]').textContent(), '组词：元宵  宵夜');
+    assert.equal(await page.locator('.stroke-count').textContent(), '共 10 笔');
     assert.equal(await page.locator('[data-slot="character-board"] svg').count(), 1);
 
     for (const action of [
@@ -186,9 +186,9 @@ export async function registerBrowserTests({ test }) {
       ['slow', 'normal', 'fast']
     );
 
-    await page.locator('[data-action="next-character"][data-character="据"]').click();
-    await waitForCharacter(page, '据');
-    const accordingHash = characterHash('lesson-1', 'write', '据');
+    await page.locator('[data-action="next-character"][data-character="宴"]').click();
+    await waitForCharacter(page, '宴');
+    const accordingHash = characterHash('g4f-01', 'write', '宴');
     assert.equal(await currentHash(page), accordingHash);
     assert.equal(
       await page.evaluate((key) => window.localStorage.getItem(key), LAST_ROUTE_KEY),
@@ -196,14 +196,14 @@ export async function registerBrowserTests({ test }) {
     );
 
     await page.goBack();
-    await waitForCharacter(page, '潮');
-    assert.equal(await currentHash(page), characterHash('lesson-1', 'write', '潮'));
+    await waitForCharacter(page, '宵');
+    assert.equal(await currentHash(page), characterHash('g4f-01', 'write', '宵'));
     await page.goForward();
-    await waitForCharacter(page, '据');
+    await waitForCharacter(page, '宴');
     assert.equal(await currentHash(page), accordingHash);
 
     await page.reload({ waitUntil: 'load' });
-    await waitForCharacter(page, '据');
+    await waitForCharacter(page, '宴');
     assert.equal(await currentHash(page), accordingHash);
 
     await page.locator('[data-action="back-lesson"]').click();
@@ -213,7 +213,7 @@ export async function registerBrowserTests({ test }) {
     const resume = page.locator('[data-action="resume-learning"]');
     await resume.waitFor({ state: 'visible' });
     await resume.click();
-    await waitForCharacter(page, '据');
+    await waitForCharacter(page, '宴');
     assert.equal(await currentHash(page), accordingHash);
   });
 
@@ -223,10 +223,10 @@ export async function registerBrowserTests({ test }) {
   }) => {
     const page = await openPage({ instrumentAudio: true, reducedMotion: true });
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-1', 'write', '潮')),
+      withHash(indexUrl, characterHash('g4f-01', 'write', '宵')),
       { waitUntil: 'load' }
     );
-    await waitForCharacter(page, '潮');
+    await waitForCharacter(page, '宵');
 
     const before = await page.evaluate(() => window.__HANZI_AUDIO_PROBE__.snapshot());
     assert.equal(before.nativeAudio, true);
@@ -240,31 +240,31 @@ export async function registerBrowserTests({ test }) {
           || probe.records[0].error !== null);
     });
     await page.waitForFunction(() => document.querySelector('#announcer')
-      ?.textContent.includes('潮的读音已开始播放'));
+      ?.textContent.includes('宵的读音已开始播放'));
 
     const after = await page.evaluate(() => window.__HANZI_AUDIO_PROBE__.snapshot());
     assert.equal(after.records.length, 1);
     assert.equal(after.records[0].src.startsWith('file:'), true);
-    assert.match(after.records[0].src, /\/assets\/audio\/chao2\.mp3$/);
+    assert.match(after.records[0].src, /\/assets\/audio\/xiao1\.mp3$/);
     assert.ok(after.records[0].readyState >= 2, JSON.stringify(after.records[0]));
     assert.equal(after.records[0].error, null);
     assert.deepEqual(after.records[0].errorEvents, []);
-    assert.match(await page.locator('#announcer').textContent(), /潮的读音已开始播放/);
+    assert.match(await page.locator('#announcer').textContent(), /宵的读音已开始播放/);
   });
 
-  test('renders all 15 潮 ghost paths with usable geometry and non-white raster pixels', async ({
+  test('renders all 10 宵 ghost paths with usable geometry and non-white raster pixels', async ({
     indexUrl,
     openPage
   }) => {
     const page = await openPage({ reducedMotion: true });
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-1', 'write', '潮')),
+      withHash(indexUrl, characterHash('g4f-01', 'write', '宵')),
       { waitUntil: 'load' }
     );
-    await waitForCharacter(page, '潮');
+    await waitForCharacter(page, '宵');
 
     const ghostPaths = page.locator('[data-slot="character-board"] .hanzi-stroke--ghost');
-    assert.equal(await ghostPaths.count(), 15);
+    assert.equal(await ghostPaths.count(), 10);
     const boxes = await ghostPaths.evaluateAll((paths) => paths.map((path) => {
       const box = path.getBBox();
       return { width: box.width, height: box.height };
@@ -286,10 +286,10 @@ export async function registerBrowserTests({ test }) {
   }) => {
     const page = await openPage();
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-1', 'write', '潮')),
+      withHash(indexUrl, characterHash('g4f-01', 'write', '宵')),
       { waitUntil: 'load' }
     );
-    await waitForCharacter(page, '潮');
+    await waitForCharacter(page, '宵');
 
     await waitForVisibleDot(page);
     const visibleStartCap = page.locator('.hanzi-stroke-start-cap[display="inline"]');
@@ -313,10 +313,10 @@ export async function registerBrowserTests({ test }) {
     }
 
     await page.locator('[data-action="next-stroke"]').click();
-    await waitForStatus(page, '第 2 / 15 笔');
+    await waitForStatus(page, '第 2 / 10 笔');
     await waitForStatus(page, '已暂停');
     await page.locator('[data-action="previous-stroke"]').click();
-    await waitForStatus(page, '第 1 / 15 笔');
+    await waitForStatus(page, '第 1 / 10 笔');
     await waitForStatus(page, '已暂停');
 
     await page.locator('[data-action="replay"]').click();
@@ -326,18 +326,18 @@ export async function registerBrowserTests({ test }) {
     await waitForDotMovement(page, replayStart);
   });
 
-  test('orders all speeds and loops the three-stroke 亿 animation after completion', async ({
+  test('orders all speeds and loops the five-stroke 凹 animation after completion', async ({
     indexUrl,
     openPage
   }) => {
     const page = await openPage();
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-7', 'write', '亿')),
+      withHash(indexUrl, characterHash('g4f-04', 'write', '凹')),
       { waitUntil: 'load' }
     );
-    await waitForCharacter(page, '亿');
-    assert.equal(await page.locator('.stroke-count').textContent(), '共 3 笔');
-    assert.equal(await page.locator('.hanzi-stroke--ghost').count(), 3);
+    await waitForCharacter(page, '凹');
+    assert.equal(await page.locator('.stroke-count').textContent(), '共 5 笔');
+    assert.equal(await page.locator('.hanzi-stroke--ghost').count(), 5);
 
     const durationBySpeed = {
       slow: await measureFirstStrokeDuration(page, 'slow'),
@@ -357,13 +357,13 @@ export async function registerBrowserTests({ test }) {
     await waitForStatus(page, '书写完成', 12_000);
     assert.equal(
       await page.locator('.hanzi-stroke--completed[display="inline"]').count(),
-      3
+      5
     );
     await page.waitForFunction(() => {
       const status = document.querySelector('[data-slot="animation-status"]')?.textContent || '';
       const dot = document.querySelector('[data-tracking-dot="core"]');
       return status.includes('正在书写')
-        && status.includes('第 1 / 3 笔')
+        && status.includes('第 1 / 5 笔')
         && dot?.getAttribute('display') !== 'none';
     }, null, { timeout: 4_000 });
   });
@@ -374,10 +374,10 @@ export async function registerBrowserTests({ test }) {
   }) => {
     const page = await openPage({ reducedMotion: true });
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-1', 'write', '潮')),
+      withHash(indexUrl, characterHash('g4f-01', 'write', '宵')),
       { waitUntil: 'load' }
     );
-    await waitForCharacter(page, '潮');
+    await waitForCharacter(page, '宵');
     await waitForStatus(page, '准备开始');
     const initialStatus = await page.locator('[data-slot="animation-status"]').textContent();
     await page.waitForTimeout(500);
@@ -387,7 +387,7 @@ export async function registerBrowserTests({ test }) {
     );
     assert.equal(
       await page.locator('.hanzi-stroke--completed[display="inline"]').count(),
-      15
+      10
     );
     assert.equal(
       await page.locator('[data-tracking-dot="core"]').getAttribute('display'),
@@ -395,10 +395,10 @@ export async function registerBrowserTests({ test }) {
     );
 
     await page.locator('[data-action="next-stroke"]').click();
-    await waitForStatus(page, '第 2 / 15 笔');
+    await waitForStatus(page, '第 2 / 10 笔');
     await waitForVisibleDot(page);
     await waitForStatus(page, '已暂停');
     await page.locator('[data-action="previous-stroke"]').click();
-    await waitForStatus(page, '第 1 / 15 笔');
+    await waitForStatus(page, '第 1 / 10 笔');
   });
 }

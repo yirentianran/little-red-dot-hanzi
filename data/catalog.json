@@ -1,0 +1,2173 @@
+{
+  "schemaVersion": 2,
+  "framework": {
+    "id": "independent-primary-hanzi-v1",
+    "title": "小学汉字独立分级",
+    "methodVersion": "1.0.0",
+    "nonAligned": true,
+    "disclaimer": "本应用内容为独立编排，非教材同步，与任何教材出版社不存在隶属、授权或背书关系。"
+  },
+  "reviewStatus": {
+    "pinyin": "source-verified",
+    "words": "draft",
+    "audioAuditory": "pending"
+  },
+  "stages": [
+    {
+      "id": "g4-fall",
+      "grade": 4,
+      "term": "fall",
+      "title": "四年级上阶段",
+      "subtitle": "独立编排",
+      "setIds": [
+        "g4f-01",
+        "g4f-02",
+        "g4f-03",
+        "g4f-04",
+        "g4f-05",
+        "g4f-06",
+        "g4f-07",
+        "g4f-08",
+        "g4f-09",
+        "g4f-10",
+        "g4f-11",
+        "g4f-12",
+        "g4f-13",
+        "g4f-14",
+        "g4f-15"
+      ]
+    }
+  ],
+  "sets": [
+    {
+      "id": "g4f-01",
+      "number": 1,
+      "title": "第1组",
+      "entries": [
+        {
+          "character": "宵",
+          "pinyin": "xiāo",
+          "audio": "xiao1",
+          "words": [
+            "元宵",
+            "宵夜"
+          ]
+        },
+        {
+          "character": "宴",
+          "pinyin": "yàn",
+          "audio": "yan4",
+          "words": [
+            "宴会",
+            "晚宴"
+          ]
+        },
+        {
+          "character": "扇",
+          "pinyin": "shàn",
+          "audio": "shan4",
+          "words": [
+            "扇子",
+            "折扇"
+          ]
+        },
+        {
+          "character": "崭",
+          "pinyin": "zhǎn",
+          "audio": "zhan3",
+          "words": [
+            "崭新",
+            "崭露头角"
+          ]
+        },
+        {
+          "character": "渗",
+          "pinyin": "shèn",
+          "audio": "shen4",
+          "words": [
+            "渗透",
+            "渗水"
+          ]
+        },
+        {
+          "character": "凿",
+          "pinyin": "záo",
+          "audio": "zao2",
+          "words": [
+            "开凿",
+            "凿子"
+          ]
+        },
+        {
+          "character": "蛛",
+          "pinyin": "zhū",
+          "audio": "zhu1",
+          "words": [
+            "蜘蛛",
+            "蛛网"
+          ]
+        },
+        {
+          "character": "焰",
+          "pinyin": "yàn",
+          "audio": "yan4",
+          "words": [
+            "火焰",
+            "烈焰"
+          ]
+        },
+        {
+          "character": "缚",
+          "pinyin": "fù",
+          "audio": "fu4",
+          "words": [
+            "束缚",
+            "绑缚"
+          ]
+        },
+        {
+          "character": "瞅",
+          "pinyin": "chǒu",
+          "audio": "chou3",
+          "words": [
+            "瞅见",
+            "瞅一眼"
+          ]
+        },
+        {
+          "character": "蜘",
+          "pinyin": "zhī",
+          "audio": "zhi1",
+          "words": [
+            "蜘蛛",
+            "蜘蛛网"
+          ]
+        },
+        {
+          "character": "僵",
+          "pinyin": "jiāng",
+          "audio": "jiang1",
+          "words": [
+            "僵硬",
+            "冻僵"
+          ]
+        },
+        {
+          "character": "讶",
+          "pinyin": "yà",
+          "audio": "ya4",
+          "words": [
+            "惊讶",
+            "讶异"
+          ]
+        },
+        {
+          "character": "苏",
+          "pinyin": "sū",
+          "audio": "su1",
+          "words": [
+            "苏醒",
+            "复苏"
+          ]
+        },
+        {
+          "character": "驻",
+          "pinyin": "zhù",
+          "audio": "zhu4",
+          "words": [
+            "驻守",
+            "驻地"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-02",
+      "number": 2,
+      "title": "第2组",
+      "entries": [
+        {
+          "character": "砂",
+          "pinyin": "shā",
+          "audio": "sha1",
+          "words": [
+            "砂石",
+            "砂纸"
+          ]
+        },
+        {
+          "character": "挫",
+          "pinyin": "cuò",
+          "audio": "cuo4",
+          "words": [
+            "挫折",
+            "挫败"
+          ]
+        },
+        {
+          "character": "埃",
+          "pinyin": "āi",
+          "audio": "ai1",
+          "words": [
+            "尘埃",
+            "埃及"
+          ]
+        },
+        {
+          "character": "耽",
+          "pinyin": "dān",
+          "audio": "dan1",
+          "words": [
+            "耽误",
+            "耽搁"
+          ]
+        },
+        {
+          "character": "雀",
+          "pinyin": "què",
+          "audio": "que4",
+          "words": [
+            "麻雀",
+            "孔雀"
+          ]
+        },
+        {
+          "character": "淘",
+          "pinyin": "táo",
+          "audio": "tao2",
+          "words": [
+            "淘气",
+            "淘米"
+          ]
+        },
+        {
+          "character": "渣",
+          "pinyin": "zhā",
+          "audio": "zha1",
+          "words": [
+            "豆渣",
+            "残渣"
+          ]
+        },
+        {
+          "character": "慨",
+          "pinyin": "kǎi",
+          "audio": "kai3",
+          "words": [
+            "感慨",
+            "慷慨"
+          ]
+        },
+        {
+          "character": "鉴",
+          "pinyin": "jiàn",
+          "audio": "jian4",
+          "words": [
+            "鉴别",
+            "借鉴"
+          ]
+        },
+        {
+          "character": "蔬",
+          "pinyin": "shū",
+          "audio": "shu1",
+          "words": [
+            "蔬菜",
+            "果蔬"
+          ]
+        },
+        {
+          "character": "躁",
+          "pinyin": "zào",
+          "audio": "zao4",
+          "words": [
+            "急躁",
+            "暴躁"
+          ]
+        },
+        {
+          "character": "辽",
+          "pinyin": "liáo",
+          "audio": "liao2",
+          "words": [
+            "辽阔",
+            "辽宁"
+          ]
+        },
+        {
+          "character": "吁",
+          "pinyin": "xū",
+          "audio": "xu1",
+          "words": [
+            "长吁短叹",
+            "气喘吁吁"
+          ]
+        },
+        {
+          "character": "扰",
+          "pinyin": "rǎo",
+          "audio": "rao3",
+          "words": [
+            "打扰",
+            "干扰"
+          ]
+        },
+        {
+          "character": "苇",
+          "pinyin": "wěi",
+          "audio": "wei3",
+          "words": [
+            "芦苇",
+            "苇席"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-03",
+      "number": 3,
+      "title": "第3组",
+      "entries": [
+        {
+          "character": "邮",
+          "pinyin": "yóu",
+          "audio": "you2",
+          "words": [
+            "邮票",
+            "邮局"
+          ]
+        },
+        {
+          "character": "诊",
+          "pinyin": "zhěn",
+          "audio": "zhen3",
+          "words": [
+            "诊断",
+            "门诊"
+          ]
+        },
+        {
+          "character": "怖",
+          "pinyin": "bù",
+          "audio": "bu4",
+          "words": [
+            "恐怖",
+            "可怖"
+          ]
+        },
+        {
+          "character": "陌",
+          "pinyin": "mò",
+          "audio": "mo4",
+          "words": [
+            "陌生",
+            "阡陌"
+          ]
+        },
+        {
+          "character": "侮",
+          "pinyin": "wǔ",
+          "audio": "wu3",
+          "words": [
+            "侮辱",
+            "欺侮"
+          ]
+        },
+        {
+          "character": "胧",
+          "pinyin": "lóng",
+          "audio": "long2",
+          "words": [
+            "朦胧",
+            "月色朦胧"
+          ]
+        },
+        {
+          "character": "循",
+          "pinyin": "xún",
+          "audio": "xun2",
+          "words": [
+            "循环",
+            "遵循"
+          ]
+        },
+        {
+          "character": "塌",
+          "pinyin": "tā",
+          "audio": "ta1",
+          "words": [
+            "倒塌",
+            "塌陷"
+          ]
+        },
+        {
+          "character": "缠",
+          "pinyin": "chán",
+          "audio": "chan2",
+          "words": [
+            "纠缠",
+            "缠绕"
+          ]
+        },
+        {
+          "character": "瞒",
+          "pinyin": "mán",
+          "audio": "man2",
+          "words": [
+            "隐瞒",
+            "欺瞒"
+          ]
+        },
+        {
+          "character": "朦",
+          "pinyin": "méng",
+          "audio": "meng2",
+          "words": [
+            "朦胧",
+            "月色朦胧"
+          ]
+        },
+        {
+          "character": "燥",
+          "pinyin": "zào",
+          "audio": "zao4",
+          "words": [
+            "干燥",
+            "燥热"
+          ]
+        },
+        {
+          "character": "丑",
+          "pinyin": "chǒu",
+          "audio": "chou3",
+          "words": [
+            "丑陋",
+            "出丑"
+          ]
+        },
+        {
+          "character": "扒",
+          "pinyin": "bā",
+          "audio": "ba1",
+          "words": [
+            "扒拉",
+            "扒车"
+          ]
+        },
+        {
+          "character": "凸",
+          "pinyin": "tū",
+          "audio": "tu1",
+          "words": [
+            "凸起",
+            "凸面"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-04",
+      "number": 4,
+      "title": "第4组",
+      "entries": [
+        {
+          "character": "凹",
+          "pinyin": "āo",
+          "audio": "ao1",
+          "words": [
+            "凹陷",
+            "凹面"
+          ]
+        },
+        {
+          "character": "芽",
+          "pinyin": "yá",
+          "audio": "ya2",
+          "words": [
+            "发芽",
+            "嫩芽"
+          ]
+        },
+        {
+          "character": "宏",
+          "pinyin": "hóng",
+          "audio": "hong2",
+          "words": [
+            "宏大",
+            "宏伟"
+          ]
+        },
+        {
+          "character": "虏",
+          "pinyin": "lǔ",
+          "audio": "lu3",
+          "words": [
+            "俘虏",
+            "敌虏"
+          ]
+        },
+        {
+          "character": "刹",
+          "pinyin": "shā",
+          "audio": "sha1",
+          "words": [
+            "刹车",
+            "急刹"
+          ]
+        },
+        {
+          "character": "俘",
+          "pinyin": "fú",
+          "audio": "fu2",
+          "words": [
+            "俘虏",
+            "被俘"
+          ]
+        },
+        {
+          "character": "狭",
+          "pinyin": "xiá",
+          "audio": "xia2",
+          "words": [
+            "狭窄",
+            "狭小"
+          ]
+        },
+        {
+          "character": "陡",
+          "pinyin": "dǒu",
+          "audio": "dou3",
+          "words": [
+            "陡峭",
+            "陡坡"
+          ]
+        },
+        {
+          "character": "逝",
+          "pinyin": "shì",
+          "audio": "shi4",
+          "words": [
+            "逝世",
+            "流逝"
+          ]
+        },
+        {
+          "character": "贼",
+          "pinyin": "zéi",
+          "audio": "zei2",
+          "words": [
+            "盗贼",
+            "乌贼"
+          ]
+        },
+        {
+          "character": "颂",
+          "pinyin": "sòng",
+          "audio": "song4",
+          "words": [
+            "歌颂",
+            "颂扬"
+          ]
+        },
+        {
+          "character": "陵",
+          "pinyin": "líng",
+          "audio": "ling2",
+          "words": [
+            "丘陵",
+            "陵园"
+          ]
+        },
+        {
+          "character": "梢",
+          "pinyin": "shāo",
+          "audio": "shao1",
+          "words": [
+            "树梢",
+            "眉梢"
+          ]
+        },
+        {
+          "character": "辅",
+          "pinyin": "fǔ",
+          "audio": "fu3",
+          "words": [
+            "辅助",
+            "辅导"
+          ]
+        },
+        {
+          "character": "辐",
+          "pinyin": "fú",
+          "audio": "fu2",
+          "words": [
+            "辐射",
+            "轮辐"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-05",
+      "number": 5,
+      "title": "第5组",
+      "entries": [
+        {
+          "character": "碱",
+          "pinyin": "jiǎn",
+          "audio": "jian3",
+          "words": [
+            "碱性",
+            "烧碱"
+          ]
+        },
+        {
+          "character": "懒",
+          "pinyin": "lǎn",
+          "audio": "lan3",
+          "words": [
+            "懒惰",
+            "偷懒"
+          ]
+        },
+        {
+          "character": "夕",
+          "pinyin": "xī",
+          "audio": "xi1",
+          "words": [
+            "夕阳",
+            "除夕"
+          ]
+        },
+        {
+          "character": "爪",
+          "pinyin": "zhǎo",
+          "audio": "zhao3",
+          "words": [
+            "鹰爪",
+            "爪牙"
+          ]
+        },
+        {
+          "character": "丙",
+          "pinyin": "bǐng",
+          "audio": "bing3",
+          "words": [
+            "丙级",
+            "丙方"
+          ]
+        },
+        {
+          "character": "屿",
+          "pinyin": "yǔ",
+          "audio": "yu3",
+          "words": [
+            "岛屿",
+            "小屿"
+          ]
+        },
+        {
+          "character": "州",
+          "pinyin": "zhōu",
+          "audio": "zhou1",
+          "words": [
+            "神州",
+            "州府"
+          ]
+        },
+        {
+          "character": "吞",
+          "pinyin": "tūn",
+          "audio": "tun1",
+          "words": [
+            "吞咽",
+            "吞没"
+          ]
+        },
+        {
+          "character": "汹",
+          "pinyin": "xiōng",
+          "audio": "xiong1",
+          "words": [
+            "汹涌",
+            "气势汹汹"
+          ]
+        },
+        {
+          "character": "贪",
+          "pinyin": "tān",
+          "audio": "tan1",
+          "words": [
+            "贪心",
+            "贪玩"
+          ]
+        },
+        {
+          "character": "竖",
+          "pinyin": "shù",
+          "audio": "shu4",
+          "words": [
+            "竖立",
+            "横竖"
+          ]
+        },
+        {
+          "character": "哆",
+          "pinyin": "duō",
+          "audio": "duo1",
+          "words": [
+            "哆嗦",
+            "哆哆嗦嗦"
+          ]
+        },
+        {
+          "character": "竿",
+          "pinyin": "gān",
+          "audio": "gan1",
+          "words": [
+            "竹竿",
+            "钓竿"
+          ]
+        },
+        {
+          "character": "浊",
+          "pinyin": "zhuó",
+          "audio": "zhuo2",
+          "words": [
+            "浑浊",
+            "污浊"
+          ]
+        },
+        {
+          "character": "蚊",
+          "pinyin": "wén",
+          "audio": "wen2",
+          "words": [
+            "蚊子",
+            "蚊虫"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-06",
+      "number": 6,
+      "title": "第6组",
+      "entries": [
+        {
+          "character": "烫",
+          "pinyin": "tàng",
+          "audio": "tang4",
+          "words": [
+            "滚烫",
+            "烫伤"
+          ]
+        },
+        {
+          "character": "谊",
+          "pinyin": "yì",
+          "audio": "yi4",
+          "words": [
+            "友谊",
+            "情谊"
+          ]
+        },
+        {
+          "character": "梳",
+          "pinyin": "shū",
+          "audio": "shu1",
+          "words": [
+            "梳子",
+            "梳理"
+          ]
+        },
+        {
+          "character": "淀",
+          "pinyin": "diàn",
+          "audio": "dian4",
+          "words": [
+            "沉淀",
+            "淀粉"
+          ]
+        },
+        {
+          "character": "绷",
+          "pinyin": "běng",
+          "audio": "beng3",
+          "words": [
+            "绷脸",
+            "绷紧"
+          ]
+        },
+        {
+          "character": "翘",
+          "pinyin": "qiào",
+          "audio": "qiao4",
+          "words": [
+            "翘起",
+            "翘尾巴"
+          ]
+        },
+        {
+          "character": "嗦",
+          "pinyin": "suō",
+          "audio": "suo1",
+          "words": [
+            "哆嗦",
+            "啰嗦"
+          ]
+        },
+        {
+          "character": "遣",
+          "pinyin": "qiǎn",
+          "audio": "qian3",
+          "words": [
+            "派遣",
+            "遣返"
+          ]
+        },
+        {
+          "character": "黎",
+          "pinyin": "lí",
+          "audio": "li2",
+          "words": [
+            "黎明",
+            "黎族"
+          ]
+        },
+        {
+          "character": "艘",
+          "pinyin": "sōu",
+          "audio": "sou1",
+          "words": [
+            "一艘船",
+            "两艘船"
+          ]
+        },
+        {
+          "character": "邀",
+          "pinyin": "yāo",
+          "audio": "yao1",
+          "words": [
+            "邀请",
+            "应邀"
+          ]
+        },
+        {
+          "character": "乒",
+          "pinyin": "pīng",
+          "audio": "ping1",
+          "words": [
+            "乒乓",
+            "乒乓球"
+          ]
+        },
+        {
+          "character": "乓",
+          "pinyin": "pāng",
+          "audio": "pang1",
+          "words": [
+            "乒乓",
+            "乒乓球"
+          ]
+        },
+        {
+          "character": "华",
+          "pinyin": "huá",
+          "audio": "hua2",
+          "words": [
+            "中华",
+            "华丽"
+          ]
+        },
+        {
+          "character": "茂",
+          "pinyin": "mào",
+          "audio": "mao4",
+          "words": [
+            "茂盛",
+            "繁茂"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-07",
+      "number": 7,
+      "title": "第7组",
+      "entries": [
+        {
+          "character": "佩",
+          "pinyin": "pèi",
+          "audio": "pei4",
+          "words": [
+            "佩服",
+            "佩戴"
+          ]
+        },
+        {
+          "character": "柄",
+          "pinyin": "bǐng",
+          "audio": "bing3",
+          "words": [
+            "手柄",
+            "刀柄"
+          ]
+        },
+        {
+          "character": "耍",
+          "pinyin": "shuǎ",
+          "audio": "shua3",
+          "words": [
+            "玩耍",
+            "耍弄"
+          ]
+        },
+        {
+          "character": "贱",
+          "pinyin": "jiàn",
+          "audio": "jian4",
+          "words": [
+            "低贱",
+            "贵贱"
+          ]
+        },
+        {
+          "character": "矩",
+          "pinyin": "jǔ",
+          "audio": "ju3",
+          "words": [
+            "规矩",
+            "老规矩"
+          ]
+        },
+        {
+          "character": "烁",
+          "pinyin": "shuò",
+          "audio": "shuo4",
+          "words": [
+            "闪烁",
+            "烁亮"
+          ]
+        },
+        {
+          "character": "昼",
+          "pinyin": "zhòu",
+          "audio": "zhou4",
+          "words": [
+            "白昼",
+            "昼夜"
+          ]
+        },
+        {
+          "character": "聊",
+          "pinyin": "liáo",
+          "audio": "liao2",
+          "words": [
+            "聊天",
+            "无聊"
+          ]
+        },
+        {
+          "character": "铲",
+          "pinyin": "chǎn",
+          "audio": "chan3",
+          "words": [
+            "铲子",
+            "铲土"
+          ]
+        },
+        {
+          "character": "堪",
+          "pinyin": "kān",
+          "audio": "kan1",
+          "words": [
+            "难堪",
+            "不堪"
+          ]
+        },
+        {
+          "character": "毯",
+          "pinyin": "tǎn",
+          "audio": "tan3",
+          "words": [
+            "毛毯",
+            "地毯"
+          ]
+        },
+        {
+          "character": "橡",
+          "pinyin": "xiàng",
+          "audio": "xiang4",
+          "words": [
+            "橡树",
+            "橡皮"
+          ]
+        },
+        {
+          "character": "膛",
+          "pinyin": "táng",
+          "audio": "tang2",
+          "words": [
+            "胸膛",
+            "枪膛"
+          ]
+        },
+        {
+          "character": "潭",
+          "pinyin": "tán",
+          "audio": "tan2",
+          "words": [
+            "水潭",
+            "深潭"
+          ]
+        },
+        {
+          "character": "卡",
+          "pinyin": "kǎ",
+          "audio": "ka3",
+          "words": [
+            "卡片",
+            "卡车"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-08",
+      "number": 8,
+      "title": "第8组",
+      "entries": [
+        {
+          "character": "圣",
+          "pinyin": "shèng",
+          "audio": "sheng4",
+          "words": [
+            "神圣",
+            "圣洁"
+          ]
+        },
+        {
+          "character": "囱",
+          "pinyin": "cōng",
+          "audio": "cong1",
+          "words": [
+            "烟囱",
+            "囱口"
+          ]
+        },
+        {
+          "character": "甸",
+          "pinyin": "diān",
+          "audio": "dian1",
+          "words": [
+            "沉甸甸",
+            "沉甸甸的"
+          ]
+        },
+        {
+          "character": "沥",
+          "pinyin": "lì",
+          "audio": "li4",
+          "words": [
+            "沥青",
+            "淅沥"
+          ]
+        },
+        {
+          "character": "垄",
+          "pinyin": "lǒng",
+          "audio": "long3",
+          "words": [
+            "田垄",
+            "垄断"
+          ]
+        },
+        {
+          "character": "氛",
+          "pinyin": "fēn",
+          "audio": "fen1",
+          "words": [
+            "气氛",
+            "氛围"
+          ]
+        },
+        {
+          "character": "荔",
+          "pinyin": "lì",
+          "audio": "li4",
+          "words": [
+            "荔枝",
+            "荔枝树"
+          ]
+        },
+        {
+          "character": "卸",
+          "pinyin": "xiè",
+          "audio": "xie4",
+          "words": [
+            "卸货",
+            "拆卸"
+          ]
+        },
+        {
+          "character": "垒",
+          "pinyin": "lěi",
+          "audio": "lei3",
+          "words": [
+            "堡垒",
+            "垒球"
+          ]
+        },
+        {
+          "character": "倦",
+          "pinyin": "juàn",
+          "audio": "juan4",
+          "words": [
+            "疲倦",
+            "困倦"
+          ]
+        },
+        {
+          "character": "巢",
+          "pinyin": "cháo",
+          "audio": "chao2",
+          "words": [
+            "鸟巢",
+            "蜂巢"
+          ]
+        },
+        {
+          "character": "葫",
+          "pinyin": "hú",
+          "audio": "hu2",
+          "words": [
+            "葫芦",
+            "水葫芦"
+          ]
+        },
+        {
+          "character": "鹊",
+          "pinyin": "què",
+          "audio": "que4",
+          "words": [
+            "喜鹊",
+            "灰喜鹊"
+          ]
+        },
+        {
+          "character": "赖",
+          "pinyin": "lài",
+          "audio": "lai4",
+          "words": [
+            "依赖",
+            "无赖"
+          ]
+        },
+        {
+          "character": "锣",
+          "pinyin": "luó",
+          "audio": "luo2",
+          "words": [
+            "铜锣",
+            "敲锣"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-09",
+      "number": 9,
+      "title": "第9组",
+      "entries": [
+        {
+          "character": "寡",
+          "pinyin": "guǎ",
+          "audio": "gua3",
+          "words": [
+            "寡言",
+            "寡淡"
+          ]
+        },
+        {
+          "character": "嘲",
+          "pinyin": "cháo",
+          "audio": "chao2",
+          "words": [
+            "嘲笑",
+            "嘲讽"
+          ]
+        },
+        {
+          "character": "蹦",
+          "pinyin": "bèng",
+          "audio": "beng4",
+          "words": [
+            "蹦跳",
+            "蹦床"
+          ]
+        },
+        {
+          "character": "乃",
+          "pinyin": "nǎi",
+          "audio": "nai3",
+          "words": [
+            "乃至",
+            "乃是"
+          ]
+        },
+        {
+          "character": "讼",
+          "pinyin": "sòng",
+          "audio": "song4",
+          "words": [
+            "诉讼",
+            "争讼"
+          ]
+        },
+        {
+          "character": "驮",
+          "pinyin": "tuó",
+          "audio": "tuo2",
+          "words": [
+            "驮运",
+            "驮着"
+          ]
+        },
+        {
+          "character": "旺",
+          "pinyin": "wàng",
+          "audio": "wang4",
+          "words": [
+            "旺盛",
+            "兴旺"
+          ]
+        },
+        {
+          "character": "忠",
+          "pinyin": "zhōng",
+          "audio": "zhong1",
+          "words": [
+            "忠诚",
+            "忠实"
+          ]
+        },
+        {
+          "character": "昧",
+          "pinyin": "mèi",
+          "audio": "mei4",
+          "words": [
+            "愚昧",
+            "冒昧"
+          ]
+        },
+        {
+          "character": "拜",
+          "pinyin": "bài",
+          "audio": "bai4",
+          "words": [
+            "拜访",
+            "崇拜"
+          ]
+        },
+        {
+          "character": "恼",
+          "pinyin": "nǎo",
+          "audio": "nao3",
+          "words": [
+            "烦恼",
+            "恼火"
+          ]
+        },
+        {
+          "character": "绒",
+          "pinyin": "róng",
+          "audio": "rong2",
+          "words": [
+            "绒毛",
+            "羽绒"
+          ]
+        },
+        {
+          "character": "络",
+          "pinyin": "luò",
+          "audio": "luo4",
+          "words": [
+            "网络",
+            "联络"
+          ]
+        },
+        {
+          "character": "轿",
+          "pinyin": "jiào",
+          "audio": "jiao4",
+          "words": [
+            "轿车",
+            "花轿"
+          ]
+        },
+        {
+          "character": "脯",
+          "pinyin": "pú",
+          "audio": "pu2",
+          "words": [
+            "胸脯",
+            "果脯"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-10",
+      "number": 10,
+      "title": "第10组",
+      "entries": [
+        {
+          "character": "搀",
+          "pinyin": "chān",
+          "audio": "chan1",
+          "words": [
+            "搀扶",
+            "搀着"
+          ]
+        },
+        {
+          "character": "滋",
+          "pinyin": "zī",
+          "audio": "zi1",
+          "words": [
+            "滋味",
+            "滋润"
+          ]
+        },
+        {
+          "character": "署",
+          "pinyin": "shǔ",
+          "audio": "shu3",
+          "words": [
+            "署名",
+            "部署"
+          ]
+        },
+        {
+          "character": "竭",
+          "pinyin": "jié",
+          "audio": "jie2",
+          "words": [
+            "竭力",
+            "枯竭"
+          ]
+        },
+        {
+          "character": "磷",
+          "pinyin": "lín",
+          "audio": "lin2",
+          "words": [
+            "磷火",
+            "磷肥"
+          ]
+        },
+        {
+          "character": "覆",
+          "pinyin": "fù",
+          "audio": "fu4",
+          "words": [
+            "覆盖",
+            "颠覆"
+          ]
+        },
+        {
+          "character": "霸",
+          "pinyin": "bà",
+          "audio": "ba4",
+          "words": [
+            "霸占",
+            "霸王"
+          ]
+        },
+        {
+          "character": "尔",
+          "pinyin": "ěr",
+          "audio": "er3",
+          "words": [
+            "偶尔",
+            "尔后"
+          ]
+        },
+        {
+          "character": "亚",
+          "pinyin": "yà",
+          "audio": "ya4",
+          "words": [
+            "亚洲",
+            "亚军"
+          ]
+        },
+        {
+          "character": "劣",
+          "pinyin": "liè",
+          "audio": "lie4",
+          "words": [
+            "恶劣",
+            "优劣"
+          ]
+        },
+        {
+          "character": "驳",
+          "pinyin": "bó",
+          "audio": "bo2",
+          "words": [
+            "反驳",
+            "驳回"
+          ]
+        },
+        {
+          "character": "纽",
+          "pinyin": "niǔ",
+          "audio": "niu3",
+          "words": [
+            "纽扣",
+            "枢纽"
+          ]
+        },
+        {
+          "character": "枉",
+          "pinyin": "wǎng",
+          "audio": "wang3",
+          "words": [
+            "冤枉",
+            "不冤枉"
+          ]
+        },
+        {
+          "character": "顷",
+          "pinyin": "qǐng",
+          "audio": "qing3",
+          "words": [
+            "公顷",
+            "顷刻"
+          ]
+        },
+        {
+          "character": "咙",
+          "pinyin": "lóng",
+          "audio": "long2",
+          "words": [
+            "喉咙",
+            "嗓咙"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-11",
+      "number": 11,
+      "title": "第11组",
+      "entries": [
+        {
+          "character": "郊",
+          "pinyin": "jiāo",
+          "audio": "jiao1",
+          "words": [
+            "郊外",
+            "郊区"
+          ]
+        },
+        {
+          "character": "衫",
+          "pinyin": "shān",
+          "audio": "shan1",
+          "words": [
+            "衬衫",
+            "衣衫"
+          ]
+        },
+        {
+          "character": "奏",
+          "pinyin": "zòu",
+          "audio": "zou4",
+          "words": [
+            "演奏",
+            "奏乐"
+          ]
+        },
+        {
+          "character": "罚",
+          "pinyin": "fá",
+          "audio": "fa2",
+          "words": [
+            "处罚",
+            "罚款"
+          ]
+        },
+        {
+          "character": "捡",
+          "pinyin": "jiǎn",
+          "audio": "jian3",
+          "words": [
+            "捡起",
+            "捡拾"
+          ]
+        },
+        {
+          "character": "徐",
+          "pinyin": "xú",
+          "audio": "xu2",
+          "words": [
+            "徐徐",
+            "徐步"
+          ]
+        },
+        {
+          "character": "盔",
+          "pinyin": "kuī",
+          "audio": "kui1",
+          "words": [
+            "头盔",
+            "钢盔"
+          ]
+        },
+        {
+          "character": "粘",
+          "pinyin": "zhān",
+          "audio": "zhan1",
+          "words": [
+            "粘贴",
+            "粘住"
+          ]
+        },
+        {
+          "character": "猩",
+          "pinyin": "xīng",
+          "audio": "xing1",
+          "words": [
+            "猩猩",
+            "黑猩猩"
+          ]
+        },
+        {
+          "character": "奠",
+          "pinyin": "diàn",
+          "audio": "dian4",
+          "words": [
+            "奠定",
+            "祭奠"
+          ]
+        },
+        {
+          "character": "谦",
+          "pinyin": "qiān",
+          "audio": "qian1",
+          "words": [
+            "谦虚",
+            "谦让"
+          ]
+        },
+        {
+          "character": "搏",
+          "pinyin": "bó",
+          "audio": "bo2",
+          "words": [
+            "搏斗",
+            "拼搏"
+          ]
+        },
+        {
+          "character": "煌",
+          "pinyin": "huáng",
+          "audio": "huang2",
+          "words": [
+            "辉煌",
+            "金碧辉煌"
+          ]
+        },
+        {
+          "character": "窟",
+          "pinyin": "kū",
+          "audio": "ku1",
+          "words": [
+            "石窟",
+            "洞窟"
+          ]
+        },
+        {
+          "character": "谬",
+          "pinyin": "miù",
+          "audio": "miu4",
+          "words": [
+            "荒谬",
+            "谬误"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-12",
+      "number": 12,
+      "title": "第12组",
+      "entries": [
+        {
+          "character": "嫩",
+          "pinyin": "nèn",
+          "audio": "nen4",
+          "words": [
+            "嫩芽",
+            "鲜嫩"
+          ]
+        },
+        {
+          "character": "窿",
+          "pinyin": "lóng",
+          "audio": "long2",
+          "words": [
+            "窟窿",
+            "冰窟窿"
+          ]
+        },
+        {
+          "character": "卜",
+          "pinyin": "bǔ",
+          "audio": "bu3",
+          "words": [
+            "萝卜",
+            "胡萝卜"
+          ]
+        },
+        {
+          "character": "叭",
+          "pinyin": "bā",
+          "audio": "ba1",
+          "words": [
+            "喇叭",
+            "吹喇叭"
+          ]
+        },
+        {
+          "character": "旬",
+          "pinyin": "xún",
+          "audio": "xun2",
+          "words": [
+            "上旬",
+            "中旬"
+          ]
+        },
+        {
+          "character": "灶",
+          "pinyin": "zào",
+          "audio": "zao4",
+          "words": [
+            "炉灶",
+            "灶台"
+          ]
+        },
+        {
+          "character": "奉",
+          "pinyin": "fèng",
+          "audio": "feng4",
+          "words": [
+            "奉献",
+            "奉命"
+          ]
+        },
+        {
+          "character": "杰",
+          "pinyin": "jié",
+          "audio": "jie2",
+          "words": [
+            "杰出",
+            "豪杰"
+          ]
+        },
+        {
+          "character": "氓",
+          "pinyin": "máng",
+          "audio": "mang2",
+          "words": [
+            "流氓",
+            "群氓"
+          ]
+        },
+        {
+          "character": "沸",
+          "pinyin": "fèi",
+          "audio": "fei4",
+          "words": [
+            "沸腾",
+            "沸水"
+          ]
+        },
+        {
+          "character": "弥",
+          "pinyin": "mí",
+          "audio": "mi2",
+          "words": [
+            "弥补",
+            "弥漫"
+          ]
+        },
+        {
+          "character": "钞",
+          "pinyin": "chāo",
+          "audio": "chao1",
+          "words": [
+            "钞票",
+            "现钞"
+          ]
+        },
+        {
+          "character": "涤",
+          "pinyin": "dí",
+          "audio": "di2",
+          "words": [
+            "洗涤",
+            "涤荡"
+          ]
+        },
+        {
+          "character": "萝",
+          "pinyin": "luó",
+          "audio": "luo2",
+          "words": [
+            "萝卜",
+            "菠萝"
+          ]
+        },
+        {
+          "character": "阐",
+          "pinyin": "chǎn",
+          "audio": "chan3",
+          "words": [
+            "阐述",
+            "阐明"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-13",
+      "number": 13,
+      "title": "第13组",
+      "entries": [
+        {
+          "character": "揍",
+          "pinyin": "zòu",
+          "audio": "zou4",
+          "words": [
+            "挨揍",
+            "揍人"
+          ]
+        },
+        {
+          "character": "搂",
+          "pinyin": "lǒu",
+          "audio": "lou3",
+          "words": [
+            "搂抱",
+            "搂住"
+          ]
+        },
+        {
+          "character": "喇",
+          "pinyin": "lǎ",
+          "audio": "la3",
+          "words": [
+            "喇叭",
+            "哈喇"
+          ]
+        },
+        {
+          "character": "储",
+          "pinyin": "chǔ",
+          "audio": "chu3",
+          "words": [
+            "储存",
+            "储蓄"
+          ]
+        },
+        {
+          "character": "雇",
+          "pinyin": "gù",
+          "audio": "gu4",
+          "words": [
+            "雇用",
+            "雇主"
+          ]
+        },
+        {
+          "character": "锡",
+          "pinyin": "xī",
+          "audio": "xi1",
+          "words": [
+            "锡纸",
+            "无锡"
+          ]
+        },
+        {
+          "character": "剿",
+          "pinyin": "jiǎo",
+          "audio": "jiao3",
+          "words": [
+            "围剿",
+            "剿灭"
+          ]
+        },
+        {
+          "character": "誓",
+          "pinyin": "shì",
+          "audio": "shi4",
+          "words": [
+            "发誓",
+            "誓言"
+          ]
+        },
+        {
+          "character": "赚",
+          "pinyin": "zhuàn",
+          "audio": "zhuan4",
+          "words": [
+            "赚钱",
+            "赚取"
+          ]
+        },
+        {
+          "character": "辣",
+          "pinyin": "là",
+          "audio": "la4",
+          "words": [
+            "辣椒",
+            "辛辣"
+          ]
+        },
+        {
+          "character": "毅",
+          "pinyin": "yì",
+          "audio": "yi4",
+          "words": [
+            "毅力",
+            "坚毅"
+          ]
+        },
+        {
+          "character": "融",
+          "pinyin": "róng",
+          "audio": "rong2",
+          "words": [
+            "融化",
+            "融合"
+          ]
+        },
+        {
+          "character": "址",
+          "pinyin": "zhǐ",
+          "audio": "zhi3",
+          "words": [
+            "地址",
+            "住址"
+          ]
+        },
+        {
+          "character": "坝",
+          "pinyin": "bà",
+          "audio": "ba4",
+          "words": [
+            "大坝",
+            "堤坝"
+          ]
+        },
+        {
+          "character": "吟",
+          "pinyin": "yín",
+          "audio": "yin2",
+          "words": [
+            "吟诵",
+            "吟唱"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-14",
+      "number": 14,
+      "title": "第14组",
+      "entries": [
+        {
+          "character": "伺",
+          "pinyin": "cì",
+          "audio": "ci4",
+          "words": [
+            "伺候",
+            "伺候人"
+          ]
+        },
+        {
+          "character": "陈",
+          "pinyin": "chén",
+          "audio": "chen2",
+          "words": [
+            "陈列",
+            "陈旧"
+          ]
+        },
+        {
+          "character": "坯",
+          "pinyin": "pī",
+          "audio": "pi1",
+          "words": [
+            "土坯",
+            "砖坯"
+          ]
+        },
+        {
+          "character": "拐",
+          "pinyin": "guǎi",
+          "audio": "guai3",
+          "words": [
+            "拐弯",
+            "拐杖"
+          ]
+        },
+        {
+          "character": "乳",
+          "pinyin": "rǔ",
+          "audio": "ru3",
+          "words": [
+            "乳汁",
+            "乳白"
+          ]
+        },
+        {
+          "character": "肿",
+          "pinyin": "zhǒng",
+          "audio": "zhong3",
+          "words": [
+            "红肿",
+            "肿痛"
+          ]
+        },
+        {
+          "character": "询",
+          "pinyin": "xún",
+          "audio": "xun2",
+          "words": [
+            "询问",
+            "咨询"
+          ]
+        },
+        {
+          "character": "垫",
+          "pinyin": "diàn",
+          "audio": "dian4",
+          "words": [
+            "坐垫",
+            "垫子"
+          ]
+        },
+        {
+          "character": "砌",
+          "pinyin": "qì",
+          "audio": "qi4",
+          "words": [
+            "砌墙",
+            "堆砌"
+          ]
+        },
+        {
+          "character": "恍",
+          "pinyin": "huǎng",
+          "audio": "huang3",
+          "words": [
+            "恍然",
+            "恍惚"
+          ]
+        },
+        {
+          "character": "剖",
+          "pinyin": "pōu",
+          "audio": "pou1",
+          "words": [
+            "剖开",
+            "解剖"
+          ]
+        },
+        {
+          "character": "诸",
+          "pinyin": "zhū",
+          "audio": "zhu1",
+          "words": [
+            "诸位",
+            "诸多"
+          ]
+        },
+        {
+          "character": "逻",
+          "pinyin": "luó",
+          "audio": "luo2",
+          "words": [
+            "逻辑",
+            "巡逻"
+          ]
+        },
+        {
+          "character": "惭",
+          "pinyin": "cán",
+          "audio": "can2",
+          "words": [
+            "惭愧",
+            "羞惭"
+          ]
+        },
+        {
+          "character": "绸",
+          "pinyin": "chóu",
+          "audio": "chou2",
+          "words": [
+            "丝绸",
+            "绸缎"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "g4f-15",
+      "number": 15,
+      "title": "第15组",
+      "entries": [
+        {
+          "character": "赔",
+          "pinyin": "péi",
+          "audio": "pei2",
+          "words": [
+            "赔偿",
+            "赔钱"
+          ]
+        },
+        {
+          "character": "鹅",
+          "pinyin": "é",
+          "audio": "e2",
+          "words": [
+            "天鹅",
+            "白鹅"
+          ]
+        },
+        {
+          "character": "堡",
+          "pinyin": "bǎo",
+          "audio": "bao3",
+          "words": [
+            "城堡",
+            "堡垒"
+          ]
+        },
+        {
+          "character": "羡",
+          "pinyin": "xiàn",
+          "audio": "xian4",
+          "words": [
+            "羡慕",
+            "艳羡"
+          ]
+        },
+        {
+          "character": "蓬",
+          "pinyin": "péng",
+          "audio": "peng2",
+          "words": [
+            "蓬松",
+            "莲蓬"
+          ]
+        },
+        {
+          "character": "腹",
+          "pinyin": "fù",
+          "audio": "fu4",
+          "words": [
+            "腹部",
+            "空腹"
+          ]
+        },
+        {
+          "character": "慕",
+          "pinyin": "mù",
+          "audio": "mu4",
+          "words": [
+            "羡慕",
+            "仰慕"
+          ]
+        },
+        {
+          "character": "忧",
+          "pinyin": "yōu",
+          "audio": "you1",
+          "words": [
+            "忧愁",
+            "担忧"
+          ]
+        },
+        {
+          "character": "泌",
+          "pinyin": "mì",
+          "audio": "mi4",
+          "words": [
+            "分泌",
+            "泌尿"
+          ]
+        },
+        {
+          "character": "饶",
+          "pinyin": "ráo",
+          "audio": "rao2",
+          "words": [
+            "富饶",
+            "求饶"
+          ]
+        },
+        {
+          "character": "捣",
+          "pinyin": "dǎo",
+          "audio": "dao3",
+          "words": [
+            "捣乱",
+            "捣碎"
+          ]
+        },
+        {
+          "character": "档",
+          "pinyin": "dàng",
+          "audio": "dang4",
+          "words": [
+            "档案",
+            "高档"
+          ]
+        },
+        {
+          "character": "悦",
+          "pinyin": "yuè",
+          "audio": "yue4",
+          "words": [
+            "喜悦",
+            "愉悦"
+          ]
+        },
+        {
+          "character": "陶",
+          "pinyin": "táo",
+          "audio": "tao2",
+          "words": [
+            "陶瓷",
+            "陶醉"
+          ]
+        },
+        {
+          "character": "匾",
+          "pinyin": "biǎn",
+          "audio": "bian3",
+          "words": [
+            "牌匾",
+            "匾额"
+          ]
+        }
+      ]
+    }
+  ]
+}

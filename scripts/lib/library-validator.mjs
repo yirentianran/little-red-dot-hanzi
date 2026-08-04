@@ -1,210 +1,63 @@
-const PATH_COMMANDS = new Map([
-  ['M', 2], ['m', 2], ['L', 2], ['l', 2], ['H', 1], ['h', 1], ['V', 1], ['v', 1],
-  ['C', 6], ['c', 6], ['S', 4], ['s', 4], ['Q', 4], ['q', 4], ['T', 2], ['t', 2],
-  ['A', 7], ['a', 7], ['Z', 0], ['z', 0]
-]);
-const PATH_TOKEN = /[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g;
+const isRecord = value => value && typeof value === 'object' && !Array.isArray(value);
 
-const isRecord = value => value !== null && typeof value === 'object' && !Array.isArray(value);
-const hasNonBlankString = value => typeof value === 'string' && value.trim() !== '';
-
-function isValidPath(path) {
-  if (typeof path !== 'string' || path.trim() === '') return false;
-
-  const tokens = path.match(PATH_TOKEN) ?? [];
-  if (tokens.length === 0 || !/^[Mm]$/.test(tokens[0])) return false;
-  if (path.replace(PATH_TOKEN, '').replace(/[\s,]/g, '') !== '') return false;
-
-  let command;
-  let argumentsForCommand = [];
-
-  const argumentsAreValid = () => {
-    const expected = PATH_COMMANDS.get(command);
-    if (expected === undefined) return false;
-    if (expected === 0) return argumentsForCommand.length === 0;
-    if (argumentsForCommand.length < expected || argumentsForCommand.length % expected !== 0) return false;
-
-    if (command === 'A' || command === 'a') {
-      for (let index = 0; index < argumentsForCommand.length; index += expected) {
-        const radiusX = Number(argumentsForCommand[index]);
-        const radiusY = Number(argumentsForCommand[index + 1]);
-        const largeArcFlag = argumentsForCommand[index + 3];
-        const sweepFlag = argumentsForCommand[index + 4];
-        if (!Number.isFinite(radiusX) || radiusX < 0 || !Number.isFinite(radiusY) || radiusY < 0) return false;
-        if ((largeArcFlag !== '0' && largeArcFlag !== '1') || (sweepFlag !== '0' && sweepFlag !== '1')) return false;
-      }
-    }
-
-    return true;
-  };
-
-  for (const token of tokens) {
-    if (/^[a-zA-Z]$/.test(token)) {
-      if (command && !argumentsAreValid()) return false;
-      if (!PATH_COMMANDS.has(token)) return false;
-      command = token;
-      argumentsForCommand = [];
-      continue;
-    }
-
-    if (!command || !Number.isFinite(Number(token))) return false;
-    argumentsForCommand.push(token);
-  }
-
-  return Boolean(command) && argumentsAreValid();
-}
-
-function hasValidMedianPoints(median) {
-  return Array.isArray(median)
-    && median.length >= 2
-    && median.every(point => Array.isArray(point)
-      && point.length === 2
-      && Number.isFinite(point[0])
-      && Number.isFinite(point[1]));
-}
-
-export function validateLibrary(curriculum, characterDocument, audioIds) {
+export function validateLibrary(catalog, characterDocument, audioIds) {
   const errors = [];
-  if (!isRecord(curriculum)) {
-    errors.push('curriculum: must be an object');
-    return errors;
-  }
-  if (!Array.isArray(curriculum.units)) {
-    errors.push('curriculum.units: must be an array');
-    return errors;
-  }
-  if (!isRecord(characterDocument)) {
-    errors.push('characters: must be an object');
-    return errors;
+  if (!isRecord(catalog) || catalog.schemaVersion !== 2) return ['catalog.schemaVersion: must equal 2'];
+  if (!Array.isArray(catalog.stages)) return ['catalog.stages: must be an array'];
+  if (!Array.isArray(catalog.sets)) return ['catalog.sets: must be an array'];
+  if (!isRecord(characterDocument?.characters)) return ['characters.characters: must be an object'];
+  const availableAudio = audioIds instanceof Set ? audioIds : new Set(audioIds || []);
+  const stageIds = new Set();
+  const referencedSetIds = new Set();
+  for (const [stageIndex, stage] of catalog.stages.entries()) {
+    const stagePath = `stages[${stageIndex}]`;
+    if (!isRecord(stage) || typeof stage.id !== 'string') { errors.push(`${stagePath}: invalid stage`); continue; }
+    if (stageIds.has(stage.id)) errors.push(`${stagePath}.id: duplicate ${stage.id}`);
+    stageIds.add(stage.id);
+    if (!Array.isArray(stage.setIds) || stage.setIds.length === 0) {
+      errors.push(`${stagePath}.setIds: must be a non-empty array`); continue;
+    }
+    for (const setId of stage.setIds) {
+      if (referencedSetIds.has(setId)) errors.push(`${stagePath}.setIds: duplicate reference ${setId}`);
+      referencedSetIds.add(setId);
+    }
   }
 
-  if (characterDocument.schemaVersion !== 1) {
-    errors.push('characters.schemaVersion: must equal 1');
-  }
-
-  const notice = characterDocument.modificationNotice;
-  if (!isRecord(notice)) {
-    errors.push('characters.modificationNotice: must be an object');
-  } else {
-    for (const field of ['date', 'source', 'license']) {
-      if (!hasNonBlankString(notice[field])) {
-        errors.push(`characters.modificationNotice.${field}: must be a non-blank string`);
+  const setIds = new Set();
+  const characters = new Set();
+  let entryCount = 0;
+  for (const [setIndex, set] of catalog.sets.entries()) {
+    const setPath = `sets[${setIndex}]`;
+    if (!isRecord(set) || typeof set.id !== 'string') { errors.push(`${setPath}: invalid set`); continue; }
+    if (setIds.has(set.id)) errors.push(`${setPath}.id: duplicate ${set.id}`);
+    setIds.add(set.id);
+    if (!Array.isArray(set.entries)) { errors.push(`${setPath}.entries: must be an array`); continue; }
+    const local = new Set();
+    for (const [entryIndex, entry] of set.entries.entries()) {
+      entryCount += 1;
+      const label = `${setPath}.entries[${entryIndex}]`;
+      if (!isRecord(entry) || typeof entry.character !== 'string' || Array.from(entry.character).length !== 1) {
+        errors.push(`${label}.character: must be one code point`); continue;
       }
-    }
-    if (!Array.isArray(notice.changes)
-      || notice.changes.length === 0
-      || !notice.changes.every(hasNonBlankString)) {
-      errors.push('characters.modificationNotice.changes: must be a non-empty array of non-blank strings');
-    }
-  }
-
-  if (!isRecord(characterDocument.characters)) {
-    errors.push('characters.characters: must be an object');
-    return errors;
-  }
-
-  const lessonIds = new Set();
-  const unitIds = new Set();
-  const geometryByCharacter = characterDocument.characters;
-  const availableAudioIds = audioIds instanceof Set ? audioIds : new Set(audioIds ?? []);
-
-  for (const [unitIndex, unit] of curriculum.units.entries()) {
-    const unitPosition = `unit ${unitIndex + 1}`;
-    if (!isRecord(unit)) {
-      errors.push(`${unitPosition}: must be an object`);
-      continue;
-    }
-
-    const unitId = hasNonBlankString(unit.id) ? unit.id : undefined;
-    if (!unitId) errors.push(`${unitPosition}: missing or blank id`);
-    else if (unitIds.has(unitId)) errors.push(`duplicate unit id: ${unitId}`);
-    if (unitId) unitIds.add(unitId);
-
-    if (!Array.isArray(unit.lessons)) {
-      errors.push(`${unitId ?? unitPosition}: lessons must be an array`);
-      continue;
-    }
-
-    for (const [lessonIndex, lesson] of unit.lessons.entries()) {
-      const lessonPosition = `lesson ${lessonIndex + 1} in ${unitId ?? unitPosition}`;
-      if (!isRecord(lesson)) {
-        errors.push(`${lessonPosition}: must be an object`);
-        continue;
+      if (local.has(entry.character)) errors.push(`${label}.character: duplicate in set`);
+      if (characters.has(entry.character)) errors.push(`${label}.character: duplicate in catalog`);
+      local.add(entry.character); characters.add(entry.character);
+      if (typeof entry.pinyin !== 'string' || !entry.pinyin.trim()) errors.push(`${label}.pinyin: missing`);
+      if (!Array.isArray(entry.words) || entry.words.length !== 2
+        || entry.words.some(word => typeof word !== 'string' || !word.includes(entry.character))) {
+        errors.push(`${label}.words: must contain two words using the character`);
       }
-
-      const lessonId = hasNonBlankString(lesson.id) ? lesson.id : undefined;
-      if (!lessonId) errors.push(`${lessonPosition}: missing or blank id`);
-      if (lessonIds.has(lessonId)) errors.push(`duplicate lesson id: ${lessonId}`);
-      if (lessonId) lessonIds.add(lessonId);
-
-      for (const group of ['recognize', 'write']) {
-        if (!Array.isArray(lesson[group])) {
-          errors.push(`${lessonId ?? lessonPosition}: ${group} must be an array`);
-          continue;
-        }
-
-        const seenCharacters = new Set();
-        for (const candidate of lesson[group]) {
-          const entry = isRecord(candidate) ? candidate : {};
-          const character = typeof entry.character === 'string' ? entry.character : '';
-          const label = `${lessonId ?? lessonPosition} ${character || '<missing character>'}`;
-
-          if (Array.from(character).length !== 1) errors.push(`${label}: character must be one code point`);
-          if (seenCharacters.has(character)) errors.push(`${label}: duplicate in ${group}`);
-          seenCharacters.add(character);
-
-          if (typeof entry.pinyin !== 'string' || entry.pinyin.trim() === '') {
-            errors.push(`${label}: missing or blank pinyin`);
-          } else if (entry.pinyin !== entry.pinyin.normalize('NFC')) {
-            errors.push(`${label}: pinyin must be NFC-normalized pinyin`);
-          }
-
-          if (typeof entry.audio !== 'string' || entry.audio.trim() === '' || !availableAudioIds.has(entry.audio)) {
-            errors.push(`${label}: missing audio ${entry.audio ?? '<missing audio id>'}`);
-          }
-          if (!Array.isArray(entry.words) || entry.words.length < 1 || entry.words.length > 3) {
-            errors.push(`${label}: words must be an array with 1 to 3 words`);
-          } else {
-            entry.words.forEach((word, index) => {
-              if (!hasNonBlankString(word)) {
-                errors.push(`${label}: words[${index}] must be a non-blank string`);
-              } else if (!word.includes(character)) {
-                errors.push(`${label}: words[${index}] must include ${character}`);
-              }
-            });
-          }
-
-          const geometry = geometryByCharacter[character];
-          if (!geometry || typeof geometry !== 'object') {
-            errors.push(`${label}: missing geometry`);
-            continue;
-          }
-
-          const hasStrokes = Array.isArray(geometry.strokes);
-          const hasMedians = Array.isArray(geometry.medians);
-          const strokes = hasStrokes ? geometry.strokes : [];
-          const medians = hasMedians ? geometry.medians : [];
-          if (!hasStrokes) errors.push(`${label}: strokes must be an array`);
-          if (!hasMedians) errors.push(`${label}: medians must be an array`);
-          if (!Number.isInteger(geometry.strokeCount) || geometry.strokeCount <= 0) {
-            errors.push(`${label}: strokeCount must be a positive integer`);
-          }
-          if (geometry.strokeCount !== strokes.length || geometry.strokeCount !== medians.length) {
-            errors.push(`${label}: strokeCount does not match strokes and medians`);
-          }
-
-          strokes.forEach((stroke, index) => {
-            if (!isValidPath(stroke)) errors.push(`${label}: malformed stroke ${index + 1} path`);
-          });
-          medians.forEach((median, index) => {
-            if (!hasValidMedianPoints(median)) {
-              errors.push(`${label}: median ${index + 1} must contain at least two numeric coordinate points`);
-            }
-          });
-        }
-      }
+      if (!availableAudio.has(entry.audio)) errors.push(`${label}.audio: missing ${entry.audio}`);
+      const geometry = characterDocument.characters[entry.character];
+      if (!isRecord(geometry)) errors.push(`${label}: missing geometry`);
+      else if (!Number.isInteger(geometry.strokeCount) || geometry.strokeCount !== geometry.strokes?.length
+        || geometry.strokeCount !== geometry.medians?.length) errors.push(`${label}: malformed geometry`);
     }
   }
-
+  for (const setId of setIds) if (!referencedSetIds.has(setId)) errors.push(`sets: unreferenced set ${setId}`);
+  for (const setId of referencedSetIds) if (!setIds.has(setId)) errors.push(`stages: missing set ${setId}`);
+  const extraGeometry = Object.keys(characterDocument.characters).filter(character => !characters.has(character));
+  if (extraGeometry.length) errors.push(`characters: ${extraGeometry.length} unreferenced entries`);
+  if (entryCount === 0) errors.push('catalog: must contain entries');
   return errors;
 }

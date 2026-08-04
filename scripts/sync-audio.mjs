@@ -34,56 +34,38 @@ function manifestSource() {
   return source;
 }
 
-export function collectAudioIds(curriculum) {
-  if (!curriculum || typeof curriculum !== 'object' || Array.isArray(curriculum)) {
-    throw new Error('curriculum must be an object');
+export function collectAudioIds(catalog) {
+  if (!catalog || typeof catalog !== 'object' || Array.isArray(catalog)) {
+    throw new Error('catalog must be an object');
   }
-  if (!Array.isArray(curriculum.units)) {
-    throw new Error('curriculum.units must be an array');
+  if (!Array.isArray(catalog.sets)) {
+    throw new Error('catalog.sets must be an array');
   }
-  if (curriculum.units.length === 0) {
-    throw new Error('curriculum.units must be non-empty');
+  if (catalog.sets.length === 0) {
+    throw new Error('catalog.sets must be non-empty');
   }
 
   const ids = new Set();
-  for (const [unitIndex, unit] of curriculum.units.entries()) {
-    const unitLocation = `curriculum.units[${unitIndex}]`;
-    if (!unit || typeof unit !== 'object' || Array.isArray(unit)) {
-      throw new Error(`${unitLocation} must be an object`);
-    }
-    if (!Array.isArray(unit.lessons)) {
-      throw new Error(`${unitLocation}.lessons must be an array`);
-    }
-    if (unit.lessons.length === 0) {
-      throw new Error(`${unitLocation}.lessons must be non-empty`);
-    }
-
-    for (const [sectionIndex, section] of unit.lessons.entries()) {
-      const sectionLocation = `${unitLocation}.lessons[${sectionIndex}]`;
-      if (!section || typeof section !== 'object' || Array.isArray(section)) {
-        throw new Error(`${sectionLocation} must be an object`);
+  for (const [setIndex, set] of catalog.sets.entries()) {
+      const setLocation = `catalog.sets[${setIndex}]`;
+      if (!set || typeof set !== 'object' || Array.isArray(set)) {
+        throw new Error(`${setLocation} must be an object`);
       }
-      for (const group of ['recognize', 'write']) {
-        const groupLocation = `${sectionLocation}.${group}`;
-        if (!Array.isArray(section[group])) {
-          throw new Error(`${groupLocation} must be an array`);
+      if (!Array.isArray(set.entries)) throw new Error(`${setLocation}.entries must be an array`);
+      for (const [entryIndex, entry] of set.entries.entries()) {
+        const entryLocation = `${setLocation}.entries[${entryIndex}]`;
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+          throw new Error(`${entryLocation} must be an object`);
         }
-        for (const [entryIndex, entry] of section[group].entries()) {
-          const entryLocation = `${groupLocation}[${entryIndex}]`;
-          if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
-            throw new Error(`${entryLocation} must be an object`);
-          }
-          try {
-            sourceRecordForId(entry.audio);
-          } catch (error) {
-            throw new Error(`${entryLocation}.audio: ${error.message}`);
-          }
-          ids.add(entry.audio);
+        try {
+          sourceRecordForId(entry.audio);
+        } catch (error) {
+          throw new Error(`${entryLocation}.audio: ${error.message}`);
         }
+        ids.add(entry.audio);
       }
-    }
   }
-  if (ids.size === 0) throw new Error('Curriculum must reference at least one audio id');
+  if (ids.size === 0) throw new Error('Catalog must reference at least one audio id');
   return [...ids].sort();
 }
 
@@ -348,11 +330,11 @@ function validateManifestDocument(manifest) {
   return ids;
 }
 
-async function readCurriculumDocument(curriculumPath) {
+async function readCatalogDocument(catalogPath) {
   try {
-    return JSON.parse(await readFile(curriculumPath, 'utf8'));
+    return JSON.parse(await readFile(catalogPath, 'utf8'));
   } catch (error) {
-    throw new Error(`Unable to read curriculum ${curriculumPath}: ${error.message}`);
+    throw new Error(`Unable to read catalog ${catalogPath}: ${error.message}`);
   }
 }
 
@@ -371,8 +353,8 @@ function assertExactIds(actualIds, expectedIds, context) {
 
 export async function verifyAudioDirectory({
   audioDir = path.join(defaultRootDir, 'assets/audio'),
-  curriculum,
-  curriculumPath = path.join(defaultRootDir, 'data/curriculum.json'),
+  catalog,
+  catalogPath = path.join(defaultRootDir, 'data/catalog.json'),
   inspectFile = inspectAudioFile,
   concurrency = 6
 } = {}) {
@@ -380,8 +362,8 @@ export async function verifyAudioDirectory({
     throw new Error('Audio verification concurrency must be a positive integer');
   }
 
-  if (curriculum === undefined) curriculum = await readCurriculumDocument(curriculumPath);
-  const curriculumIds = collectAudioIds(curriculum);
+  if (catalog === undefined) catalog = await readCatalogDocument(catalogPath);
+  const catalogIds = collectAudioIds(catalog);
 
   let manifest;
   try {
@@ -390,7 +372,7 @@ export async function verifyAudioDirectory({
     throw new Error(`Unable to read audio manifest: ${error.message}`);
   }
   const ids = validateManifestDocument(manifest);
-  assertExactIds(ids, curriculumIds, 'Audio manifest does not exactly cover curriculum');
+  assertExactIds(ids, catalogIds, 'Audio manifest does not exactly cover catalog');
 
   let directoryEntries;
   try {
@@ -515,7 +497,7 @@ async function publishAudioCandidate(candidateDir, outputDir, { renamePath = ren
 }
 
 export async function syncAudio({
-  curriculum,
+  catalog,
   outputDir = path.join(defaultRootDir, 'assets/audio'),
   sourceDir,
   fetchImpl = globalThis.fetch,
@@ -524,8 +506,8 @@ export async function syncAudio({
   verifySourceRevision = verifySourceCheckout,
   renamePath = rename
 } = {}) {
-  if (curriculum === undefined) {
-    curriculum = await readCurriculumDocument(path.join(defaultRootDir, 'data/curriculum.json'));
+  if (catalog === undefined) {
+    catalog = await readCatalogDocument(path.join(defaultRootDir, 'data/catalog.json'));
   }
   if (!Number.isInteger(concurrency) || concurrency < 1) {
     throw new Error('Audio sync concurrency must be a positive integer');
@@ -534,7 +516,7 @@ export async function syncAudio({
     throw new Error('A fetch implementation is required when --source is not used');
   }
 
-  const ids = collectAudioIds(curriculum);
+  const ids = collectAudioIds(catalog);
   if (sourceDir !== undefined) await verifySourceRevision(sourceDir);
 
   await mkdir(path.dirname(outputDir), { recursive: true });
@@ -566,7 +548,7 @@ export async function syncAudio({
     });
 
     const manifest = createManifest(records);
-    assertExactIds(Object.keys(manifest.readings), ids, 'Generated manifest ids do not match curriculum');
+    assertExactIds(Object.keys(manifest.readings), ids, 'Generated manifest ids do not match catalog');
     await preserveNonManagedEntries(outputDir, candidateDir);
     await writeFile(path.join(candidateDir, 'manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`);
     await publishAudioCandidate(candidateDir, outputDir, { renamePath });

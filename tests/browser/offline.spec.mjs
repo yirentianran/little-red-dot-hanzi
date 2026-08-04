@@ -60,7 +60,7 @@ const LANDSCAPE_VIEWPORTS = Object.freeze([
   Object.freeze({ width: 1440, height: 800, label: 'Mac-Chrome-1440x800' })
 ]);
 
-const PRACTICE_CHARACTER = '肃';
+const PRACTICE_CHARACTER = '砂';
 const PRACTICE_PADDING = 0;
 
 function lessonHash(lessonId, group) {
@@ -325,25 +325,25 @@ async function observeScrollPosition(page, durationMs = 250) {
 }
 
 async function assertDirectoryGeometry(page, label) {
-  assert.equal(await page.locator('[data-view-heading]').textContent(), '课程目录');
+  assert.equal(await page.locator('[data-view-heading]').textContent(), '阶段目录');
   assert.equal(await page.locator(
-    '[data-action="open-lesson"][data-lesson-id="lesson-22"]'
+    '[data-action="open-lesson"][data-lesson-id="g4f-02"]'
   ).count(), 1);
   await assertSelectorsDoNotOverlap(page, [
     '[data-view="directory"] [data-view-heading]',
-    '[data-view="directory"] [data-unit-band="unit-1"]'
+    '[data-view="directory"] [data-unit-band="g4-fall"]'
   ], label);
 }
 
 async function assertLessonGeometry(page, label) {
-  assert.equal(await page.locator('[data-view-heading]').textContent(), '22  为中华之崛起而读书');
+  assert.equal(await page.locator('[data-view-heading]').textContent(), '第2组');
   assert.equal(
     await page.locator('[data-action="select-group"][data-group="write"]')
       .getAttribute('aria-pressed'),
     'true'
   );
   assert.equal(await page.locator(
-    '[data-action="open-character"][data-character="肃"]'
+    '[data-action="open-character"][data-character="砂"]'
   ).count(), 2);
   await assertSelectorsDoNotOverlap(page, [
     '[data-view="lesson"] [data-action="go-directory"]',
@@ -356,9 +356,9 @@ async function assertLessonGeometry(page, label) {
 }
 
 async function assertCharacterGeometry(page, viewport, label) {
-  assert.equal(await page.locator('[data-view-heading]').textContent(), '学习“肃”');
-  assert.equal(await page.locator('.character-pinyin').textContent(), 'sù');
-  assert.match(await page.locator('[data-action="back-lesson"]').textContent(), /为中华之崛起而读书/);
+  assert.equal(await page.locator('[data-view-heading]').textContent(), '学习“砂”');
+  assert.equal(await page.locator('.character-pinyin').textContent(), 'shā');
+  assert.match(await page.locator('[data-action="back-lesson"]').textContent(), /第2组/);
 
   const board = page.locator('[data-slot="character-board"]');
   const before = await board.boundingBox();
@@ -1073,7 +1073,7 @@ async function assertPracticeActiveGeometry(page, viewport, phase, label) {
   assert.equal(await board.getAttribute('role'), 'img');
   assert.match(
     await board.getAttribute('aria-label'),
-    new RegExp(`${PRACTICE_CHARACTER}.*${phase}.*\u7b2c1\u7b14.*\u51718\u7b14`)
+    new RegExp(`${PRACTICE_CHARACTER}.*${phase}.*\u7b2c1\u7b14.*\u51719\u7b14`)
   );
   assert.equal(await page.locator('[data-action="practice-hint"]').getAttribute('aria-label'), '提示当前笔');
   assert.equal(await page.locator('[data-slot="practice-feedback"]').getAttribute('aria-live'), 'polite');
@@ -1151,7 +1151,7 @@ export async function registerBrowserTests({ test }) {
       );
 
       await page.goto(
-        withHash(indexUrl, lessonHash('lesson-22', 'write')),
+        withHash(indexUrl, lessonHash('g4f-02', 'write')),
         { waitUntil: 'load' }
       );
       await waitForView(page, 'lesson');
@@ -1160,12 +1160,12 @@ export async function registerBrowserTests({ test }) {
       await assertLessonGeometry(page, `${viewport.label} lesson`);
       await saveFullPageScreenshot(
         page,
-        artifactPath(`${viewport.label}-lesson-22-write.png`),
+        artifactPath(`${viewport.label}-g4f-02-write.png`),
         `${viewport.label} lesson`
       );
 
       await page.goto(
-        withHash(indexUrl, characterHash('lesson-22', 'write', '肃')),
+        withHash(indexUrl, characterHash('g4f-02', 'write', '砂')),
         { waitUntil: 'load' }
       );
       await waitForView(page, 'character');
@@ -1174,7 +1174,7 @@ export async function registerBrowserTests({ test }) {
       await assertCharacterGeometry(page, viewport, `${viewport.label} character`);
       await saveFullPageScreenshot(
         page,
-        artifactPath(`${viewport.label}-lesson-22-write-su.png`),
+        artifactPath(`${viewport.label}-g4f-02-write-su.png`),
         `${viewport.label} character`
       );
     });
@@ -1188,7 +1188,7 @@ export async function registerBrowserTests({ test }) {
     }) => {
       const page = await openPage({ viewport, reducedMotion: true });
       await page.goto(
-        withHash(indexUrl, characterHash('lesson-22', 'write', '肃')),
+        withHash(indexUrl, characterHash('g4f-02', 'write', '砂')),
         { waitUntil: 'load' }
       );
       await waitForView(page, 'character');
@@ -1221,7 +1221,7 @@ export async function registerBrowserTests({ test }) {
       if (viewport.height <= 430) {
         assert.equal(verticalLayout.headerDisplay, 'none', `${viewport.label}: phone header remains visible`);
         assert.notEqual(verticalLayout.headingDisplay, 'none', `${viewport.label}: learning heading is hidden`);
-        assert.equal(verticalLayout.headingText, '学习“肃”', `${viewport.label}: learning heading is incorrect`);
+        assert.equal(verticalLayout.headingText, '学习“砂”', `${viewport.label}: learning heading is incorrect`);
         assert.ok(verticalLayout.headingHeight > 0, `${viewport.label}: learning heading has no height`);
         assert.ok(
           Math.max(
@@ -1268,16 +1268,16 @@ export async function registerBrowserTests({ test }) {
     const viewport = PHONE_LANDSCAPE_VIEWPORTS[2];
     const page = await openPage({ viewport, reducedMotion: true });
     await page.goto(
-      withHash(indexUrl, characterHash('lesson-1', 'write', '据')),
+      withHash(indexUrl, characterHash('g4f-01', 'write', '宴')),
       { waitUntil: 'load' }
     );
     await waitForView(page, 'character');
-    assert.equal(await page.locator('.character-pinyin').textContent(), 'jù');
-    assert.equal(await page.locator('.character-words').textContent(), '组词：根据  据说  证据');
+    assert.equal(await page.locator('.character-pinyin').textContent(), 'yàn');
+    assert.equal(await page.locator('.character-words').textContent(), '组词：宴会  晚宴');
     assert.equal(await page.locator('.character-words').evaluate(
       (words) => getComputedStyle(words).display
     ), 'none');
-    await assertNoHorizontalOverflow(page, `${viewport.label} 据 learning`);
+    await assertNoHorizontalOverflow(page, `${viewport.label} 宴 learning`);
     await assertSelectorsAreContained(page, '.character-tools', [
       '.character-pinyin',
       '.character-practice-status',
@@ -1285,7 +1285,7 @@ export async function registerBrowserTests({ test }) {
       '.button--audio',
       '.stroke-controls',
       '.speed-control'
-    ], `${viewport.label} 据 learning`);
+    ], `${viewport.label} 宴 learning`);
     await assertTextIsNotClipped(page, [
       '.character-pinyin',
       '.character-practice-status',
@@ -1294,11 +1294,11 @@ export async function registerBrowserTests({ test }) {
       '.speed-control [data-speed="slow"]',
       '.speed-control [data-speed="normal"]',
       '.speed-control [data-speed="fast"]'
-    ], `${viewport.label} 据 learning`);
+    ], `${viewport.label} 宴 learning`);
     await saveFullPageScreenshot(
       page,
       artifactPath(`${viewport.label}-ju-long-metadata.png`),
-      `${viewport.label} 据 learning metadata`
+      `${viewport.label} 宴 learning metadata`
     );
   });
 
@@ -1310,7 +1310,7 @@ export async function registerBrowserTests({ test }) {
     }) => {
       const page = await openPage({ viewport, reducedMotion: true });
       await page.goto(
-        withHash(indexUrl, characterHash('lesson-22', 'write', '肃')),
+        withHash(indexUrl, characterHash('g4f-02', 'write', '砂')),
         { waitUntil: 'load' }
       );
       await waitForView(page, 'character');
@@ -1349,7 +1349,7 @@ export async function registerBrowserTests({ test }) {
     }) => {
       const page = await openPage({ viewport, reducedMotion: true });
       await page.goto(
-        withHash(indexUrl, characterHash('lesson-22', 'write', PRACTICE_CHARACTER)),
+        withHash(indexUrl, characterHash('g4f-02', 'write', PRACTICE_CHARACTER)),
         { waitUntil: 'load' }
       );
       await waitForView(page, 'character');
@@ -1373,7 +1373,7 @@ export async function registerBrowserTests({ test }) {
 
       await page.goto(withHash(
         indexUrl,
-        practiceHash('lesson-22', 'write', 'single', PRACTICE_CHARACTER)
+        practiceHash('g4f-02', 'write', 'single', PRACTICE_CHARACTER)
       ), { waitUntil: 'load' });
       await waitForPractice(page, '引导描写');
       const practiceStyle = await readWorkSurfaceStyle(page, 'practice');
@@ -1524,7 +1524,7 @@ export async function registerBrowserTests({ test }) {
       artifactPath
     }) => {
       const page = await openPage({ viewport, reducedMotion: true });
-      await page.goto(withHash(indexUrl, lessonHash('lesson-1', 'write')), { waitUntil: 'load' });
+      await page.goto(withHash(indexUrl, lessonHash('g4f-01', 'write')), { waitUntil: 'load' });
       await waitForView(page, 'lesson');
       assert.equal(await page.locator('.character-card').count(), 15);
       await assertNoHorizontalOverflow(page, `${viewport.label} lesson`);
@@ -1583,7 +1583,7 @@ export async function registerBrowserTests({ test }) {
       const page = await openPage({ viewport, reducedMotion: true });
       await page.goto(withHash(
         indexUrl,
-        practiceHash('lesson-22', 'write', 'single', PRACTICE_CHARACTER)
+        practiceHash('g4f-02', 'write', 'single', PRACTICE_CHARACTER)
       ), { waitUntil: 'load' });
       await waitForPractice(page, '引导描写');
       await assertPracticeActiveGeometry(
@@ -1656,7 +1656,7 @@ export async function registerBrowserTests({ test }) {
       artifactPath
     }) => {
       const page = await openPage({ viewport, reducedMotion: true });
-      await page.goto(withHash(indexUrl, lessonHash('lesson-22', 'write')), { waitUntil: 'load' });
+      await page.goto(withHash(indexUrl, lessonHash('g4f-02', 'write')), { waitUntil: 'load' });
       await waitForView(page, 'lesson');
       assert.equal(await page.locator('[data-action="start-group-practice"]').getAttribute('type'), 'button');
       await assertNoHorizontalOverflow(page, `${viewport.label} practice entrance`);
@@ -1696,7 +1696,7 @@ export async function registerBrowserTests({ test }) {
 
       await page.goto(withHash(
         indexUrl,
-        practiceHash('lesson-22', 'write', 'single', PRACTICE_CHARACTER)
+        practiceHash('g4f-02', 'write', 'single', PRACTICE_CHARACTER)
       ), { waitUntil: 'load' });
       await waitForPractice(page, '引导描写');
       await assertPracticeActiveGeometry(page, viewport, '引导描写', `${viewport.label} guided`);
@@ -1815,13 +1815,13 @@ export async function registerBrowserTests({ test }) {
     });
     await page.goto(withHash(
       indexUrl,
-      practiceHash('lesson-22', 'write', 'single', PRACTICE_CHARACTER)
+      practiceHash('g4f-02', 'write', 'single', PRACTICE_CHARACTER)
     ), { waitUntil: 'load' });
     await waitForPractice(page, '引导描写');
 
     const board = page.locator('[data-slot="practice-board"]');
     assert.equal(await board.getAttribute('role'), 'img');
-    assert.match(await board.getAttribute('aria-label'), /肃.*引导描写.*第1笔/);
+    assert.match(await board.getAttribute('aria-label'), /砂.*引导描写.*第1笔/);
     const hint = page.locator('[data-action="practice-hint"]');
     assert.equal(await hint.evaluate((button) => button.tagName), 'BUTTON');
     assert.equal(await hint.getAttribute('type'), 'button');
@@ -1899,14 +1899,14 @@ export async function registerBrowserTests({ test }) {
     await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [continued] });
     await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
     await page.locator('[data-slot="practice-board"][aria-busy="false"]').waitFor();
-    assert.equal(await page.locator('[data-slot="practice-stroke-position"]').textContent(), '第 1 / 8 笔');
+    assert.equal(await page.locator('[data-slot="practice-stroke-position"]').textContent(), '第 1 / 9 笔');
     assert.notEqual(await page.locator('[data-slot="practice-feedback"]').getAttribute('data-kind'), 'error');
     await dispatchTouchGesture(client, firstStroke, 12);
-    await waitForPracticeStroke(page, 2, 8);
+    await waitForPracticeStroke(page, 2, 9);
     assert.notEqual(await page.locator('[data-slot="practice-feedback"]').getAttribute('data-kind'), 'error');
-    for (let index = 1; index < 8; index += 1) {
+    for (let index = 1; index < 9; index += 1) {
       await dispatchTouchGesture(client, await mappedPracticeMedian(page, index), index + 20);
-      if (index < 7) await waitForPracticeStroke(page, index + 2, 8);
+      if (index < 8) await waitForPracticeStroke(page, index + 2, 9);
     }
     await page.locator('.practice-complete-result').waitFor();
     assert.equal(await page.locator('.practice-retry-result').count(), 0,

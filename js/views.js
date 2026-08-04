@@ -409,13 +409,13 @@
     var groups = {
       write: {
         id: 'write',
-        label: '会写',
+        label: '学习',
         count: writeEntries.length,
         available: writeEntries.length > 0
       },
       recognize: {
         id: 'recognize',
-        label: '会认',
+        label: '补充',
         count: recognizeEntries.length,
         counted: recognizeCounted,
         reviews: reviews,
@@ -799,14 +799,7 @@
   }
 
   function lessonAccessibleName(lesson) {
-    var name = lesson.kind === 'lesson'
-      ? '第' + lesson.number + '课《' + lesson.title + '》'
-      : lesson.title;
-    name += '，会认' + lesson.recognizeDisplayed + '个';
-    if (lesson.polyphonicReviews > 0) {
-      name += '，其中复习' + lesson.polyphonicReviews + '个';
-    }
-    return name + '，会写' + lesson.write + '个';
+    return lesson.title + '，共' + (lesson.recognizeDisplayed + lesson.write) + '个字';
   }
 
   function renderDirectory(container, model) {
@@ -817,7 +810,7 @@
       'class': 'view view--directory',
       'data-view': 'directory'
     });
-    var heading = viewHeading(documentObject, '课程目录');
+    var heading = viewHeading(documentObject, '阶段目录');
     var resumeButton = node(documentObject, 'button', {
       'class': 'button button--primary directory-resume',
       'type': 'button',
@@ -840,10 +833,8 @@
           : lesson.title;
         var title = node(documentObject, 'span', { 'class': 'lesson-row__title' }, titleText);
         var counts = node(documentObject, 'span', { 'class': 'lesson-row__counts' }, undefined, [
-          node(documentObject, 'span', { 'class': 'count count--recognize' },
-            '会认 ' + lesson.recognizeDisplayed),
           node(documentObject, 'span', { 'class': 'count count--write' },
-            '会写 ' + lesson.write)
+            (lesson.recognizeDisplayed + lesson.write) + ' 个字')
         ]);
         var button = node(documentObject, 'button', {
           'class': 'lesson-row',
@@ -943,8 +934,8 @@
       'class': 'button button--quiet back-button',
       'type': 'button',
       'data-action': 'go-directory',
-      'aria-label': '返回课程目录'
-    }, undefined, [icon(documentObject, '←'), node(documentObject, 'span', {}, '课程目录')]);
+      'aria-label': '返回阶段目录'
+    }, undefined, [icon(documentObject, '←'), node(documentObject, 'span', {}, '阶段目录')]);
     var lessonTitle = model.lesson.kind === 'lesson'
       ? model.lesson.number + '  ' + model.lesson.title
       : model.lesson.title;
@@ -1063,7 +1054,7 @@
       'data-action': 'back-lesson',
       'data-lesson-id': model.lesson.id,
       'data-group': model.group,
-      'aria-label': '返回《' + model.lesson.title + '》字表'
+      'aria-label': '返回' + model.lesson.title + '字组'
     }, undefined, [icon(documentObject, '←'), node(documentObject, 'span', {}, model.lesson.title)]);
     var position = node(documentObject, 'p', {
       'class': 'character-position',
@@ -1395,7 +1386,7 @@
   function renderPractice(container, model) {
     var documentObject = requireContainer(container);
     var viewModel = copyPracticeViewModel(model);
-    var groupLabel = viewModel.group === 'write' ? '会写' : '会认';
+    var groupLabel = viewModel.group === 'write' ? '学习' : '补充';
     var lessonTitle = viewModel.lesson.kind === 'lesson'
       ? '第' + viewModel.lesson.number + '课  ' + viewModel.lesson.title
       : viewModel.lesson.title;
@@ -1409,7 +1400,7 @@
       + (viewModel.scope === 'single' ? ' practice-back--single' : '');
     var backLabel = viewModel.scope === 'single'
       ? '返回“' + viewModel.character + '”字的学习页'
-      : '返回《' + viewModel.lesson.title + '》' + groupLabel + '字表';
+      : '返回' + viewModel.lesson.title + '字组';
     var backText = viewModel.scope === 'single'
       ? '学习“' + viewModel.character + '”'
       : viewModel.lesson.title;

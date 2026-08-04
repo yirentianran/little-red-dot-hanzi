@@ -139,14 +139,14 @@ function practiceSnapshot(overrides = {}) {
 }
 
 const LESSON_ONE_WRITE_CHARACTERS = Object.freeze([
-  '潮', '据', '堤', '阔', '盼', '滚', '顿', '逐', '渐', '堵', '犹', '崩', '震', '霎', '余'
+  '宵', '宴', '扇', '崭', '渗', '凿', '蛛', '焰', '缚', '瞅', '蜘', '僵', '讶', '苏', '驻'
 ]);
 
 function sessionState(overrides = {}) {
   return {
     status: 'active',
     phase: 'guided',
-    character: '潮',
+    character: '宵',
     index: 0,
     total: 15,
     mistakes: 0,
@@ -175,19 +175,18 @@ test('exports the complete frozen view API', () => {
   assert.ok(Object.isFrozen(views));
 });
 
-test('builds an immutable eight-unit directory from the real curriculum', async () => {
+test('builds an immutable stage directory from the independent catalog', async () => {
   const { createDirectoryModel } = loadViews();
   const store = await createRuntimeStore();
   const before = store.getUnits();
   const model = createDirectoryModel(store);
   const first = model.units[0].lessons[0];
 
-  assert.equal(model.units.length, 8);
+  assert.equal(model.units.length, 1);
   assert.deepEqual(
     {
       kind: first.kind,
       id: first.id,
-      number: first.number,
       title: first.title,
       recognize: first.recognize,
       recognizeDisplayed: first.recognizeDisplayed,
@@ -198,16 +197,15 @@ test('builds an immutable eight-unit directory from the real curriculum', async 
       defaultGroup: first.defaultGroup
     },
     {
-      kind: 'lesson',
-      id: 'lesson-1',
-      number: 1,
-      title: '观潮',
-      recognize: 13,
-      recognizeDisplayed: 13,
-      recognizeCounted: 12,
-      polyphonicReviews: 1,
+      kind: 'garden',
+      id: 'g4f-01',
+      title: '第1组',
+      recognize: 0,
+      recognizeDisplayed: 0,
+      recognizeCounted: 0,
+      polyphonicReviews: 0,
       write: 15,
-      total: 28,
+      total: 15,
       defaultGroup: 'write'
     }
   );
@@ -216,64 +214,58 @@ test('builds an immutable eight-unit directory from the real curriculum', async 
   assert.ok(deepFrozen(model));
 });
 
-test('builds write, recognize, garden, and review-aware lesson models', async () => {
+test('builds learning and unavailable supplemental group models', async () => {
   const { createLessonModel } = loadViews();
   const store = await createRuntimeStore();
-  const write = createLessonModel(store, { lessonId: 'lesson-1', group: 'write' });
-  const recognize = createLessonModel(store, { lessonId: 'lesson-1', group: 'recognize' });
-  const garden = createLessonModel(store, { lessonId: 'garden-2', group: 'recognize' });
+  const write = createLessonModel(store, { lessonId: 'g4f-01', group: 'write' });
+  const recognize = createLessonModel(store, { lessonId: 'g4f-01', group: 'recognize' });
+  const second = createLessonModel(store, { lessonId: 'g4f-02', group: 'write' });
 
-  assert.equal(write.unit.title, '第一单元');
-  assert.equal(write.lesson.title, '观潮');
+  assert.equal(write.unit.title, '四年级上阶段');
+  assert.equal(write.lesson.title, '第1组');
   assert.equal(write.group, 'write');
   assert.equal(write.groups.write.count, 15);
   assert.equal(write.groups.write.available, true);
-  assert.equal(write.groups.recognize.count, 13);
-  assert.equal(write.groups.recognize.counted, 12);
-  assert.equal(write.groups.recognize.reviews, 1);
+  assert.equal(write.groups.recognize.count, 0);
+  assert.equal(write.groups.recognize.counted, 0);
+  assert.equal(write.groups.recognize.reviews, 0);
   assert.deepEqual(write.entries[0], {
-    character: '潮', pinyin: 'cháo', audioId: 'chao2', index: 0, isReview: false,
+    character: '宵', pinyin: 'xiāo', audioId: 'xiao1', index: 0, isReview: false,
     mastered: false, completedHere: false
   });
   assert.deepEqual(write.practice, { completed: 0, mastered: 0, total: 15 });
-  assert.equal(recognize.entries[1].character, '薄');
-  assert.equal(recognize.entries[1].isReview, true);
-  assert.equal(Object.hasOwn(recognize.entries[1], 'audio'), false);
-  assert.equal(garden.lesson.kind, 'garden');
-  assert.equal(Object.hasOwn(garden.lesson, 'number'), false);
-  assert.equal(garden.groups.write.available, false);
-  assert.equal(garden.groups.write.count, 0);
+  assert.deepEqual(recognize.entries, []);
+  assert.equal(recognize.groups.recognize.available, false);
+  assert.equal(second.lesson.kind, 'garden');
+  assert.equal(Object.hasOwn(second.lesson, 'number'), false);
+  assert.equal(second.groups.write.available, true);
   assert.ok(deepFrozen(write));
 });
 
-test('builds first, last, and review character models with real pinyin and strokes', async () => {
+test('builds first and last character models with real pinyin and strokes', async () => {
   const { createCharacterModel } = loadViews();
   const store = await createRuntimeStore();
   const first = createCharacterModel(store.resolve({
-    lessonId: 'lesson-1', group: 'write', character: '潮'
+    lessonId: 'g4f-01', group: 'write', character: '宵'
   }));
   const last = createCharacterModel(store.resolve({
-    lessonId: 'lesson-1', group: 'write', character: '余'
-  }));
-  const review = createCharacterModel(store.resolve({
-    lessonId: 'lesson-1', group: 'recognize', character: '薄'
+    lessonId: 'g4f-01', group: 'write', character: '驻'
   }));
 
-  assert.equal(first.character, '潮');
-  assert.equal(first.pinyin, 'cháo');
-  assert.equal(first.audioId, 'chao2');
-  assert.deepEqual(first.words, ['潮水', '浪潮', '涨潮']);
+  assert.equal(first.character, '宵');
+  assert.equal(first.pinyin, 'xiāo');
+  assert.equal(first.audioId, 'xiao1');
+  assert.deepEqual(first.words, ['元宵', '宵夜']);
   assert.ok(Object.isFrozen(first.words));
-  assert.equal(first.strokeCount, 15);
+  assert.equal(first.strokeCount, 10);
   assert.equal(first.index, 0);
   assert.equal(first.total, 15);
   assert.equal(first.previous, null);
   assert.equal(first.previousDisabled, true);
-  assert.deepEqual(first.next, { character: '据', pinyin: 'jù' });
+  assert.deepEqual(first.next, { character: '宴', pinyin: 'yàn' });
   assert.equal(first.nextDisabled, false);
   assert.equal(last.next, null);
   assert.equal(last.nextDisabled, true);
-  assert.equal(review.isReview, true);
   assert.equal(first.mastered, false);
   assert.equal(first.completedHere, false);
   assert.ok(deepFrozen(first));
@@ -283,14 +275,14 @@ test('lesson practice snapshots add independent completed and mastered state wit
   const { createLessonModel } = loadViews();
   const store = await createRuntimeStore();
   const characters = Object.create(null);
-  characters['潮'] = { attemptCount: 2, lastOutcome: 'mastered', mastered: true };
-  characters['据'] = { attemptCount: 1, lastOutcome: 'needs-practice', mastered: false };
+  characters['宵'] = { attemptCount: 2, lastOutcome: 'mastered', mastered: true };
+  characters['宴'] = { attemptCount: 1, lastOutcome: 'needs-practice', mastered: false };
   const practice = practiceSnapshot({
     characters,
     group: {
-      completedCharacters: ['潮', '据'],
+      completedCharacters: ['宵', '宴'],
       remainingCharacters: [],
-      needsPracticeCharacters: ['据'],
+      needsPracticeCharacters: ['宴'],
       currentCharacter: null,
       currentPhase: null
     }
@@ -299,7 +291,7 @@ test('lesson practice snapshots add independent completed and mastered state wit
 
   const model = createLessonModel(
     store,
-    { lessonId: 'lesson-1', group: 'write' },
+    { lessonId: 'g4f-01', group: 'write' },
     practice
   );
 
@@ -309,9 +301,9 @@ test('lesson practice snapshots add independent completed and mastered state wit
       character, mastered, completedHere
     })),
     [
-      { character: '潮', mastered: true, completedHere: true },
-      { character: '据', mastered: false, completedHere: true },
-      { character: '堤', mastered: false, completedHere: false }
+      { character: '宵', mastered: true, completedHere: true },
+      { character: '宴', mastered: false, completedHere: true },
+      { character: '扇', mastered: false, completedHere: false }
     ]
   );
   assert.deepEqual(practice.group.completedCharacters, beforeCompleted);
@@ -322,14 +314,14 @@ test('lesson practice snapshots add independent completed and mastered state wit
 test('character practice state defaults safely and remains independent when provided', async () => {
   const { createCharacterModel } = loadViews();
   const store = await createRuntimeStore();
-  const resolved = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  const resolved = store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' });
   const defaults = createCharacterModel(resolved);
   const completedOnly = createCharacterModel(resolved, practiceSnapshot({
-    characters: { '潮': { mastered: false } },
-    group: { completedCharacters: ['潮'] }
+    characters: { '宵': { mastered: false } },
+    group: { completedCharacters: ['宵'] }
   }));
   const masteredOnly = createCharacterModel(resolved, practiceSnapshot({
-    characters: { '潮': { mastered: true } },
+    characters: { '宵': { mastered: true } },
     group: { completedCharacters: [] }
   }));
 
@@ -352,7 +344,7 @@ test('models validate collaborators and selectors without accepting malformed in
   assert.throws(() => views.createDirectoryModel(null), /store/);
   assert.throws(() => views.createLessonModel(store, null), /options/);
   assert.throws(() => views.createLessonModel(store, { lessonId: 'missing', group: 'write' }), /lessonId/);
-  assert.throws(() => views.createLessonModel(store, { lessonId: 'lesson-1', group: 'other' }), /group/);
+  assert.throws(() => views.createLessonModel(store, { lessonId: 'g4f-01', group: 'other' }), /group/);
   assert.throws(() => views.createCharacterModel(null), /resolved/);
   assert.throws(() => views.createCharacterModel({}), /resolved/);
 });
@@ -360,29 +352,29 @@ test('models validate collaborators and selectors without accepting malformed in
 test('lesson models reject declared counts that disagree with the returned entry arrays', async () => {
   const { createLessonModel } = loadViews();
   const store = await createRuntimeStore();
-  const lesson = store.getLesson('lesson-1');
+  const lesson = store.getLesson('g4f-01');
   const withLesson = (overrides) => ({
     getUnits: () => store.getUnits(),
     getUnit: (id) => store.getUnit(id),
-    getLesson: (id) => (id === 'lesson-1' ? { ...lesson, ...overrides } : store.getLesson(id)),
+    getLesson: (id) => (id === 'g4f-01' ? { ...lesson, ...overrides } : store.getLesson(id)),
     getEntries: (lessonId, group) => store.getEntries(lessonId, group)
   });
 
   assert.throws(
     () => createLessonModel(withLesson({ write: lesson.write + 1 }), {
-      lessonId: 'lesson-1', group: 'write'
+      lessonId: 'g4f-01', group: 'write'
     }),
     /write.*match/i
   );
   assert.throws(
     () => createLessonModel(withLesson({ recognizeDisplayed: lesson.recognizeDisplayed + 1 }), {
-      lessonId: 'lesson-1', group: 'recognize'
+      lessonId: 'g4f-01', group: 'recognize'
     }),
     /recognizeDisplayed.*match/i
   );
   assert.throws(
     () => createLessonModel(withLesson({ recognizeCounted: lesson.recognizeCounted + 1 }), {
-      lessonId: 'lesson-1', group: 'recognize'
+      lessonId: 'g4f-01', group: 'recognize'
     }),
     /recognizeCounted.*polyphonicReviews.*match/i
   );
@@ -392,7 +384,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
   const { createPracticeModel } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' }),
     scope: 'group'
   };
   const activeState = sessionState();
@@ -401,12 +393,12 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     status: 'needs-retry',
     phase: 'independent',
     mistakes: 2,
-    completedCharacters: ['潮'],
-    remainingCharacters: ['潮', '据'],
+    completedCharacters: ['宵'],
+    remainingCharacters: ['宵', '宴'],
     total: 2,
     masteredCount: 0
   }), true);
-  const needsPracticeCharacters = ['据'];
+  const needsPracticeCharacters = ['宴'];
   const complete = createPracticeModel(resolved, sessionState({
     status: 'complete',
     phase: null,
@@ -420,17 +412,17 @@ test('creates exact frozen practice models for active, retry, and complete sessi
   }), false);
 
   assert.deepEqual(active, {
-    unit: { id: 'unit-1', title: '第一单元' },
-    lesson: { kind: 'lesson', id: 'lesson-1', title: '观潮', number: 1 },
+    unit: { id: 'g4-fall', title: '四年级上阶段' },
+    lesson: { kind: 'garden', id: 'g4f-01', title: '第1组' },
     group: 'write',
     scope: 'group',
-    character: '潮',
-    pinyin: 'cháo',
-    strokeCount: 15,
+    character: '宵',
+    pinyin: 'xiāo',
+    strokeCount: 10,
     groupIndex: 0,
     groupTotal: 15,
     previous: null,
-    next: { character: '据', pinyin: 'jù' },
+    next: { character: '宴', pinyin: 'yàn' },
     status: 'active',
     phase: 'guided',
     index: 0,
@@ -447,17 +439,17 @@ test('creates exact frozen practice models for active, retry, and complete sessi
   assert.equal(retry.completedCount, 1);
   assert.equal(retry.mistakes, 2);
   assert.deepEqual(complete, {
-    unit: { id: 'unit-1', title: '第一单元' },
-    lesson: { kind: 'lesson', id: 'lesson-1', title: '观潮', number: 1 },
+    unit: { id: 'g4-fall', title: '四年级上阶段' },
+    lesson: { kind: 'garden', id: 'g4f-01', title: '第1组' },
     group: 'write',
     scope: 'group',
-    character: '潮',
-    pinyin: 'cháo',
-    strokeCount: 15,
+    character: '宵',
+    pinyin: 'xiāo',
+    strokeCount: 10,
     groupIndex: 0,
     groupTotal: 15,
     previous: null,
-    next: { character: '据', pinyin: 'jù' },
+    next: { character: '宴', pinyin: 'yàn' },
     status: 'complete',
     phase: null,
     index: 15,
@@ -466,7 +458,7 @@ test('creates exact frozen practice models for active, retry, and complete sessi
     completedCount: 15,
     masteredCount: 1,
     newlyMasteredCount: 0,
-    needsPracticeCharacters: ['据'],
+    needsPracticeCharacters: ['宴'],
     persistent: false
   });
   assert.ok(deepFrozen(active));
@@ -474,25 +466,25 @@ test('creates exact frozen practice models for active, retry, and complete sessi
   assert.ok(deepFrozen(complete));
   assert.notEqual(complete.needsPracticeCharacters, needsPracticeCharacters);
 
-  activeState.completedCharacters.push('据');
-  needsPracticeCharacters.push('潮');
+  activeState.completedCharacters.push('宴');
+  needsPracticeCharacters.push('宵');
   assert.equal(active.completedCount, 0);
-  assert.deepEqual(complete.needsPracticeCharacters, ['据']);
+  assert.deepEqual(complete.needsPracticeCharacters, ['宴']);
 });
 
 test('practice models use session positions for filtered group review rounds', async () => {
   const { createPracticeModel } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '据' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宴' }),
     scope: 'group'
   };
 
   const model = createPracticeModel(resolved, sessionState({
-    character: '据',
+    character: '宴',
     index: 0,
     total: 1,
-    remainingCharacters: ['据']
+    remainingCharacters: ['宴']
   }), true);
 
   assert.equal(resolved.index, 1);
@@ -505,59 +497,59 @@ test('practice state consistency follows session queue and completion invariants
   const { createPracticeModel } = loadViews();
   const store = await createRuntimeStore();
   const resolve = (character, scope = 'group') => ({
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character }),
     scope
   });
 
-  const overlapping = createPracticeModel(resolve('潮'), sessionState({
+  const overlapping = createPracticeModel(resolve('宵'), sessionState({
     phase: 'independent',
-    completedCharacters: ['潮']
+    completedCharacters: ['宵']
   }), true);
   assert.equal(overlapping.index, 0);
   assert.equal(overlapping.completedCount, 1);
 
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
-    completedCharacters: ['据']
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
+    completedCharacters: ['宴']
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     phase: 'independent',
-    completedCharacters: ['潮', '据']
+    completedCharacters: ['宵', '宴']
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
-    completedCharacters: ['潮']
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
+    completedCharacters: ['宵']
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     phase: 'independent',
-    completedCharacters: ['潮'],
-    needsPracticeCharacters: ['潮']
+    completedCharacters: ['宵'],
+    needsPracticeCharacters: ['宵']
   }), true), TypeError);
 
-  assert.throws(() => createPracticeModel(resolve('据'), sessionState({
-    character: '据',
-    completedCharacters: ['潮'],
+  assert.throws(() => createPracticeModel(resolve('宴'), sessionState({
+    character: '宴',
+    completedCharacters: ['宵'],
     remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(1),
     index: 0
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('据'), sessionState({
-    character: '据',
+  assert.throws(() => createPracticeModel(resolve('宴'), sessionState({
+    character: '宴',
     completedCharacters: [],
     remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     index: 0
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     completedCharacters: [],
     remainingCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(0, -1)
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
-    needsPracticeCharacters: ['据']
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
+    needsPracticeCharacters: ['宴']
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     status: 'needs-retry',
     phase: 'independent',
     mistakes: 1,
-    completedCharacters: ['据']
+    completedCharacters: ['宴']
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     status: 'complete',
     phase: null,
     character: null,
@@ -565,34 +557,34 @@ test('practice state consistency follows session queue and completion invariants
     completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(0, -1),
     remainingCharacters: []
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵'), sessionState({
     status: 'complete',
     phase: null,
     character: null,
     index: 1,
     total: 1,
-    completedCharacters: ['据'],
+    completedCharacters: ['宴'],
     remainingCharacters: []
   }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolve('潮', 'single'), sessionState({
+  assert.throws(() => createPracticeModel(resolve('宵', 'single'), sessionState({
     total: 1,
-    completedCharacters: ['潮'],
-    remainingCharacters: ['潮'],
-    needsPracticeCharacters: ['潮']
+    completedCharacters: ['宵'],
+    remainingCharacters: ['宵'],
+    needsPracticeCharacters: ['宵']
   }), true), TypeError);
 });
 
 test('practice models accept real session snapshots across retry, defer, completion, and filters', async () => {
   const { createPracticeModel } = loadViews();
   const store = await createRuntimeStore();
-  const entries = store.getEntries('lesson-1', 'write').slice(0, 2);
+  const entries = store.getEntries('g4f-01', 'write').slice(0, 2);
   const progress = createPracticeProgressStore(null);
   const session = createPracticeSession({
-    lessonId: 'lesson-1',
+    lessonId: 'g4f-01',
     group: 'write',
     scope: 'group',
     entries,
-    startCharacter: '潮',
+    startCharacter: '宵',
     progress
   });
   const models = [];
@@ -602,7 +594,7 @@ test('practice models accept real session snapshots across retry, defer, complet
       || state.completedCharacters[state.completedCharacters.length - 1];
     const resolved = {
       ...store.resolve({
-        lessonId: 'lesson-1', group: 'write', character: stableCharacter
+        lessonId: 'g4f-01', group: 'write', character: stableCharacter
       }),
       scope: 'group'
     };
@@ -633,7 +625,7 @@ test('practice models accept real session snapshots across retry, defer, complet
   session.completeCharacter({ totalMistakes: 0 });
   assert.deepEqual(
     { character: capture().character, index: models.at(-1).index },
-    { character: '据', index: 1 }
+    { character: '宴', index: 1 }
   );
   session.completeCharacter({ totalMistakes: 0 });
   capture();
@@ -646,27 +638,27 @@ test('practice models accept real session snapshots across retry, defer, complet
       completed: models.at(-1).completedCount,
       needs: models.at(-1).needsPracticeCharacters
     },
-    { status: 'complete', completed: 2, needs: ['据'] }
+    { status: 'complete', completed: 2, needs: ['宴'] }
   );
 
   const filteredProgress = createPracticeProgressStore(null);
   const filtered = createPracticeSession({
-    lessonId: 'lesson-1',
+    lessonId: 'g4f-01',
     group: 'write',
     scope: 'group',
-    entries: store.getEntries('lesson-1', 'write').slice(1, 3),
-    startCharacter: '据',
+    entries: store.getEntries('g4f-01', 'write').slice(1, 3),
+    startCharacter: '宴',
     progress: filteredProgress,
     resume: false
   });
   const filteredState = filtered.getState();
   const filteredModel = createPracticeModel({
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '据' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宴' }),
     scope: 'group'
   }, { ...filteredState, masteredCount: 0 }, false);
   assert.deepEqual(
     { character: filteredModel.character, index: filteredModel.index, total: filteredModel.total },
-    { character: '据', index: 0, total: 2 }
+    { character: '宴', index: 0, total: 2 }
   );
 });
 
@@ -674,7 +666,7 @@ test('practice model and progress inputs reject hostile or inconsistent structur
   const { createCharacterModel, createLessonModel, createPracticeModel } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' }),
     scope: 'group'
   };
   let getterCalls = 0;
@@ -687,7 +679,7 @@ test('practice model and progress inputs reject hostile or inconsistent structur
     }
   });
   const accessorCharacters = {};
-  Object.defineProperty(accessorCharacters, '潮', {
+  Object.defineProperty(accessorCharacters, '宵', {
     enumerable: true,
     get() {
       getterCalls += 1;
@@ -711,7 +703,7 @@ test('practice model and progress inputs reject hostile or inconsistent structur
 
   assert.throws(() => createPracticeModel(resolved, accessorState, true), TypeError);
   assert.throws(() => createLessonModel(store, {
-    lessonId: 'lesson-1', group: 'write'
+    lessonId: 'g4f-01', group: 'write'
   }, practiceSnapshot({ characters: accessorCharacters })), TypeError);
   assert.throws(() => createCharacterModel(resolved, {
     ...practiceSnapshot(),
@@ -726,19 +718,19 @@ test('practice model and progress inputs reject hostile or inconsistent structur
     ...resolved, entries: missingPinyinEntries
   }, sessionState(), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({
-    completedCharacters: ['潮', '潮']
+    completedCharacters: ['宵', '宵']
   }), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({
     completedCharacters: new Array(1)
   }), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({
-    completedCharacters: ['据', '潮']
+    completedCharacters: ['宴', '宵']
   }), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({
     needsPracticeCharacters: ['龘']
   }), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({ phase: null }), true), TypeError);
-  assert.throws(() => createPracticeModel(resolved, sessionState({ character: '据' }), true), TypeError);
+  assert.throws(() => createPracticeModel(resolved, sessionState({ character: '宴' }), true), TypeError);
   assert.throws(() => createPracticeModel(resolved, sessionState({
     status: 'needs-retry', phase: 'independent', mistakes: 0
   }), true), TypeError);
@@ -757,20 +749,20 @@ test('renders directory bands, accessible lesson actions, and a stable resume ha
 
   assert.equal(container.childNodes.length, 1);
   assert.equal(byAttribute(container, 'data-view', 'directory').length, 1);
-  assert.equal(byAttribute(container, 'data-unit-band', 'unit-1').length, 1);
-  assert.equal(byAttribute(container, 'data-unit-band', 'unit-8').length, 1);
+  assert.equal(byAttribute(container, 'data-unit-band', 'g4-fall').length, 1);
+  assert.equal(byAttribute(container, 'data-unit-band', 'missing').length, 0);
   assert.equal(byTag(container, 'h1').length, 1);
-  assert.equal(byTag(container, 'section').length, 8);
-  assert.equal(byTag(container, 'ul').length, 8);
-  assert.equal(byTag(container, 'li').length, 31);
+  assert.equal(byTag(container, 'section').length, 1);
+  assert.equal(byTag(container, 'ul').length, 1);
+  assert.equal(byTag(container, 'li').length, 15);
   byTag(container, 'section').forEach((section) => {
     assert.match(section.getAttribute('aria-labelledby'), /^unit-heading-/);
   });
-  assert.equal(byAction(container, 'open-lesson').length, 31);
+  assert.equal(byAction(container, 'open-lesson').length, 15);
   const firstLesson = byAction(container, 'open-lesson')[0];
-  assert.equal(firstLesson.getAttribute('data-lesson-id'), 'lesson-1');
+  assert.equal(firstLesson.getAttribute('data-lesson-id'), 'g4f-01');
   assert.equal(firstLesson.getAttribute('data-group'), 'write');
-  assert.match(firstLesson.getAttribute('aria-label'), /1.*观潮.*会认13.*会写15/);
+  assert.match(firstLesson.getAttribute('aria-label'), /第1组.*15个字/);
   assert.equal(byAttribute(container, 'data-view-heading', '')[0].getAttribute('tabindex'), '-1');
   assert.equal(handle.root, container.childNodes[0]);
   assert.equal(handle.resumeButton.getAttribute('hidden'), '');
@@ -787,18 +779,18 @@ test('renders lesson segmented groups, review labels, character routes, and star
   const store = await createRuntimeStore();
   const writeDom = createDom();
   const reviewDom = createDom();
-  const gardenDom = createDom();
+  const supplementalDom = createDom();
   const writeHandle = renderLesson(
     writeDom.container,
-    createLessonModel(store, { lessonId: 'lesson-1', group: 'write' })
+    createLessonModel(store, { lessonId: 'g4f-01', group: 'write' })
   );
   renderLesson(
     reviewDom.container,
-    createLessonModel(store, { lessonId: 'lesson-1', group: 'recognize' })
+    createLessonModel(store, { lessonId: 'g4f-01', group: 'recognize' })
   );
   renderLesson(
-    gardenDom.container,
-    createLessonModel(store, { lessonId: 'garden-2', group: 'recognize' })
+    supplementalDom.container,
+    createLessonModel(store, { lessonId: 'g4f-01', group: 'recognize' })
   );
 
   const groupButtons = byAction(writeDom.container, 'select-group');
@@ -810,21 +802,17 @@ test('renders lesson segmented groups, review labels, character routes, and star
   assert.equal(byAction(writeDom.container, 'open-character').length, 16);
   assert.match(
     byAction(writeDom.container, 'open-character')[0].getAttribute('aria-label'),
-    /^从第一个字开始学习.*潮.*cháo$/
+    /^从第一个字开始学习.*宵.*xiāo$/
   );
   const firstCard = byAction(writeDom.container, 'open-character')[1];
-  assert.equal(firstCard.getAttribute('aria-label'), '潮，cháo');
-  assert.equal(firstCard.getAttribute('data-character'), '潮');
-  assert.equal(firstCard.getAttribute('data-lesson-id'), 'lesson-1');
+  assert.equal(firstCard.getAttribute('aria-label'), '宵，xiāo');
+  assert.equal(firstCard.getAttribute('data-character'), '宵');
+  assert.equal(firstCard.getAttribute('data-lesson-id'), 'g4f-01');
   assert.equal(firstCard.getAttribute('data-group'), 'write');
-  const reviewButton = byAction(reviewDom.container, 'open-character').find((button) => (
-    button.getAttribute('data-character') === '薄' && button.textContent.includes('复习')
-  ));
-  assert.ok(reviewButton);
-  assert.match(reviewButton.getAttribute('aria-label'), /复习/);
+  assert.equal(byAction(reviewDom.container, 'open-character').length, 0);
   assert.equal(byTag(writeDom.container, 'ul').length, 1);
   assert.equal(byTag(writeDom.container, 'li').length, 15);
-  assert.equal(byAction(gardenDom.container, 'select-group')[0].getAttribute('disabled'), '');
+  assert.equal(byAction(supplementalDom.container, 'start-group-practice')[0].getAttribute('disabled'), '');
   assert.equal(writeHandle.heading.getAttribute('data-view-heading'), '');
   assert.ok(Object.isFrozen(writeHandle));
 });
@@ -837,39 +825,36 @@ test('renders group practice summaries, actions, and independent card states in 
   const gardenDom = createDom();
   renderLesson(writeDom.container, createLessonModel(
     store,
-    { lessonId: 'lesson-1', group: 'write' },
+    { lessonId: 'g4f-01', group: 'write' },
     practiceSnapshot({
-      characters: { '潮': { mastered: true }, '据': { mastered: false } },
-      group: { completedCharacters: ['潮', '据'] }
+      characters: { '宵': { mastered: true }, '宴': { mastered: false } },
+      group: { completedCharacters: ['宵', '宴'] }
     })
   ));
   renderLesson(recognizeDom.container, createLessonModel(
     store,
-    { lessonId: 'lesson-1', group: 'recognize' },
-    practiceSnapshot({
-      characters: { '盐': { mastered: true }, '薄': { mastered: false } },
-      group: { completedCharacters: ['薄'] }
-    })
+    { lessonId: 'g4f-01', group: 'recognize' },
+    practiceSnapshot()
   ));
   renderLesson(gardenDom.container, createLessonModel(
     store,
-    { lessonId: 'garden-2', group: 'write' },
+    { lessonId: 'g4f-02', group: 'recognize' },
     practiceSnapshot()
   ));
 
   const writePractice = byAction(writeDom.container, 'start-group-practice')[0];
-  assert.equal(writePractice.getAttribute('data-lesson-id'), 'lesson-1');
+  assert.equal(writePractice.getAttribute('data-lesson-id'), 'g4f-01');
   assert.equal(writePractice.getAttribute('data-group'), 'write');
   assert.equal(writePractice.textContent, '练习本组');
   assert.match(writeDom.container.textContent, /本组已完成 2 \/ 15/);
   assert.match(writeDom.container.textContent, /当前掌握 1 个/);
   const masteredCard = byAction(writeDom.container, 'open-character').find((button) => (
     button.getAttribute('class') === 'character-card'
-      && button.getAttribute('data-character') === '潮'
+      && button.getAttribute('data-character') === '宵'
   ));
   const completedOnlyCard = byAction(writeDom.container, 'open-character').find((button) => (
     button.getAttribute('class') === 'character-card'
-      && button.getAttribute('data-character') === '据'
+      && button.getAttribute('data-character') === '宴'
   ));
   assert.equal(masteredCard.getAttribute('data-practice-mastered'), 'true');
   assert.equal(masteredCard.getAttribute('data-practice-completed-here'), 'true');
@@ -883,13 +868,8 @@ test('renders group practice summaries, actions, and independent card states in 
     element.getAttribute('class') === 'lesson-practice-summary'
   )), true);
 
-  const recognizeMastered = byAction(recognizeDom.container, 'open-character').find((button) => (
-    button.getAttribute('class') === 'character-card'
-      && button.getAttribute('data-character') === '盐'
-  ));
-  assert.equal(recognizeMastered.getAttribute('data-practice-mastered'), 'true');
-  assert.equal(recognizeMastered.getAttribute('data-practice-completed-here'), 'false');
-  assert.equal(byAction(recognizeDom.container, 'start-group-practice')[0].getAttribute('data-group'), 'recognize');
+  assert.equal(byAction(recognizeDom.container, 'open-character').length, 0);
+  assert.equal(byAction(recognizeDom.container, 'start-group-practice')[0].getAttribute('disabled'), '');
   assert.equal(byAction(gardenDom.container, 'start-group-practice')[0].getAttribute('disabled'), '');
 });
 
@@ -897,18 +877,18 @@ test('renders character work surface and updates only coarse animation state', a
   const { createCharacterModel, renderCharacter } = loadViews();
   const store = await createRuntimeStore();
   const model = createCharacterModel(store.resolve({
-    lessonId: 'lesson-1', group: 'write', character: '潮'
+    lessonId: 'g4f-01', group: 'write', character: '宵'
   }));
   const { container } = createDom();
   const handle = renderCharacter(container, model);
 
   assert.equal(byAction(container, 'back-lesson').length, 1);
   assert.equal(byTag(container, 'h1').length, 1);
-  assert.match(byAction(container, 'back-lesson')[0].getAttribute('aria-label'), /返回.*观潮/);
+  assert.match(byAction(container, 'back-lesson')[0].getAttribute('aria-label'), /返回.*第1组/);
   assert.equal(byAction(container, 'play-audio').length, 1);
   assert.match(
     byAction(container, 'play-audio')[0].getAttribute('aria-label'),
-    /^听读音.*潮.*cháo$/
+    /^听读音.*宵.*xiāo$/
   );
   assert.equal(byAction(container, 'previous-stroke').length, 1);
   assert.equal(byAction(container, 'toggle-play').length, 1);
@@ -921,12 +901,12 @@ test('renders character work surface and updates only coarse animation state', a
   assert.equal(byAttribute(container, 'data-slot', 'speed-group')[0].getAttribute('role'), 'group');
   const vocabulary = byAttribute(container, 'data-slot', 'vocabulary-words');
   assert.equal(vocabulary.length, 1);
-  assert.equal(vocabulary[0].textContent, '组词：潮水  浪潮  涨潮');
+  assert.equal(vocabulary[0].textContent, '组词：元宵  宵夜');
   assert.equal(byAction(container, 'previous-character').length, 1);
   assert.equal(byAction(container, 'next-character').length, 1);
   assert.equal(handle.board.getAttribute('data-slot'), 'character-board');
   assert.equal(handle.board.getAttribute('role'), 'img');
-  assert.match(handle.board.getAttribute('aria-label'), /潮.*笔顺/);
+  assert.match(handle.board.getAttribute('aria-label'), /宵.*笔顺/);
   assert.match(byAttribute(container, 'data-slot', 'character-position')[0].textContent, /第 1 个，共 15 个/);
   assert.equal(byAttribute(container, 'data-slot', 'board-error')[0].getAttribute('hidden'), '');
   assert.equal(byAttribute(container, 'data-slot', 'audio-feedback')[0].getAttribute('hidden'), '');
@@ -940,7 +920,7 @@ test('renders character work surface and updates only coarse animation state', a
     status: 'playing', mode: 'continuous', strokeIndex: 4, progress: 0.25, speed: 'fast'
   });
   const status = byAttribute(container, 'data-slot', 'animation-status')[0];
-  assert.match(status.textContent, /正在书写.*第 5 \/ 15 笔.*连续播放/);
+  assert.match(status.textContent, /正在书写.*第 5 \/ 10 笔.*连续播放/);
   assert.equal(byAction(container, 'toggle-play')[0].textContent, '⏸');
   assert.equal(byAction(container, 'toggle-play')[0].getAttribute('aria-label'), '暂停笔顺');
   assert.equal(byAction(container, 'set-speed')[2].getAttribute('aria-pressed'), 'true');
@@ -956,13 +936,13 @@ test('renders character work surface and updates only coarse animation state', a
   );
 
   handle.setAnimationState({
-    status: 'completed', mode: 'continuous', strokeIndex: 14, progress: 1, speed: 'fast'
+    status: 'completed', mode: 'continuous', strokeIndex: 9, progress: 1, speed: 'fast'
   });
   assert.equal(byAction(container, 'toggle-play')[0].textContent, '⏸');
   assert.equal(byAction(container, 'toggle-play')[0].getAttribute('aria-label'), '暂停笔顺');
 
   handle.setAnimationState({
-    status: 'completed', mode: 'step', strokeIndex: 14, progress: 1, speed: 'slow'
+    status: 'completed', mode: 'step', strokeIndex: 9, progress: 1, speed: 'slow'
   });
   assert.match(status.textContent, /书写完成.*单笔练习/);
   assert.equal(byAction(container, 'next-stroke')[0].getAttribute('disabled'), '');
@@ -975,18 +955,18 @@ test('renders single-character practice actions and status for write and recogni
   const store = await createRuntimeStore();
   const cases = [
     {
-      route: { lessonId: 'lesson-1', group: 'write', character: '潮' },
+      route: { lessonId: 'g4f-01', group: 'write', character: '宵' },
       practice: practiceSnapshot({
-        characters: { '潮': { mastered: true } },
+        characters: { '宵': { mastered: true } },
         group: { completedCharacters: [] }
       }),
       status: /已掌握/
     },
     {
-      route: { lessonId: 'lesson-1', group: 'recognize', character: '薄' },
+      route: { lessonId: 'g4f-01', group: 'write', character: '宴' },
       practice: practiceSnapshot({
-        characters: { '薄': { mastered: false } },
-        group: { completedCharacters: ['薄'] }
+        characters: { '宴': { mastered: false } },
+        group: { completedCharacters: ['宴'] }
       }),
       status: /本组已完成/
     }
@@ -1009,7 +989,7 @@ test('renders active practice as an unframed board with stable live handles and 
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' }),
     scope: 'group'
   };
   const model = createPracticeModel(resolved, sessionState(), true);
@@ -1025,23 +1005,23 @@ test('renders active practice as an unframed board with stable live handles and 
   );
   assert.ok(Object.isFrozen(handle));
   assert.equal(byAction(container, 'practice-back').length, 1);
-  assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-lesson-id'), 'lesson-1');
+  assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-lesson-id'), 'g4f-01');
   assert.equal(byAction(container, 'practice-back')[0].getAttribute('data-group'), 'write');
-  assert.match(byAction(container, 'practice-back')[0].getAttribute('aria-label'), /返回.*观潮.*会写/);
-  assert.match(byAction(container, 'practice-back')[0].textContent, /观潮/);
-  assert.match(container.textContent, /观潮/);
-  assert.match(container.textContent, /会写/);
+  assert.match(byAction(container, 'practice-back')[0].getAttribute('aria-label'), /返回.*第1组.*字组/);
+  assert.match(byAction(container, 'practice-back')[0].textContent, /第1组/);
+  assert.match(container.textContent, /第1组/);
+  assert.match(container.textContent, /学习/);
   assert.match(container.textContent, /第 1 \/ 15 个/);
-  assert.match(handle.heading.textContent, /潮/);
+  assert.match(handle.heading.textContent, /宵/);
   assert.equal(handle.board, byAttribute(container, 'data-slot', 'practice-board')[0]);
   assert.equal(handle.board.parentNode, handle.root);
   assert.equal(handle.board.childNodes.length, 0);
   assert.equal(handle.board.getAttribute('role'), 'img');
-  assert.equal(handle.board.getAttribute('aria-label'), '潮，引导描写，第1笔，共15笔');
+  assert.equal(handle.board.getAttribute('aria-label'), '宵，引导描写，第1笔，共10笔');
   assert.equal(byAttribute(container, 'data-slot', 'practice-feedback')[0].getAttribute('aria-live'), 'polite');
-  assert.equal(byAttribute(container, 'data-slot', 'practice-stroke-position')[0].textContent, '第 1 / 15 笔');
+  assert.equal(byAttribute(container, 'data-slot', 'practice-stroke-position')[0].textContent, '第 1 / 10 笔');
   const progress = byTag(container, 'progress')[0];
-  assert.equal(progress.getAttribute('max'), '15');
+  assert.equal(progress.getAttribute('max'), '10');
   assert.equal(progress.getAttribute('value'), '0');
   assert.equal(byAction(container, 'practice-hint')[0].getAttribute('aria-label'), '提示当前笔');
   assert.equal(byAction(container, 'practice-hint')[0].getAttribute('title'), '提示当前笔');
@@ -1051,25 +1031,25 @@ test('renders active practice as an unframed board with stable live handles and 
   const feedback = byAttribute(container, 'data-slot', 'practice-feedback')[0];
   assert.equal(feedback.textContent, '这一笔写得很好');
   assert.equal(feedback.getAttribute('data-kind'), 'success');
-  handle.setStrokePosition(5, 15);
-  assert.equal(byAttribute(container, 'data-slot', 'practice-stroke-position')[0].textContent, '第 5 / 15 笔');
+  handle.setStrokePosition(5, 10);
+  assert.equal(byAttribute(container, 'data-slot', 'practice-stroke-position')[0].textContent, '第 5 / 10 笔');
   assert.equal(progress.getAttribute('value'), '4');
-  assert.equal(handle.board.getAttribute('aria-label'), '潮，引导描写，第5笔，共15笔');
+  assert.equal(handle.board.getAttribute('aria-label'), '宵，引导描写，第5笔，共10笔');
   const beforeInvalid = handle.board.getAttribute('aria-label');
   assert.throws(() => handle.setFeedback('bad', 'warning'), TypeError);
-  assert.throws(() => handle.setStrokePosition(0, 15), TypeError);
+  assert.throws(() => handle.setStrokePosition(0, 10), TypeError);
   assert.equal(handle.board.getAttribute('aria-label'), beforeInvalid);
 
   const singleModel = createPracticeModel({ ...resolved, scope: 'single' }, sessionState({
     total: 1,
-    remainingCharacters: ['潮']
+    remainingCharacters: ['宵']
   }), true);
   const singleDom = createDom();
   renderPractice(singleDom.container, singleModel);
   const singleBack = byAction(singleDom.container, 'practice-back')[0];
-  assert.match(singleBack.getAttribute('aria-label'), /返回.*潮.*学习页/);
+  assert.match(singleBack.getAttribute('aria-label'), /返回.*宵.*学习页/);
   assert.doesNotMatch(singleBack.getAttribute('aria-label'), /字表/);
-  assert.match(singleBack.textContent, /潮/);
+  assert.match(singleBack.textContent, /宵/);
   assert.equal(
     byAttribute(singleDom.container, 'data-slot', 'practice-round-position')[0].textContent,
     '第 1 个，共 15 个'
@@ -1080,7 +1060,7 @@ test('renders active practice as an unframed board with stable live handles and 
   assert.equal(byAction(singleDom.container, 'next-character')[0].getAttribute('disabled'), '');
 
   const secondResolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '据' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宴' }),
     scope: 'single'
   };
   const secondComplete = createPracticeModel(secondResolved, sessionState({
@@ -1089,7 +1069,7 @@ test('renders active practice as an unframed board with stable live handles and 
     character: null,
     index: 1,
     total: 1,
-    completedCharacters: ['据'],
+    completedCharacters: ['宴'],
     remainingCharacters: [],
     masteredCount: 1
   }), true);
@@ -1101,11 +1081,11 @@ test('renders active practice as an unframed board with stable live handles and 
   );
   assert.equal(
     byAction(secondDom.container, 'previous-character')[0].getAttribute('data-character'),
-    '潮'
+    '宵'
   );
   assert.equal(
     byAction(secondDom.container, 'next-character')[0].getAttribute('data-character'),
-    '堤'
+    '扇'
   );
   assert.equal(
     byAction(secondDom.container, 'previous-character')[0].getAttribute('disabled'),
@@ -1117,13 +1097,13 @@ test('renders active practice as an unframed board with stable live handles and 
 test('renders retry controls by scope and rejects inactive handle mutations without DOM changes', async () => {
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
-  const baseResolved = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  const baseResolved = store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' });
   const groupModel = createPracticeModel({ ...baseResolved, scope: 'group' }, sessionState({
     status: 'needs-retry',
     phase: 'independent',
     mistakes: 3,
-    completedCharacters: ['潮'],
-    remainingCharacters: ['潮', '据'],
+    completedCharacters: ['宵'],
+    remainingCharacters: ['宵', '宴'],
     total: 2
   }), true);
   const singleModel = createPracticeModel({ ...baseResolved, scope: 'single' }, sessionState({
@@ -1131,8 +1111,8 @@ test('renders retry controls by scope and rejects inactive handle mutations with
     phase: 'independent',
     total: 1,
     mistakes: 2,
-    completedCharacters: ['潮'],
-    remainingCharacters: ['潮']
+    completedCharacters: ['宵'],
+    remainingCharacters: ['宵']
   }), true);
   const groupDom = createDom();
   const singleDom = createDom();
@@ -1156,7 +1136,7 @@ test('renders retry controls by scope and rejects inactive handle mutations with
 test('active practice unavailable state disables hints and offers skipping only for groups', async () => {
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
-  const resolved = store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' });
+  const resolved = store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' });
   const groupDom = createDom();
   const singleDom = createDom();
   const groupHandle = renderPractice(groupDom.container, createPracticeModel(
@@ -1164,7 +1144,7 @@ test('active practice unavailable state disables hints and offers skipping only 
   ));
   const singleHandle = renderPractice(singleDom.container, createPracticeModel(
     { ...resolved, scope: 'single' }, sessionState({
-      total: 1, remainingCharacters: ['潮']
+      total: 1, remainingCharacters: ['宵']
     }), true
   ));
 
@@ -1188,7 +1168,7 @@ test('renders complete summaries, conditional review actions, return action, and
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' }),
     scope: 'group'
   };
   const withNeeds = createPracticeModel(resolved, sessionState({
@@ -1199,7 +1179,7 @@ test('renders complete summaries, conditional review actions, return action, and
     mistakes: 0,
     completedCharacters: LESSON_ONE_WRITE_CHARACTERS.slice(),
     remainingCharacters: [],
-    needsPracticeCharacters: ['据'],
+    needsPracticeCharacters: ['宴'],
     masteredCount: 1,
     newlyMasteredCount: 1
   }), false);
@@ -1237,7 +1217,7 @@ test('practice rendering rejects accessor and symbol models before creating DOM 
   const { createPracticeModel, renderPractice } = loadViews();
   const store = await createRuntimeStore();
   const resolved = {
-    ...store.resolve({ lessonId: 'lesson-1', group: 'write', character: '潮' }),
+    ...store.resolve({ lessonId: 'g4f-01', group: 'write', character: '宵' }),
     scope: 'group'
   };
   const valid = createPracticeModel(resolved, sessionState(), true);
@@ -1267,10 +1247,10 @@ test('omits the vocabulary row when a legacy character model has no words', () =
   const { renderCharacter } = loadViews();
   const { container } = createDom();
   const model = Object.freeze({
-    unit: Object.freeze({ id: 'unit-1', title: '第一单元' }),
-    lesson: Object.freeze({ id: 'lesson-1', title: '观潮', kind: 'lesson', number: 1 }),
+    unit: Object.freeze({ id: 'g4-fall', title: '第一单元' }),
+    lesson: Object.freeze({ id: 'g4f-01', title: '第1组', kind: 'lesson', number: 1 }),
     group: 'write',
-    character: '潮',
+    character: '宵',
     pinyin: 'cháo',
     audioId: 'chao2',
     strokeCount: 15,
@@ -1293,7 +1273,7 @@ test('updates audio feedback and keeps pronunciation and character navigation af
   const { createCharacterModel, renderCharacter } = loadViews();
   const store = await createRuntimeStore();
   const model = createCharacterModel(store.resolve({
-    lessonId: 'lesson-1', group: 'write', character: '潮'
+    lessonId: 'g4f-01', group: 'write', character: '宵'
   }));
   const { container } = createDom();
   const handle = renderCharacter(container, model);
@@ -1349,7 +1329,7 @@ test('index is offline-first, accessible, and loads classic scripts in dependenc
   assert.match(html, /name="viewport" content="width=device-width, initial-scale=1"/);
   assert.match(html, /<body>\s*<a class="skip-link" href="#app">跳到学习内容<\/a>/);
   assert.match(html, /class="brand-name">小红点识字<\//);
-  assert.match(html, /人教版四年级上册·2019年审定/);
+  assert.match(html, /独立编排 · 四年级上阶段/);
   assert.match(html, /<main id="app" tabindex="-1"><\/main>/);
   assert.match(html, /id="announcer" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"/);
   assert.doesNotMatch(html, /id="announcer"[^>]*\shidden(?:\s|=|>)/);
